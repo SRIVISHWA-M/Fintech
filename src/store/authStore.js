@@ -1,4 +1,5 @@
-// Simple persisted store for user authentication & preferences
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const DEFAULT_USER = {
   name: 'Aarav Shah',
   customerId: 'NV-48211',
@@ -12,18 +13,23 @@ const DEFAULT_USER = {
   preferences: {
     darkMode: true,
     notifications: true,
-    loginAlerts: true
-  }
+    loginAlerts: true,
+  },
 };
 
 let listeners = [];
-let state = {
-  user: JSON.parse(localStorage.getItem('nova_user')) || DEFAULT_USER,
-  isAuthenticated: true
-};
+let state = { user: DEFAULT_USER, isAuthenticated: true };
+
+// Load persisted state asynchronously at startup
+AsyncStorage.getItem('nova_user').then((json) => {
+  if (json) {
+    state = { user: JSON.parse(json), isAuthenticated: true };
+    notify();
+  }
+});
 
 const notify = () => {
-  listeners.forEach(listener => listener(state));
+  listeners.forEach((listener) => listener(state));
 };
 
 export const authStore = {
@@ -33,18 +39,12 @@ export const authStore = {
   subscribe(listener) {
     listeners.push(listener);
     return () => {
-      listeners = listeners.filter(l => l !== listener);
+      listeners = listeners.filter((l) => l !== listener);
     };
   },
   updateUser(updates) {
-    state = {
-      ...state,
-      user: {
-        ...state.user,
-        ...updates
-      }
-    };
-    localStorage.setItem('nova_user', JSON.stringify(state.user));
+    state = { ...state, user: { ...state.user, ...updates } };
+    AsyncStorage.setItem('nova_user', JSON.stringify(state.user));
     notify();
   },
   updatePreferences(prefUpdates) {
@@ -52,29 +52,20 @@ export const authStore = {
       ...state,
       user: {
         ...state.user,
-        preferences: {
-          ...state.user.preferences,
-          ...prefUpdates
-        }
-      }
+        preferences: { ...state.user.preferences, ...prefUpdates },
+      },
     };
-    localStorage.setItem('nova_user', JSON.stringify(state.user));
+    AsyncStorage.setItem('nova_user', JSON.stringify(state.user));
     notify();
   },
   logout() {
-    state = {
-      user: null,
-      isAuthenticated: false
-    };
-    localStorage.removeItem('nova_user');
+    state = { user: null, isAuthenticated: false };
+    AsyncStorage.removeItem('nova_user');
     notify();
   },
   login() {
-    state = {
-      user: DEFAULT_USER,
-      isAuthenticated: true
-    };
-    localStorage.setItem('nova_user', JSON.stringify(DEFAULT_USER));
+    state = { user: DEFAULT_USER, isAuthenticated: true };
+    AsyncStorage.setItem('nova_user', JSON.stringify(DEFAULT_USER));
     notify();
-  }
+  },
 };

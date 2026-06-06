@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const DEFAULT_LOAN = {
   id: 'LN-48211',
   type: 'Personal Loan',
@@ -13,15 +15,22 @@ const DEFAULT_LOAN = {
   breakdown: {
     principal: 980,
     interest: 210,
-    fees: 50
-  }
+    fees: 50,
+  },
 };
 
 let listeners = [];
-let state = JSON.parse(localStorage.getItem('nova_loan')) || DEFAULT_LOAN;
+let state = DEFAULT_LOAN;
+
+AsyncStorage.getItem('nova_loan').then((json) => {
+  if (json) {
+    state = JSON.parse(json);
+    notify();
+  }
+});
 
 const notify = () => {
-  listeners.forEach(listener => listener(state));
+  listeners.forEach((listener) => listener(state));
 };
 
 export const loanStore = {
@@ -31,22 +40,19 @@ export const loanStore = {
   subscribe(listener) {
     listeners.push(listener);
     return () => {
-      listeners = listeners.filter(l => l !== listener);
+      listeners = listeners.filter((l) => l !== listener);
     };
   },
   makePayment(amount) {
     const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) return;
 
-    // Calculate how many EMIs were paid (approximately, based on $1240 per EMI)
     const emiValue = 1240;
     const emiCountPaid = Math.floor(numericAmount / emiValue) || 1;
-    
     const newOutstanding = Math.max(0, state.outstanding - numericAmount);
     const newPaid = state.paid + numericAmount;
     const newPaidEmis = Math.min(state.termMonths, state.paidEmis + emiCountPaid);
-    
-    // Shift next due date by emiCountPaid months
+
     const currentDate = new Date(state.nextDueDate);
     currentDate.setMonth(currentDate.getMonth() + emiCountPaid);
     const year = currentDate.getFullYear();
@@ -59,15 +65,15 @@ export const loanStore = {
       outstanding: newOutstanding,
       paid: newPaid,
       paidEmis: newPaidEmis,
-      nextDueDate: newDueDate
+      nextDueDate: newDueDate,
     };
 
-    localStorage.setItem('nova_loan', JSON.stringify(state));
+    AsyncStorage.setItem('nova_loan', JSON.stringify(state));
     notify();
   },
   resetStore() {
     state = DEFAULT_LOAN;
-    localStorage.setItem('nova_loan', JSON.stringify(DEFAULT_LOAN));
+    AsyncStorage.setItem('nova_loan', JSON.stringify(DEFAULT_LOAN));
     notify();
-  }
+  },
 };

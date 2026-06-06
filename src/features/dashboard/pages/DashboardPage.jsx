@@ -1,355 +1,508 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  ArrowRight, TrendingUp, Calendar, CreditCard, Shield,
-  AlertCircle, CheckCircle2, ChevronRight, Zap, Clock
-} from 'lucide-react';
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { loanStore } from '../../../store/loanStore';
 import { paymentStore } from '../../../store/paymentStore';
 import { authStore } from '../../../store/authStore';
-import LoanProgressChart from '../../../components/charts/LoanProgressChart';
-import PaymentTrendChart from '../../../components/charts/PaymentTrendChart';
-import EmiBreakdownChart from '../../../components/charts/EmiBreakdownChart';
+import {
+  LoanProgressChart,
+  PaymentTrendChart,
+  EmiBreakdownChart,
+} from '../../../components/charts/Charts';
+import colors from '../../../theme/colors';
 
-const fmt = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
-const fmtDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+const fmt = (n) =>
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
+const fmtDate = (d) =>
+  new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 const daysUntil = (d) => Math.ceil((new Date(d) - new Date()) / 86400000);
 
-const StatCard = ({ icon: Icon, label, value, sub, accent, onClick }) => (
-  <div
-    onClick={onClick}
-    style={{
-      background: 'var(--gradient-card)',
-      border: '1px solid var(--border)',
-      borderRadius: 'calc(var(--radius) + 0.25rem)',
-      padding: '1.25rem',
-      display: 'flex', flexDirection: 'column', gap: '0.75rem',
-      boxShadow: 'var(--shadow-card)',
-      cursor: onClick ? 'pointer' : 'default',
-      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-    }}
-    onMouseEnter={e => { if (onClick) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-glow)'; } }}
-    onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = 'var(--shadow-card)'; }}
+/* ── Mini stat card ─────────────────────────────────────────────────────────── */
+const StatCard = ({ iconName, iconColor = colors.success, label, value, sub, onPress }) => (
+  <TouchableOpacity
+    style={styles.statCard}
+    onPress={onPress}
+    activeOpacity={onPress ? 0.75 : 1}
   >
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <div style={{
-        width: '2.25rem', height: '2.25rem', borderRadius: '0.625rem',
-        background: accent || 'oklch(74% 0.17 165 / 0.12)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center'
-      }}>
-        <Icon size={16} color="var(--success)" />
-      </div>
-      {onClick && <ChevronRight size={15} color="var(--muted-foreground)" />}
-    </div>
-    <div>
-      <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginBottom: '0.25rem', fontWeight: 500 }}>{label}</div>
-      <div style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.1 }}>{value}</div>
-      {sub && <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>{sub}</div>}
-    </div>
-  </div>
+    <View style={styles.statCardTop}>
+      <View style={[styles.statIconBox, { backgroundColor: `${iconColor}18` }]}>
+        <Ionicons name={iconName} size={16} color={iconColor} />
+      </View>
+      {onPress && <Ionicons name="chevron-forward" size={14} color={colors.mutedForeground} />}
+    </View>
+    <Text style={styles.statLabel}>{label}</Text>
+    <Text style={styles.statValue}>{value}</Text>
+    {sub ? <Text style={styles.statSub}>{sub}</Text> : null}
+  </TouchableOpacity>
 );
 
+/* ── SIM chip ───────────────────────────────────────────────────────────────── */
+const SimChip = () => (
+  <View style={styles.simChip}>
+    <View style={styles.simInner}>
+      <View style={styles.simLineH} />
+      <View style={styles.simLineV} />
+      <View style={styles.simCenter} />
+    </View>
+  </View>
+);
+
+/* ── Card decorative waves ──────────────────────────────────────────────────── */
+const CardWaves = () => (
+  <View style={StyleSheet.absoluteFill} pointerEvents="none">
+    <Svg width="100%" height="100%">
+      <Defs>
+        <LinearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <Stop offset="0%" stopColor="#34d87c" stopOpacity="0.10" />
+          <Stop offset="100%" stopColor="#60a5fa" stopOpacity="0.04" />
+        </LinearGradient>
+      </Defs>
+      <Path d="M -30 40 Q 100 130 220 20 T 420 90" fill="none" stroke="url(#waveGrad)" strokeWidth="60" />
+      <Path d="M -20 110 Q 140 20 260 130 T 440 30" fill="none" stroke="rgba(52,216,124,0.05)" strokeWidth="40" />
+    </Svg>
+  </View>
+);
+
+/* ── Page ────────────────────────────────────────────────────────────────────── */
 const DashboardPage = () => {
-  const navigate = useNavigate();
+  const navigation = useNavigation();
   const [loan, setLoan] = useState(loanStore.getState());
   const [payments, setPayments] = useState(paymentStore.getState());
   const [user] = useState(authStore.getState().user);
 
   useEffect(() => {
-    const unsub1 = loanStore.subscribe(setLoan);
-    const unsub2 = paymentStore.subscribe(setPayments);
-    return () => { unsub1(); unsub2(); };
+    const u1 = loanStore.subscribe(setLoan);
+    const u2 = paymentStore.subscribe(setPayments);
+    return () => { u1(); u2(); };
   }, []);
 
   const daysLeft = daysUntil(loan.nextDueDate);
   const progress = Math.round((loan.paid / loan.principal) * 100);
   const recentPayments = payments.payments.slice(0, 3);
+  const isUrgent = daysLeft <= 3;
+  const initials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Hero Loan Card */}
-      <div style={{
-        background: 'linear-gradient(135deg, oklch(22% 0.035 264) 0%, oklch(18% 0.028 264) 100%)',
-        border: '1px solid var(--border)',
-        borderRadius: 'calc(var(--radius) + 0.5rem)',
-        padding: '1.75rem',
-        boxShadow: 'var(--shadow-card)',
-        position: 'relative', overflow: 'hidden'
-      }}>
-        {/* Background decoration */}
-        <div style={{
-          position: 'absolute', top: '-40px', right: '-40px',
-          width: '220px', height: '220px', borderRadius: '50%',
-          background: 'oklch(74% 0.17 165 / 0.05)', pointerEvents: 'none'
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '-60px', right: '60px',
-          width: '160px', height: '160px', borderRadius: '50%',
-          background: 'oklch(74% 0.17 165 / 0.04)', pointerEvents: 'none'
-        }} />
+    <SafeAreaView style={styles.safe}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Header ─────────────────────────────────────────────────────── */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>Good morning,</Text>
+            <Text style={styles.userName}>{user?.name?.split(' ')[0]} 👋</Text>
+          </View>
+          <View style={styles.headerRight}>
+            <TouchableOpacity style={styles.notifBtn} activeOpacity={0.75}>
+              <Ionicons name="notifications-outline" size={20} color={colors.foreground} />
+              <View style={styles.notifDot} />
+            </TouchableOpacity>
+            <View style={styles.avatarBox}>
+              <Text style={styles.avatarText}>{initials}</Text>
+            </View>
+          </View>
+        </View>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <span style={{
-                fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
-                color: 'var(--success)', background: 'oklch(74% 0.17 165 / 0.12)',
-                padding: '0.2rem 0.625rem', borderRadius: '999px', border: '1px solid oklch(74% 0.17 165 / 0.25)'
-              }}>
-                {loan.type}
-              </span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>#{loan.id}</span>
-            </div>
-            <div style={{ fontSize: '0.8125rem', color: 'var(--muted-foreground)', marginBottom: '0.375rem' }}>Outstanding Balance</div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.035em', lineHeight: 1 }}>
-              {fmt(loan.outstanding)}
-            </div>
-            <div style={{ fontSize: '0.8125rem', color: 'var(--muted-foreground)', marginTop: '0.375rem' }}>
-              of {fmt(loan.principal)} total principal
-            </div>
-          </div>
+        {/* ── Hero Loan Card ──────────────────────────────────────────────── */}
+        <View style={styles.heroCard}>
+          {/* Credit card visual */}
+          <View style={styles.creditCardVisual}>
+            <CardWaves />
 
-          {/* Mini donut */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.375rem' }}>
-            <LoanProgressChart paid={loan.paid} outstanding={loan.outstanding} size={90} />
-            <span style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>{progress}% repaid</span>
-          </div>
-        </div>
+            <View style={styles.cardHeaderRow}>
+              <View style={styles.logoCol}>
+                <Ionicons name="flash" size={13} color={colors.success} style={{ marginRight: 5 }} />
+                <Text style={styles.logoText}>NOVA</Text>
+              </View>
+              <View style={styles.networkBadge}>
+                <Text style={styles.networkText}>MASTERCARD</Text>
+              </View>
+            </View>
 
-        {/* Progress bar */}
-        <div style={{ marginTop: '1.5rem' }}>
-          <div style={{
-            height: '6px', background: 'var(--border)',
-            borderRadius: '999px', overflow: 'hidden'
-          }}>
-            <div style={{
-              height: '100%', width: `${progress}%`,
-              background: 'var(--gradient-success)',
-              borderRadius: '999px',
-              transition: 'width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
-            }} />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
-              {loan.paidEmis}/{loan.termMonths} EMIs paid
-            </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--success)', fontWeight: 500 }}>
-              {fmt(loan.paid)} paid
-            </span>
-          </div>
-        </div>
-      </div>
+            <View style={styles.cardMiddleRow}>
+              <View style={styles.chipAndBalance}>
+                <SimChip />
+                <View style={styles.balanceCol}>
+                  <Text style={styles.balLabel}>Outstanding Balance</Text>
+                  <Text style={styles.balValue}>{fmt(loan.outstanding)}</Text>
+                </View>
+              </View>
+              <View style={{ flexShrink: 0 }}>
+                <LoanProgressChart outstanding={loan.outstanding} principal={loan.principal} size={60} />
+              </View>
+            </View>
 
-      {/* EMI Due Alert */}
-      <div style={{
-        background: daysLeft <= 3
-          ? 'oklch(62% 0.22 27 / 0.08)'
-          : 'oklch(74% 0.17 165 / 0.08)',
-        border: `1px solid ${daysLeft <= 3 ? 'oklch(62% 0.22 27 / 0.3)' : 'oklch(74% 0.17 165 / 0.25)'}`,
-        borderRadius: 'var(--radius)',
-        padding: '1rem 1.25rem',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{
-            width: '2.25rem', height: '2.25rem', borderRadius: '50%',
-            background: daysLeft <= 3 ? 'oklch(62% 0.22 27 / 0.15)' : 'oklch(74% 0.17 165 / 0.15)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-          }}>
-            {daysLeft <= 3
-              ? <AlertCircle size={16} color="var(--destructive)" />
-              : <Clock size={16} color="var(--success)" />
-            }
-          </div>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
-              Next EMI: {fmt(loan.nextDueAmount)}
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
-              Due {fmtDate(loan.nextDueDate)} · {daysLeft <= 0 ? 'Overdue!' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`}
-            </div>
-          </div>
-        </div>
-        <button
-          onClick={() => navigate('/loans')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '0.375rem',
-            padding: '0.5rem 1.125rem',
-            background: 'var(--gradient-success)',
-            color: 'var(--success-foreground)',
-            border: 'none', borderRadius: 'var(--radius)',
-            fontWeight: 600, fontSize: '0.8125rem', cursor: 'pointer',
-            boxShadow: 'var(--shadow-glow)', whiteSpace: 'nowrap'
-          }}
-        >
-          Pay Now <ArrowRight size={14} />
-        </button>
-      </div>
+            <View style={styles.cardDivider} />
 
-      {/* Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.875rem' }}>
-        <StatCard
-          icon={TrendingUp}
-          label="Interest Rate"
-          value={`${loan.interestRate}%`}
-          sub="p.a. flat rate"
-        />
-        <StatCard
-          icon={Calendar}
-          label="Remaining Term"
-          value={`${loan.termMonths - loan.paidEmis} mo`}
-          sub={`of ${loan.termMonths} months`}
-        />
-        <StatCard
-          icon={CreditCard}
-          label="EMI Amount"
-          value={fmt(loan.nextDueAmount)}
-          sub={`via ${loan.paymentMethod}`}
-          onClick={() => navigate('/loans')}
-        />
-        <StatCard
-          icon={Shield}
-          label="On-Time Rate"
-          value={`${user?.onTimeRate || 100}%`}
-          sub="all-time record"
-        />
-      </div>
+            <View style={styles.cardBottomRow}>
+              <View>
+                <Text style={styles.cardBottomLabel}>CARD NUMBER</Text>
+                <Text style={styles.cardBottomValue}>•••• •••• •••• 4421</Text>
+              </View>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={styles.cardBottomLabel}>VALID THRU</Text>
+                <Text style={styles.cardBottomValue}>06/28</Text>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={styles.cardBottomLabel}>CARDHOLDER</Text>
+                <Text style={styles.cardBottomValue}>{user?.name?.split(' ')[0]?.toUpperCase()}</Text>
+              </View>
+            </View>
+          </View>
 
-      {/* Payment Trend Chart */}
-      <div style={{
-        background: 'var(--gradient-card)',
-        border: '1px solid var(--border)',
-        borderRadius: 'calc(var(--radius) + 0.25rem)',
-        padding: '1.25rem',
-        boxShadow: 'var(--shadow-card)'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: '0.9375rem' }}>Payment History</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Monthly EMI trend</div>
-          </div>
-          <button
-            onClick={() => navigate('/payments')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.25rem',
-              fontSize: '0.75rem', color: 'var(--success)',
-              background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500
-            }}
+          {/* Loan progress */}
+          <View style={styles.progressSection}>
+            <View style={styles.progressBarBg}>
+              <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
+            </View>
+            <View style={styles.progressMeta}>
+              <Text style={styles.progressMetaLeft}>{loan.paidEmis}/{loan.termMonths} EMIs paid</Text>
+              <Text style={styles.progressMetaRight}>{progress}% repaid · {fmt(loan.paid)}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* ── EMI Alert ──────────────────────────────────────────────────── */}
+        <View style={[
+          styles.alertCard,
+          isUrgent ? styles.alertCardUrgent : styles.alertCardNormal,
+        ]}>
+          <View style={[
+            styles.alertIconWrap,
+            isUrgent ? styles.alertIconWrapUrgent : styles.alertIconWrapNormal,
+          ]}>
+            <Ionicons
+              name={isUrgent ? 'alert-circle' : 'time-outline'}
+              size={18}
+              color={isUrgent ? colors.destructive : colors.success}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.alertTitle}>Next EMI: {fmt(loan.nextDueAmount)}</Text>
+            <Text style={styles.alertSub}>
+              Due {fmtDate(loan.nextDueDate)} ·{' '}
+              {daysLeft <= 0 ? 'Overdue!' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.payNowBtn}
+            onPress={() => navigation.navigate('Loans')}
+            activeOpacity={0.85}
           >
-            View all <ChevronRight size={14} />
-          </button>
-        </div>
-        <PaymentTrendChart payments={payments.payments} />
-      </div>
+            <Text style={styles.payNowText}>Pay Now</Text>
+            <Ionicons name="arrow-forward" size={13} color={colors.successForeground} />
+          </TouchableOpacity>
+        </View>
 
-      {/* EMI Breakdown + Recent Payments side by side */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
-        {/* EMI Breakdown */}
-        <div style={{
-          background: 'var(--gradient-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'calc(var(--radius) + 0.25rem)',
-          padding: '1.25rem',
-          boxShadow: 'var(--shadow-card)'
-        }}>
-          <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.25rem' }}>EMI Breakdown</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginBottom: '1rem' }}>Per installment</div>
-          <EmiBreakdownChart breakdown={loan.breakdown} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+        {/* ── Stats Grid ─────────────────────────────────────────────────── */}
+        <View style={styles.statsGrid}>
+          <StatCard
+            iconName="trending-up" label="Interest Rate"
+            value={`${loan.interestRate}%`} sub="p.a. flat rate"
+          />
+          <StatCard
+            iconName="calendar-outline" iconColor={colors.chartBlue}
+            label="Remaining" value={`${loan.termMonths - loan.paidEmis} mo`}
+            sub={`of ${loan.termMonths} months`}
+          />
+          <StatCard
+            iconName="card-outline" iconColor={colors.chartPurple}
+            label="EMI Amount" value={fmt(loan.nextDueAmount)}
+            sub={`via ${loan.paymentMethod}`}
+            onPress={() => navigation.navigate('Loans')}
+          />
+          <StatCard
+            iconName="shield-checkmark-outline" iconColor={colors.warning}
+            label="On-Time Rate" value={`${user?.onTimeRate || 100}%`}
+            sub="all-time record"
+          />
+        </View>
+
+        {/* ── Payment Trend Chart ─────────────────────────────────────────── */}
+        <View style={styles.chartCard}>
+          <View style={styles.chartCardHeader}>
+            <View>
+              <Text style={styles.cardTitle}>Payment History</Text>
+              <Text style={styles.cardSub}>Monthly EMI breakdown</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Payments')}
+              style={styles.viewAllBtn}
+            >
+              <Text style={styles.viewAllText}>View all</Text>
+              <Ionicons name="chevron-forward" size={13} color={colors.success} />
+            </TouchableOpacity>
+          </View>
+          <PaymentTrendChart payments={payments.payments} />
+        </View>
+
+        {/* ── EMI Breakdown + Recent Payments ─────────────────────────────── */}
+        <View style={styles.twoCol}>
+          {/* EMI Breakdown */}
+          <View style={[styles.chartCard, { flex: 1 }]}>
+            <Text style={styles.cardTitle}>EMI Breakdown</Text>
+            <Text style={styles.cardSub}>Per installment</Text>
+            <View style={{ marginTop: 14 }}>
+              <EmiBreakdownChart breakdown={loan.breakdown} />
+            </View>
             {[
-              { label: 'Principal', value: loan.breakdown.principal, color: 'var(--success)' },
-              { label: 'Interest', value: loan.breakdown.interest, color: 'oklch(74% 0.15 240)' },
-              { label: 'Fees', value: loan.breakdown.fees, color: 'oklch(74% 0.14 300)' },
+              { label: 'Principal', value: loan.breakdown.principal, color: colors.success },
+              { label: 'Interest', value: loan.breakdown.interest, color: colors.chartBlue },
+              { label: 'Fees', value: loan.breakdown.fees, color: colors.chartPurple },
             ].map(({ label, value, color }) => (
-              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: color }} />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>{label}</span>
-                </div>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, color }}>{fmt(value)}</span>
-              </div>
+              <View key={label} style={styles.breakdownRow}>
+                <View style={styles.breakdownLeft}>
+                  <View style={[styles.breakdownDot, { backgroundColor: color }]} />
+                  <Text style={styles.breakdownLabel}>{label}</Text>
+                </View>
+                <Text style={[styles.breakdownValue, { color }]}>{fmt(value)}</Text>
+              </View>
             ))}
-          </div>
-        </div>
+          </View>
 
-        {/* Recent Payments */}
-        <div style={{
-          background: 'var(--gradient-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'calc(var(--radius) + 0.25rem)',
-          padding: '1.25rem',
-          boxShadow: 'var(--shadow-card)',
-          display: 'flex', flexDirection: 'column'
-        }}>
-          <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.25rem' }}>Recent Payments</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginBottom: '1rem' }}>Last 3 EMIs</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem', flex: 1 }}>
-            {recentPayments.map((p) => (
-              <div key={p.id} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '0.5rem 0',
-                borderBottom: '1px solid var(--border)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <CheckCircle2 size={14} color="var(--success)" />
-                  <div>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 500 }}>EMI #{p.emiNo}</div>
-                    <div style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)' }}>
+          {/* Recent Payments */}
+          <View style={[styles.chartCard, { flex: 1 }]}>
+            <Text style={styles.cardTitle}>Recent</Text>
+            <Text style={styles.cardSub}>Last 3 EMIs</Text>
+            <View style={{ marginTop: 12, gap: 8 }}>
+              {recentPayments.map((p) => (
+                <View key={p.id} style={styles.recentRow}>
+                  <View style={styles.recentIconBox}>
+                    <Ionicons name="checkmark-circle" size={14} color={colors.success} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.recentEmi}>EMI #{p.emiNo}</Text>
+                    <Text style={styles.recentDate}>
                       {new Date(p.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                    </div>
-                  </div>
-                </div>
-                <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--success)' }}>
-                  {fmt(p.amount)}
-                </span>
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={() => navigate('/payments')}
-            style={{
-              marginTop: '0.875rem', width: '100%',
-              padding: '0.5rem', borderRadius: 'var(--radius)',
-              border: '1px solid var(--border)',
-              background: 'transparent', color: 'var(--muted-foreground)',
-              fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = 'var(--foreground)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted-foreground)'; }}
-          >
-            All history <ChevronRight size={13} />
-          </button>
-        </div>
-      </div>
+                    </Text>
+                  </View>
+                  <Text style={styles.recentAmount}>{fmt(p.amount)}</Text>
+                </View>
+              ))}
+            </View>
+            <TouchableOpacity
+              style={styles.allHistoryBtn}
+              onPress={() => navigation.navigate('Payments')}
+              activeOpacity={0.75}
+            >
+              <Text style={styles.allHistoryText}>All history</Text>
+              <Ionicons name="chevron-forward" size={12} color={colors.mutedForeground} />
+            </TouchableOpacity>
+          </View>
+        </View>
 
-      {/* Credit Score Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, oklch(22% 0.04 264), oklch(19% 0.035 264))',
-        border: '1px solid oklch(74% 0.17 165 / 0.15)',
-        borderRadius: 'calc(var(--radius) + 0.25rem)',
-        padding: '1.25rem 1.5rem',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexWrap: 'wrap', gap: '1rem', boxShadow: 'var(--shadow-card)'
-      }}>
-        <div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginBottom: '0.25rem', fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Credit Score</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.375rem' }}>
-            <span style={{ fontSize: '2.25rem', fontWeight: 800, color: 'var(--success)', letterSpacing: '-0.03em' }}>
-              {user?.creditScore || 782}
-            </span>
-            <span style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>/ 900</span>
-          </div>
-          <div style={{ fontSize: '0.8125rem', color: 'var(--success)', fontWeight: 500, marginTop: '0.125rem' }}>Excellent</div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Zap size={16} color="var(--success)" />
-          <span style={{ fontSize: '0.8125rem', color: 'var(--muted-foreground)' }}>Eligible for better rates</span>
-        </div>
-      </div>
-    </div>
+
+
+      </ScrollView>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.background },
+  scroll: { flex: 1 },
+  scrollContent: { padding: 16, paddingBottom: 36, gap: 14 },
+
+  // Header
+  header: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', paddingBottom: 4, paddingTop: 4,
+  },
+  greeting: { fontSize: 13, color: colors.mutedForeground, fontWeight: '500' },
+  userName: { fontSize: 24, fontWeight: '800', color: colors.foreground, letterSpacing: -0.6, marginTop: 2 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  notifBtn: { position: 'relative' },
+  notifDot: {
+    position: 'absolute', top: -1, right: -1,
+    width: 8, height: 8, borderRadius: 4,
+    backgroundColor: colors.destructive,
+    borderWidth: 1.5, borderColor: colors.background,
+  },
+  avatarBox: {
+    width: 42, height: 42, borderRadius: 13,
+    backgroundColor: colors.success,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: colors.success,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4, shadowRadius: 10, elevation: 6,
+  },
+  avatarText: { fontSize: 15, fontWeight: '800', color: colors.successForeground },
+
+  // Hero Card
+  heroCard: {
+    backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border,
+    borderRadius: colors.radiusLg, padding: 16, ...colors.shadowCard,
+  },
+
+  // Credit card visual
+  creditCardVisual: {
+    backgroundColor: '#0a1a10',
+    borderRadius: 16, padding: 18,
+    overflow: 'hidden',
+    borderWidth: 1, borderColor: 'rgba(52,216,124,0.20)',
+    marginBottom: 2,
+    minHeight: 160,
+  },
+  cardHeaderRow: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', marginBottom: 22,
+  },
+  logoCol: { flexDirection: 'row', alignItems: 'center' },
+  logoText: { color: '#ffffff', fontSize: 15, fontWeight: '900', letterSpacing: 2 },
+  networkBadge: {
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)',
+    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 5,
+  },
+  networkText: { color: 'rgba(255,255,255,0.6)', fontSize: 8, fontWeight: '700', letterSpacing: 1.5 },
+  cardMiddleRow: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', marginBottom: 18,
+  },
+  chipAndBalance: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
+  balanceCol: {},
+  balLabel: {
+    fontSize: 9, color: 'rgba(255,255,255,0.45)',
+    textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 3, fontWeight: '600',
+  },
+  balValue: { fontSize: 26, fontWeight: '800', color: '#ffffff', letterSpacing: -0.5 },
+  cardDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.06)', marginBottom: 14 },
+  cardBottomRow: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+  },
+  cardBottomLabel: {
+    fontSize: 7, color: 'rgba(255,255,255,0.35)',
+    fontWeight: '600', letterSpacing: 0.8, marginBottom: 3, textTransform: 'uppercase',
+  },
+  cardBottomValue: { fontSize: 11, color: 'rgba(255,255,255,0.85)', fontWeight: '700', letterSpacing: 0.3 },
+
+  // SIM Chip
+  simChip: {
+    width: 36, height: 28, borderRadius: 6,
+    backgroundColor: '#C9A227', overflow: 'hidden',
+    padding: 3, borderWidth: 1, borderColor: 'rgba(0,0,0,0.15)',
+  },
+  simInner: { flex: 1, position: 'relative' },
+  simLineH: { position: 'absolute', left: 0, right: 0, top: '50%', height: 1, backgroundColor: 'rgba(0,0,0,0.25)' },
+  simLineV: { position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, backgroundColor: 'rgba(0,0,0,0.25)' },
+  simCenter: {
+    position: 'absolute', left: '25%', right: '25%',
+    top: '25%', bottom: '25%', borderRadius: 2,
+    borderWidth: 1, borderColor: 'rgba(0,0,0,0.2)',
+  },
+
+  // Progress
+  progressSection: { marginTop: 16 },
+  progressBarBg: { height: 5, backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 99, overflow: 'hidden' },
+  progressBarFill: {
+    height: '100%', backgroundColor: colors.success,
+    borderRadius: 99, shadowColor: colors.success,
+    shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.5, shadowRadius: 6,
+  },
+  progressMeta: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+  progressMetaLeft: { fontSize: 11, color: colors.mutedForeground, fontWeight: '500' },
+  progressMetaRight: { fontSize: 11, color: colors.success, fontWeight: '600' },
+
+  // Alert
+  alertCard: {
+    borderRadius: colors.radius, padding: 14,
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    borderWidth: 1,
+  },
+  alertCardNormal: { backgroundColor: 'rgba(52,216,124,0.06)', borderColor: colors.successBorder },
+  alertCardUrgent: { backgroundColor: colors.destructiveDim, borderColor: colors.destructiveBorder },
+  alertIconWrap: {
+    width: 40, height: 40, borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+  },
+  alertIconWrapNormal: { backgroundColor: 'rgba(52,216,124,0.15)' },
+  alertIconWrapUrgent: { backgroundColor: 'rgba(248,113,113,0.15)' },
+  alertTitle: { fontWeight: '700', fontSize: 14, color: colors.foreground },
+  alertSub: { fontSize: 12, color: colors.mutedForeground, marginTop: 2 },
+  payNowBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: colors.success,
+    paddingHorizontal: 14, paddingVertical: 9,
+    borderRadius: colors.radius,
+    shadowColor: colors.success,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4, shadowRadius: 10, elevation: 5,
+  },
+  payNowText: { color: colors.successForeground, fontWeight: '800', fontSize: 13 },
+
+  // Stats grid
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  statCard: {
+    flex: 1, minWidth: '45%',
+    backgroundColor: colors.card,
+    borderWidth: 1, borderColor: colors.border,
+    borderRadius: colors.radiusMd,
+    padding: 16, gap: 6,
+    ...colors.shadowCard,
+  },
+  statCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  statIconBox: {
+    width: 36, height: 36, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  statLabel: { fontSize: 11, color: colors.mutedForeground, fontWeight: '500', letterSpacing: 0.2 },
+  statValue: { fontSize: 20, fontWeight: '800', color: colors.foreground, letterSpacing: -0.5 },
+  statSub: { fontSize: 11, color: colors.mutedForeground },
+
+  // Chart card
+  chartCard: {
+    backgroundColor: colors.card,
+    borderWidth: 1, borderColor: colors.border,
+    borderRadius: colors.radiusMd, padding: 16,
+    ...colors.shadowCard,
+  },
+  chartCardHeader: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', marginBottom: 14,
+  },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: colors.foreground },
+  cardSub: { fontSize: 12, color: colors.mutedForeground, marginTop: 2 },
+  viewAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  viewAllText: { fontSize: 12, color: colors.success, fontWeight: '600' },
+
+  twoCol: { flexDirection: 'row', gap: 10 },
+
+  // Breakdown
+  breakdownRow: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', marginTop: 8,
+  },
+  breakdownLeft: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  breakdownDot: { width: 8, height: 8, borderRadius: 2 },
+  breakdownLabel: { fontSize: 12, color: colors.mutedForeground, fontWeight: '500' },
+  breakdownValue: { fontSize: 12, fontWeight: '700' },
+
+  // Recent payments
+  recentRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  recentIconBox: {
+    width: 28, height: 28, borderRadius: 8,
+    backgroundColor: colors.successDim,
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+  },
+  recentEmi: { fontSize: 12, fontWeight: '700', color: colors.foreground },
+  recentDate: { fontSize: 11, color: colors.mutedForeground, marginTop: 1 },
+  recentAmount: { fontSize: 13, fontWeight: '700', color: colors.success },
+  allHistoryBtn: {
+    marginTop: 10, paddingVertical: 9, borderRadius: colors.radius,
+    borderWidth: 1, borderColor: colors.border,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
+    backgroundColor: colors.muted,
+  },
+  allHistoryText: { fontSize: 12, color: colors.mutedForeground, fontWeight: '600' },
+});
 
 export default DashboardPage;

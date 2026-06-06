@@ -19,23 +19,23 @@ export const AuthProvider = ({ children }) => {
   const login = () => authStore.login();
 
   return (
-    <AuthContext.Provider value={{ 
-      user: authState.user, 
-      isAuthenticated: authState.isAuthenticated,
-      updateUser,
-      updatePreferences,
-      logout,
-      login
-    }}>
+    <AuthContext.Provider
+      value={{
+        user: authState.user,
+        isAuthenticated: authState.isAuthenticated,
+        updateUser,
+        updatePreferences,
+        logout,
+        login,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
+  return ctx;
 };

@@ -1,25 +1,26 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('nova_theme');
-    return saved || 'dark'; // default to premium dark mode
-  });
+  const [theme, setThemeState] = useState('dark');
 
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === 'light') {
-      root.classList.add('theme-light');
-    } else {
-      root.classList.remove('theme-light');
-    }
-    localStorage.setItem('nova_theme', theme);
-  }, [theme]);
+  // Load saved theme on mount
+  React.useEffect(() => {
+    AsyncStorage.getItem('nova_theme').then((saved) => {
+      if (saved) setThemeState(saved);
+    });
+  }, []);
+
+  const setTheme = (t) => {
+    setThemeState(t);
+    AsyncStorage.setItem('nova_theme', t);
+  };
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
   };
 
   return (
@@ -30,9 +31,7 @@ export const ThemeProvider = ({ children }) => {
 };
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error('useTheme must be used within a ThemeProvider');
+  return ctx;
 };
