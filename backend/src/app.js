@@ -1,0 +1,53 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
+const logger = require('./config/logger');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./config/swagger.json');
+const apiRoutes = require('./routes');
+const errorHandler = require('./middleware/error.middleware');
+const { NotFoundError } = require('./utils/errors');
+
+const app = express();
+
+// CORS config
+app.use(cors({
+  origin: '*', // Allow all origins for testing/development
+  credentials: true,
+}));
+
+// Request parsers
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Morgan logger stream to Winston
+const morganStream = {
+  write: (message) => logger.http(message.trim()),
+};
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms', { stream: morganStream }));
+
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// Mount API routes
+app.use('/api/v1', apiRoutes);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: 'UP',
+    timestamp: new Date(),
+  });
+});
+
+// Capture 404 Route Errors
+app.use((req, res, next) => {
+  next(new NotFoundError(`Route ${req.originalUrl} not found`));
+});
+
+// Global Error Handler
+app.use(errorHandler);
+
+module.exports = app;

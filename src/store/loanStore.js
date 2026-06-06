@@ -76,4 +76,21 @@ export const loanStore = {
     AsyncStorage.setItem('nova_loan', JSON.stringify(DEFAULT_LOAN));
     notify();
   },
+  // Populate store fully from backend loan object
+  setLoan(loanData) {
+    state = {
+      ...state,
+      ...loanData,
+      // Map backend field names to store field names
+      paymentMethod: loanData.paymentMethod || state.paymentMethod,
+    };
+    AsyncStorage.setItem('nova_loan', JSON.stringify(state));
+    notify();
+  },
+  // Partial update after a payment (outstanding, paid, paidEmis, nextDueDate)
+  syncFromBackend(partial) {
+    state = { ...state, ...partial };
+    AsyncStorage.setItem('nova_loan', JSON.stringify(state));
+    notify();
+  },
 };

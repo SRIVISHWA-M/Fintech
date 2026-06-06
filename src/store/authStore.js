@@ -68,4 +68,10 @@ export const authStore = {
     AsyncStorage.setItem('nova_user', JSON.stringify(DEFAULT_USER));
     notify();
   },
+  // Called after a successful real API login with backend user data
+  setUser(userData) {
+    state = { user: { ...DEFAULT_USER, ...userData }, isAuthenticated: true };
+    AsyncStorage.setItem('nova_user', JSON.stringify(state.user));
+    notify();
+  },
 };
