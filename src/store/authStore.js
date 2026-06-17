@@ -4,6 +4,7 @@ const DEFAULT_USER = {
   name: 'Aarav Shah',
   customerId: 'NV-48211',
   email: 'aarav.shah@example.com',
+  role: 'user',
   phone: '+91 98765 43421',
   phoneMasked: '+91 98••• ••421',
   kycStatus: 'verified',
@@ -18,7 +19,7 @@ const DEFAULT_USER = {
 };
 
 let listeners = [];
-let state = { user: DEFAULT_USER, isAuthenticated: true };
+let state = { user: null, isAuthenticated: false };
 
 // Load persisted state asynchronously at startup
 AsyncStorage.getItem('nova_user').then((json) => {
@@ -70,7 +71,8 @@ export const authStore = {
   },
   // Called after a successful real API login with backend user data
   setUser(userData) {
-    state = { user: { ...DEFAULT_USER, ...userData }, isAuthenticated: true };
+    const baseUser = userData?.role === 'superadmin' ? {} : DEFAULT_USER;
+    state = { user: { ...baseUser, ...userData }, isAuthenticated: true };
     AsyncStorage.setItem('nova_user', JSON.stringify(state.user));
     notify();
   },

@@ -173,31 +173,29 @@ const MainTabs = () => (
 );
 
 const AppNavigator = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    authStore.getState().isAuthenticated
-  );
+  const [authState, setAuthState] = useState(authStore.getState());
 
   useEffect(() => {
     // Subscribe to auth state — automatically navigate when user logs in/out
     const unsubscribe = authStore.subscribe((state) => {
-      setIsAuthenticated(state.isAuthenticated);
+      setAuthState(state);
     });
     return unsubscribe;
   }, []);
+
+  const isAuthenticated = authState.isAuthenticated;
+  const isSuperAdmin = authState.user?.role === 'superadmin';
 
   return (
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{ headerShown: false, animation: 'fade' }}
       >
-        {isAuthenticated ? (
+        {isAuthenticated && isSuperAdmin ? (
+          <Stack.Screen name="SuperAdmin" component={SuperAdminScreen} />
+        ) : isAuthenticated ? (
           <>
             <Stack.Screen name="Main" component={MainTabs} />
-            <Stack.Screen
-              name="SuperAdmin"
-              component={SuperAdminScreen}
-              options={{ animation: 'slide_from_right' }}
-            />
           </>
         ) : (
           <Stack.Screen name="Login" component={LoginScreen} />

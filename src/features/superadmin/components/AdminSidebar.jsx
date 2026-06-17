@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import adminColors from '../theme/adminColors';
+import { authService } from '../../../services/authService';
 
 const NAV_ITEMS = [
   { key: 'overview',     label: 'Overview',         icon: 'grid-outline',         iconActive: 'grid' },
@@ -83,8 +84,8 @@ const AdminSidebar = ({ activeTab, onNavigate }) => {
             <Text style={styles.adminName}>Aanya K.</Text>
             <Text style={styles.adminRole}>Super Admin</Text>
           </View>
-          <TouchableOpacity activeOpacity={0.7}>
-            <Ionicons name="ellipsis-horizontal" size={16} color={adminColors.fgMuted} />
+          <TouchableOpacity onPress={() => authService.logout()} activeOpacity={0.7}>
+            <Ionicons name="log-out-outline" size={16} color={adminColors.fgMuted} />
           </TouchableOpacity>
         </View>
       </View>
