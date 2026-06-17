@@ -13,6 +13,7 @@ import DashboardScreen from '../features/dashboard/pages/DashboardPage';
 import LoansScreen from '../features/loans/pages/LoansPage';
 import PaymentsScreen from '../features/payments/pages/PaymentsPage';
 import ProfileScreen from '../features/profile/pages/ProfilePage';
+import SuperAdminScreen from '../features/superadmin/SuperAdminScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -190,7 +191,14 @@ const AppNavigator = () => {
         screenOptions={{ headerShown: false, animation: 'fade' }}
       >
         {isAuthenticated ? (
-          <Stack.Screen name="Main" component={MainTabs} />
+          <>
+            <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen
+              name="SuperAdmin"
+              component={SuperAdminScreen}
+              options={{ animation: 'slide_from_right' }}
+            />
+          </>
         ) : (
           <Stack.Screen name="Login" component={LoginScreen} />
         )}
