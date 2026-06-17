@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { paymentStore } from '../../../store/paymentStore';
 import { loanStore } from '../../../store/loanStore';
 import colors from '../../../theme/colors';
+import { paymentService } from '../../../services/paymentService';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
@@ -27,8 +28,16 @@ const PaymentsPage = () => {
   useEffect(() => {
     const u1 = paymentStore.subscribe(setPayments);
     const u2 = loanStore.subscribe(setLoan);
+    // Fetch payments from backend on mount
+    paymentService.getPayments().catch(e => console.log('Payments API unavailable:', e.message));
     return () => { u1(); u2(); };
   }, []);
+
+  // Refetch calendar data when month/year changes
+  useEffect(() => {
+    paymentService.getCalendar(calYear, calMonth + 1)
+      .catch(e => console.log('Calendar API unavailable:', e.message));
+  }, [calYear, calMonth]);
 
   const paidDates   = new Set(payments.payments.map((p) => p.date));
   const nextDue     = loan.nextDueDate;
@@ -251,7 +260,7 @@ const PaymentsPage = () => {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 36, gap: 14 },
+  scrollContent: { padding: 16, paddingBottom: 110, gap: 14 },
 
   // Page header
   pageHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 4, paddingBottom: 4 },

@@ -9,6 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import Svg, { Path, Defs, RadialGradient, Stop, Ellipse } from 'react-native-svg';
 import { authStore } from '../../../store/authStore';
 import colors from '../../../theme/colors';
+import { authService } from '../../../services/authService';
 
 const BgGlow = () => (
   <View style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -33,12 +34,19 @@ const LoginPage = () => {
   const [emailFocused, setEmailFocused] = useState(false);
   const [pwFocused, setPwFocused] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setLoading(true);
-    setTimeout(() => {
+    try {
+      // Use authService.login — it persists the token to AsyncStorage automatically
+      await authService.login(email, password);
+      navigation.replace('Main');
+    } catch (error) {
+      console.log('Login API error, falling back to local demo login:', error.message);
       authStore.login();
       navigation.replace('Main');
-    }, 900);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

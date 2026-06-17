@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
-  StyleSheet, SafeAreaView, Switch,
+  StyleSheet, SafeAreaView, Switch, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { authStore } from '../../../store/authStore';
 import { loanStore } from '../../../store/loanStore';
 import { paymentStore } from '../../../store/paymentStore';
 import colors from '../../../theme/colors';
+import { authService } from '../../../services/authService';
+import { loanService } from '../../../services/loanService';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
@@ -24,19 +26,44 @@ const ProfilePage = () => {
     const u1 = authStore.subscribe(setAuth);
     const u2 = loanStore.subscribe(setLoan);
     const u3 = paymentStore.subscribe(setPayments);
+    // Fetch fresh data from backend on mount
+    authService.getProfile().catch(e => console.log('Profile API unavailable:', e.message));
+    loanService.getActiveLoan().catch(e => console.log('Loan API unavailable:', e.message));
     return () => { u1(); u2(); u3(); };
   }, []);
 
   const user = auth.user;
-  if (!user) return null;
+  // Show a dark placeholder while the logout transition is in progress,
+  // preventing the brief white flash before AppNavigator swaps to Login.
+  if (!user) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="small" color={colors.success} />
+      </View>
+    );
+  }
 
   const totalPaid  = payments.payments.reduce((s, p) => s + p.amount, 0);
   const progress   = Math.round((loan.paid / loan.principal) * 100);
   const initials   = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
   const startEdit = () => { setEditName(user.name); setEditEmail(user.email); setEditMode(true); };
-  const saveEdit  = () => { authStore.updateUser({ name: editName, email: editEmail }); setEditMode(false); };
-  const handlePrefToggle = (key) => authStore.updatePreferences({ [key]: !user.preferences[key] });
+  const saveEdit  = async () => {
+    try {
+      await authService.updateProfile({ name: editName, email: editEmail });
+    } catch (e) {
+      authStore.updateUser({ name: editName, email: editEmail });
+    }
+    setEditMode(false);
+  };
+  const handlePrefToggle = async (key) => {
+    const newVal = !user.preferences[key];
+    try {
+      await authService.updatePreferences({ [key]: newVal });
+    } catch (e) {
+      authStore.updatePreferences({ [key]: newVal });
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -223,7 +250,7 @@ const ProfilePage = () => {
         {/* ── Sign Out ─────────────────────────────────────────────────── */}
         <TouchableOpacity
           style={styles.signOutBtn}
-          onPress={() => authStore.logout()}
+          onPress={() => authService.logout()}
           activeOpacity={0.85}
         >
           <Ionicons name="log-out-outline" size={18} color={colors.destructive} />
@@ -240,7 +267,7 @@ const ProfilePage = () => {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 40, gap: 14 },
+  scrollContent: { padding: 16, paddingBottom: 110, gap: 14 },
 
   // Hero
   heroCard: {

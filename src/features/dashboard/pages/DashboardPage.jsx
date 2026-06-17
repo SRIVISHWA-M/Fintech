@@ -14,6 +14,8 @@ import {
   EmiBreakdownChart,
 } from '../../../components/charts/Charts';
 import colors from '../../../theme/colors';
+import { loanService } from '../../../services/loanService';
+import { paymentService } from '../../../services/paymentService';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
@@ -77,6 +79,9 @@ const DashboardPage = () => {
   useEffect(() => {
     const u1 = loanStore.subscribe(setLoan);
     const u2 = paymentStore.subscribe(setPayments);
+    // Fetch latest data from backend on mount
+    loanService.getActiveLoan().catch(e => console.log('Loan API unavailable:', e.message));
+    paymentService.getPayments().catch(e => console.log('Payments API unavailable:', e.message));
     return () => { u1(); u2(); };
   }, []);
 
@@ -308,7 +313,7 @@ const DashboardPage = () => {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 36, gap: 14 },
+  scrollContent: { padding: 16, paddingBottom: 110, gap: 14 },
 
   // Header
   header: {

@@ -75,17 +75,6 @@ export const PaymentTrendChart = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.chartHeader}>
-        <View>
-          <Text style={styles.chartSubLabel}>6 months trend</Text>
-          <Text style={styles.chartTitle}>Monthly Payments</Text>
-        </View>
-        <View style={{ alignItems: 'flex-end' }}>
-          <Text style={styles.chartSubLabel}>Average</Text>
-          <Text style={styles.chartTitle}>₹1,240 / mo</Text>
-        </View>
-      </View>
-
       <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
         {/* Grid lines */}
         {[0, 0.5, 1].map((fraction, i) => {
@@ -98,7 +87,8 @@ export const PaymentTrendChart = () => {
                 strokeDasharray={fraction === 0 ? '0' : '3 4'}
               />
               <SvgText
-                x="2" y={y + 3}
+                x={padX - 6} y={y + 3}
+                textAnchor="end"
                 fill={colors.mutedForeground} fontSize="7" fontWeight="500"
               >
                 {fraction === 0 ? '₹0' : fraction === 0.5 ? '₹645' : '₹1.3K'}

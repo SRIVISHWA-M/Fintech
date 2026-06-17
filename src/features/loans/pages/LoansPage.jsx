@@ -9,6 +9,8 @@ import { loanStore } from '../../../store/loanStore';
 import { paymentStore } from '../../../store/paymentStore';
 import { LoanProgressChart } from '../../../components/charts/Charts';
 import colors from '../../../theme/colors';
+import { paymentService } from '../../../services/paymentService';
+import { loanService } from '../../../services/loanService';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
@@ -61,6 +63,8 @@ const LoansPage = () => {
   useEffect(() => {
     const u1 = loanStore.subscribe(setLoan);
     const u2 = paymentStore.subscribe(setPayments);
+    // Fetch fresh loan data from backend on mount
+    loanService.getActiveLoan().catch(e => console.log('Loan API unavailable:', e.message));
     return () => { u1(); u2(); };
   }, []);
 
@@ -73,16 +77,26 @@ const LoansPage = () => {
   const progress = Math.round((loan.paid / loan.principal) * 100);
   const daysLeft = daysUntil(loan.nextDueDate);
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     if (payAmount <= 0 || payAmount > loan.outstanding) return;
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const response = await paymentService.makePayment(payAmount, methodLabel);
+      setSuccess({
+        amount: payAmount,
+        method: methodLabel,
+        date: response.transaction?.date || new Date().toISOString(),
+      });
+      setCustomAmount('');
+    } catch (error) {
+      console.log('Payment API error, falling back to local simulation:', error.message);
       paymentStore.addPayment(payAmount, methodLabel);
       loanStore.makePayment(payAmount);
       setSuccess({ amount: payAmount, method: methodLabel, date: new Date().toISOString() });
-      setLoading(false);
       setCustomAmount('');
-    }, 1200);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ── Success screen ────────────────────────────────────────────────────────
@@ -385,7 +399,7 @@ const LoansPage = () => {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 36, gap: 14 },
+  scrollContent: { padding: 16, paddingBottom: 110, gap: 14 },
 
   // Success
   successContainer: { flexGrow: 1, alignItems: 'center', padding: 32, paddingTop: 80, gap: 16 },

@@ -63,4 +63,14 @@ export const paymentStore = {
     AsyncStorage.setItem('nova_payments', JSON.stringify(INITIAL_PAYMENTS));
     notify();
   },
+  setPayments(paymentList) {
+    state = { payments: paymentList };
+    AsyncStorage.setItem('nova_payments', JSON.stringify(paymentList));
+    notify();
+  },
+  prependPayment(transaction) {
+    state = { ...state, payments: [transaction, ...state.payments] };
+    AsyncStorage.setItem('nova_payments', JSON.stringify(state.payments));
+    notify();
+  },
 };
