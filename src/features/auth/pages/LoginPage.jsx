@@ -14,26 +14,24 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Svg, { Defs, RadialGradient, Stop, Ellipse } from 'react-native-svg';
+import Svg, { Defs, RadialGradient, Stop, Ellipse, Path, LinearGradient } from 'react-native-svg';
 import { authStore } from '../../../store/authStore';
 import colors from '../../../theme/colors';
 import { authService } from '../../../services/authService';
+import NovaLogo, { NovaLogoIcon } from '../../../components/NovaLogo';
 
 const DEMO_USERS = [
   {
     email: 'aarav.shah@example.com',
     password: 'password123',
-    user: null,
+    name: 'Aarav Shah',
+    role: 'Client',
   },
   {
     email: 'superadmin@novafinance.com',
     password: 'superadmin123',
-    user: {
-      id: 'super-admin',
-      name: 'Super Admin',
-      email: 'superadmin@novafinance.com',
-      role: 'superadmin',
-    },
+    name: 'Super Admin',
+    role: 'Superadmin',
   },
 ];
 
@@ -45,21 +43,41 @@ const DASHBOARD_METRICS = [
 ];
 
 const SECURITY_ITEMS = [
-  { icon: 'shield-outline', text: '256-bit SSL' },
-  { icon: 'finger-print-outline', text: 'Biometric' },
-  { icon: 'lock-closed-outline', text: 'Encrypted' },
+  { icon: 'shield-checkmark-outline', text: '256-bit SSL Encryption' },
+  { icon: 'finger-print-outline', text: 'Biometric Login Ready' },
+  { icon: 'lock-closed-outline', text: 'Encrypted Databases' },
 ];
 
 const BgGlow = () => (
   <View style={StyleSheet.absoluteFill} pointerEvents="none">
     <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
       <Defs>
-        <RadialGradient id="glow" cx="50%" cy="30%" r="60%">
-          <Stop offset="0%" stopColor="#34d87c" stopOpacity="0.07" />
+        <RadialGradient id="glowTop" cx="30%" cy="20%" r="50%">
+          <Stop offset="0%" stopColor="#34d87c" stopOpacity="0.08" />
+          <Stop offset="100%" stopColor="#080c12" stopOpacity="0" />
+        </RadialGradient>
+        <RadialGradient id="glowBottom" cx="80%" cy="80%" r="60%">
+          <Stop offset="0%" stopColor="#60a5fa" stopOpacity="0.06" />
           <Stop offset="100%" stopColor="#080c12" stopOpacity="0" />
         </RadialGradient>
       </Defs>
-      <Ellipse cx="50%" cy="30%" rx="60%" ry="50%" fill="url(#glow)" />
+      <Ellipse cx="30%" cy="20%" rx="50%" ry="40%" fill="url(#glowTop)" />
+      <Ellipse cx="80%" cy="80%" rx="60%" ry="50%" fill="url(#glowBottom)" />
+    </Svg>
+  </View>
+);
+
+const CardWaves = () => (
+  <View style={StyleSheet.absoluteFill} pointerEvents="none">
+    <Svg width="100%" height="100%">
+      <Defs>
+        <LinearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <Stop offset="0%" stopColor="#34d87c" stopOpacity="0.12" />
+          <Stop offset="100%" stopColor="#60a5fa" stopOpacity="0.05" />
+        </LinearGradient>
+      </Defs>
+      <Path d="M -30 30 Q 120 120 240 10 T 450 80" fill="none" stroke="url(#waveGrad)" strokeWidth="50" />
+      <Path d="M -20 90 Q 150 10 280 120 T 460 20" fill="none" stroke="rgba(52,216,124,0.06)" strokeWidth="30" />
     </Svg>
   </View>
 );
@@ -67,35 +85,63 @@ const BgGlow = () => (
 const DesktopPanel = () => (
   <View style={styles.desktopPanel}>
     <View style={styles.desktopBrandRow}>
-      <View style={styles.desktopBrandIcon}>
-        <Ionicons name="flash" size={20} color={colors.successForeground} />
+      <NovaLogo size={46} layout="row" subtitle="Secure loan operations" />
+    </View>
+
+    {/* Custom Credit Card Visual */}
+    <View style={styles.creditCardVisual}>
+      <CardWaves />
+      <View style={styles.cardHeaderRow}>
+        <View style={styles.logoCol}>
+          <NovaLogoIcon size={18} />
+          <Text style={styles.cardLogoText}>NOVA</Text>
+        </View>
+        <Text style={styles.cardNetworkText}>PREMIUM MEMBER</Text>
       </View>
-      <View>
-        <Text style={styles.desktopBrandName}>Nova Finance</Text>
-        <Text style={styles.desktopBrandSub}>Secure loan operations</Text>
+      <View style={styles.cardMiddleRow}>
+        <View style={styles.simChip}>
+          <View style={styles.simInner}>
+            <View style={styles.simLineH} />
+            <View style={styles.simLineV} />
+            <View style={styles.simCenter} />
+          </View>
+        </View>
+        <View style={styles.balanceCol}>
+          <Text style={styles.balLabel}>CREDIT LINE ACCESS</Text>
+          <Text style={styles.balValue}>₹25,00,000</Text>
+        </View>
+      </View>
+      <View style={styles.cardBottomRow}>
+        <Text style={styles.cardNumber}>•••• •••• •••• 8890</Text>
+        <Text style={styles.cardHolder}>NOVA FINANCE INC</Text>
       </View>
     </View>
 
     <View style={styles.desktopMetricGrid}>
       {DASHBOARD_METRICS.map(({ label, value, icon, color }) => (
         <View key={label} style={styles.desktopMetric}>
-          <View style={[styles.desktopMetricIcon, { backgroundColor: `${color}18` }]}>
-            <Ionicons name={icon} size={16} color={color} />
+          <View style={[styles.desktopMetricIcon, { backgroundColor: `${color}12` }]}>
+            <Ionicons name={icon} size={15} color={color} />
           </View>
-          <Text style={styles.desktopMetricValue}>{value}</Text>
-          <Text style={styles.desktopMetricLabel}>{label}</Text>
+          <View>
+            <Text style={styles.desktopMetricValue}>{value}</Text>
+            <Text style={styles.desktopMetricLabel}>{label}</Text>
+          </View>
         </View>
       ))}
     </View>
 
     <View style={styles.desktopActivity}>
       <View style={styles.activityHeader}>
-        <Text style={styles.activityTitle}>Live access</Text>
-        <View style={styles.activityPulse} />
+        <Text style={styles.activityTitle}>Live Operations Status</Text>
+        <View style={styles.activityPulseContainer}>
+          <View style={styles.activityPulse} />
+          <Text style={styles.pulseText}>Active</Text>
+        </View>
       </View>
-      {['User workspace available', 'Super admin route protected', 'Session tokens encrypted'].map((item) => (
+      {['Workspace initialized successfully', 'Encrypted handshake verified', 'Super admin routes active'].map((item) => (
         <View key={item} style={styles.activityRow}>
-          <Ionicons name="checkmark-circle" size={15} color={colors.success} />
+          <Ionicons name="checkmark-circle" size={14} color={colors.success} />
           <Text style={styles.activityText}>{item}</Text>
         </View>
       ))}
@@ -130,11 +176,15 @@ const LoginPage = () => {
       }
 
       console.log('Login API error, using local demo credentials:', error.message);
-      if (demoUser.user) {
-        authStore.setUser(demoUser.user);
-      } else {
-        authStore.login();
-      }
+      const mappedUser = {
+        id: demoUser.email === 'superadmin@novafinance.com' ? 'super-admin' : 'user-aarav',
+        name: demoUser.name,
+        email: demoUser.email,
+        role: demoUser.role.toLowerCase(),
+      };
+      
+      authStore.setUser(mappedUser);
+      authStore.login();
     } finally {
       setLoading(false);
     }
@@ -153,35 +203,60 @@ const LoginPage = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={[styles.shell, isDesktop && styles.shellDesktop]}>
-            {isDesktop && <DesktopPanel />}
-
             <View style={[styles.formColumn, isDesktop && styles.formColumnDesktop]}>
               <View style={[styles.logoArea, isDesktop && styles.logoAreaDesktop]}>
-                <View style={styles.logoIconWrap}>
-                  <View style={styles.logoIcon}>
-                    <Ionicons name="flash" size={22} color={colors.successForeground} />
-                  </View>
-                  <View style={styles.logoGlow} />
-                </View>
-                <Text style={styles.logoText}>Nova Finance</Text>
-                <View style={styles.logoBadge}>
-                  <View style={styles.logoBadgeDot} />
-                  <Text style={styles.logoBadgeText}>Secure Banking</Text>
-                </View>
+                <NovaLogo size={60} layout="column" subtitle="Secure Banking" />
               </View>
 
-              <Text style={[styles.heading, isDesktop && styles.headingDesktop]}>Welcome back</Text>
+              <Text style={[styles.heading, isDesktop && styles.headingDesktop]}>Control Center</Text>
               <Text style={[styles.subheading, isDesktop && styles.subheadingDesktop]}>
-                Sign in to manage your loan account
+                Sign in to manage and verify secure transactions
               </Text>
 
+              {/* Glassmorphic Form Card */}
               <View style={[styles.formCard, isDesktop && styles.formCardDesktop]}>
+                
+                {/* Pre-filled Account Quick Select */}
+                <View style={styles.quickSelectSection}>
+                  <Text style={styles.quickSelectTitle}>Quick Sign-In</Text>
+                  <View style={styles.quickSelectRow}>
+                    {DEMO_USERS.map((user) => (
+                      <TouchableOpacity
+                        key={user.email}
+                        style={[
+                          styles.quickSelectBtn,
+                          email === user.email && styles.quickSelectBtnActive,
+                        ]}
+                        onPress={() => {
+                          setEmail(user.email);
+                          setPassword(user.password);
+                        }}
+                      >
+                        <Ionicons
+                          name={user.role === 'Superadmin' ? 'shield-checkmark' : 'person-circle'}
+                          size={15}
+                          color={email === user.email ? colors.successForeground : colors.success}
+                        />
+                        <Text
+                          style={[
+                            styles.quickSelectText,
+                            email === user.email && styles.quickSelectTextActive,
+                          ]}
+                        >
+                          {user.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Form fields */}
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.label}>Email address</Text>
+                  <Text style={styles.label}>Email Address</Text>
                   <View style={[styles.inputWrapper, emailFocused && styles.inputWrapperFocused]}>
                     <Ionicons
                       name="mail-outline"
-                      size={17}
+                      size={16}
                       color={emailFocused ? colors.success : colors.mutedForeground}
                       style={styles.inputIcon}
                     />
@@ -200,15 +275,15 @@ const LoginPage = () => {
 
                 <View style={styles.fieldGroup}>
                   <View style={styles.labelRow}>
-                    <Text style={styles.label}>Password</Text>
+                    <Text style={styles.label}>Security Password</Text>
                     <TouchableOpacity>
-                      <Text style={styles.forgotText}>Forgot password?</Text>
+                      <Text style={styles.forgotText}>Forgot?</Text>
                     </TouchableOpacity>
                   </View>
                   <View style={[styles.inputWrapper, pwFocused && styles.inputWrapperFocused]}>
                     <Ionicons
                       name="lock-closed-outline"
-                      size={17}
+                      size={16}
                       color={pwFocused ? colors.success : colors.mutedForeground}
                       style={styles.inputIcon}
                     />
@@ -224,7 +299,7 @@ const LoginPage = () => {
                     <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPw((s) => !s)}>
                       <Ionicons
                         name={showPw ? 'eye-off-outline' : 'eye-outline'}
-                        size={18}
+                        size={17}
                         color={colors.mutedForeground}
                       />
                     </TouchableOpacity>
@@ -241,27 +316,17 @@ const LoginPage = () => {
                     <ActivityIndicator color={colors.successForeground} />
                   ) : (
                     <>
-                      <Text style={styles.signInText}>Sign in</Text>
+                      <Text style={styles.signInText}>Sign In Securely</Text>
                       <Ionicons name="arrow-forward" size={16} color={colors.successForeground} />
                     </>
                   )}
                 </TouchableOpacity>
               </View>
 
-              <View style={[styles.demoCard, isDesktop && styles.demoCardDesktop]}>
-                <View style={styles.demoIconWrap}>
-                  <Ionicons name="shield-checkmark" size={15} color={colors.success} />
-                </View>
-                <Text style={styles.demoText}>
-                  <Text style={styles.demoTextStrong}>Demo mode</Text>
-                  {' - use the pre-filled user account or sign in as superadmin@novafinance.com.'}
-                </Text>
-              </View>
-
               <View style={[styles.securityStrip, isDesktop && styles.securityStripDesktop]}>
                 {SECURITY_ITEMS.map(({ icon, text }) => (
                   <View key={text} style={styles.securityItem}>
-                    <Ionicons name={icon} size={13} color={colors.mutedForeground} />
+                    <Ionicons name={icon} size={12} color={colors.success} style={{ marginRight: 4 }} />
                     <Text style={styles.securityText}>{text}</Text>
                   </View>
                 ))}
@@ -280,13 +345,13 @@ const styles = StyleSheet.create({
   scroll: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 24,
-    paddingTop: 40,
-    paddingBottom: 40,
+    padding: 20,
+    paddingTop: 30,
+    paddingBottom: 30,
   },
   scrollDesktop: {
-    minHeight: 680,
-    paddingHorizontal: 48,
+    minHeight: 700,
+    paddingHorizontal: 40,
     paddingVertical: 32,
   },
   shell: {
@@ -294,232 +359,276 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   shellDesktop: {
-    maxWidth: 1180,
-    minHeight: 680,
+    maxWidth: 1100,
+    minHeight: 660,
     flexDirection: 'row',
-    alignItems: 'stretch',
+    alignItems: 'center',
     justifyContent: 'center',
-    gap: 28,
+    gap: 32,
   },
   formColumn: {
     width: '100%',
   },
   formColumnDesktop: {
-    width: 430,
+    width: 410,
     flexShrink: 0,
     justifyContent: 'center',
   },
 
+  /* Desktop Panel Redesign */
   desktopPanel: {
     flex: 1,
     minWidth: 0,
     borderRadius: colors.radiusLg,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: '#0d131b',
-    padding: 28,
+    borderColor: colors.borderStrong,
+    backgroundColor: '#0a0e16',
+    padding: 32,
     justifyContent: 'space-between',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.28,
-    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.4,
+    shadowRadius: 30,
+    elevation: 12,
   },
   desktopBrandRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
   },
-  desktopBrandIcon: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
-    backgroundColor: colors.success,
+  creditCardVisual: {
+    backgroundColor: '#081710',
+    borderRadius: 20,
+    padding: 24,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(52,216,124,0.18)',
+    marginVertical: 18,
+    minHeight: 180,
+    justifyContent: 'space-between',
+    shadowColor: colors.success,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 15,
+  },
+  cardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  desktopBrandName: {
-    color: colors.foreground,
-    fontSize: 18,
-    fontWeight: '800',
+  logoCol: { flexDirection: 'row', alignItems: 'center' },
+  cardLogoText: { color: '#ffffff', fontSize: 15, fontWeight: '900', letterSpacing: 2, marginLeft: 6 },
+  cardNetworkText: { color: 'rgba(255,255,255,0.4)', fontSize: 8, fontWeight: '700', letterSpacing: 1 },
+  cardMiddleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
   },
-  desktopBrandSub: {
-    color: colors.mutedForeground,
-    fontSize: 12,
-    marginTop: 3,
-    fontWeight: '600',
+  simChip: {
+    width: 38,
+    height: 28,
+    borderRadius: 5,
+    backgroundColor: '#C59E27',
+    padding: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.15)',
   },
+  simInner: { flex: 1, position: 'relative' },
+  simLineH: { position: 'absolute', left: 0, right: 0, top: '50%', height: 1, backgroundColor: 'rgba(0,0,0,0.2)' },
+  simLineV: { position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, backgroundColor: 'rgba(0,0,0,0.2)' },
+  simCenter: { position: 'absolute', left: '25%', right: '25%', top: '25%', bottom: '25%', borderRadius: 1.5, borderWidth: 1, borderColor: 'rgba(0,0,0,0.15)' },
+  balanceCol: {},
+  balLabel: { fontSize: 8, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, fontWeight: '600' },
+  balValue: { fontSize: 24, fontWeight: '800', color: '#ffffff', marginTop: 2 },
+  cardBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardNumber: { fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: '600', letterSpacing: 0.5 },
+  cardHolder: { fontSize: 10, color: 'rgba(255,255,255,0.5)', fontWeight: '700' },
+
   desktopMetricGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-    marginVertical: 32,
+    marginVertical: 10,
   },
   desktopMetric: {
-    flexBasis: '48%',
-    minWidth: 180,
+    flexBasis: '47%',
+    flexGrow: 1,
     borderRadius: colors.radius,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.card,
-    padding: 16,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   desktopMetricIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
   },
   desktopMetricValue: {
     color: colors.foreground,
-    fontSize: 25,
+    fontSize: 18,
     fontWeight: '800',
   },
   desktopMetricLabel: {
     color: colors.mutedForeground,
-    fontSize: 12,
-    marginTop: 4,
-    fontWeight: '600',
+    fontSize: 11,
+    marginTop: 2,
+    fontWeight: '500',
   },
   desktopActivity: {
     borderRadius: colors.radius,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.muted,
-    padding: 18,
+    padding: 16,
   },
   activityHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 14,
+    marginBottom: 10,
   },
   activityTitle: {
     color: colors.foreground,
-    fontSize: 14,
-    fontWeight: '800',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  activityPulseContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   activityPulse: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
     backgroundColor: colors.success,
+  },
+  pulseText: {
+    fontSize: 11,
+    color: colors.success,
+    fontWeight: '600',
   },
   activityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 9,
-    paddingVertical: 7,
+    gap: 8,
+    paddingVertical: 5,
   },
   activityText: {
     color: colors.foregroundSecondary,
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '500',
   },
 
-  logoArea: { alignItems: 'center', marginBottom: 36 },
-  logoAreaDesktop: { marginBottom: 28 },
-  logoIconWrap: { position: 'relative', marginBottom: 12 },
-  logoIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
-    backgroundColor: colors.success,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: colors.success,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  logoGlow: {
-    position: 'absolute',
-    top: -10,
-    left: -10,
-    right: -10,
-    bottom: -10,
-    borderRadius: 30,
-    backgroundColor: 'rgba(52,216,124,0.06)',
-  },
-  logoText: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: colors.foreground,
-    marginBottom: 8,
-  },
-  logoBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: colors.successDim,
-    borderWidth: 1,
-    borderColor: colors.successBorder,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: colors.radiusFull,
-  },
-  logoBadgeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success },
-  logoBadgeText: {
-    fontSize: 11,
-    color: colors.success,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-
+  /* Auth form area redesign */
+  logoArea: { alignItems: 'center', marginBottom: 28 },
+  logoAreaDesktop: { marginBottom: 20 },
   heading: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '800',
     color: colors.foreground,
     marginBottom: 6,
     textAlign: 'center',
+    letterSpacing: -0.5,
   },
   headingDesktop: {
-    fontSize: 30,
+    fontSize: 26,
   },
   subheading: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.mutedForeground,
-    marginBottom: 28,
+    marginBottom: 24,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 18,
   },
   subheadingDesktop: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
 
+  /* Glassmorphic Auth Form Card */
   formCard: {
-    backgroundColor: colors.card,
+    backgroundColor: 'rgba(16, 20, 29, 0.75)',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderStrong,
     borderRadius: colors.radiusLg,
-    padding: 20,
-    gap: 4,
+    padding: 24,
+    gap: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.4,
+    shadowRadius: 24,
     elevation: 10,
     marginBottom: 20,
   },
   formCardDesktop: {
-    padding: 24,
+    padding: 28,
   },
-  fieldGroup: { marginBottom: 14 },
+
+  /* Quick select section */
+  quickSelectSection: {
+    marginBottom: 4,
+  },
+  quickSelectTitle: {
+    fontSize: 11,
+    color: colors.mutedForeground,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 10,
+  },
+  quickSelectRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  quickSelectBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: colors.radius,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.input,
+  },
+  quickSelectBtnActive: {
+    borderColor: colors.success,
+    backgroundColor: colors.success,
+  },
+  quickSelectText: {
+    fontSize: 12,
+    color: colors.foregroundSecondary,
+    fontWeight: '600',
+  },
+  quickSelectTextActive: {
+    color: colors.successForeground,
+    fontWeight: '800',
+  },
+
+  fieldGroup: { gap: 8 },
   labelRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 7,
   },
   label: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '700',
     color: colors.foregroundSecondary,
-    marginBottom: 7,
+    letterSpacing: 0.2,
   },
-  forgotText: { fontSize: 12, color: colors.success, fontWeight: '600' },
+  forgotText: { fontSize: 12, color: colors.success, fontWeight: '700' },
 
   inputWrapper: {
     flexDirection: 'row',
@@ -529,94 +638,62 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: colors.radius,
     overflow: 'hidden',
-    minHeight: 50,
+    minHeight: 48,
   },
   inputWrapperFocused: { borderColor: colors.success },
-  inputIcon: { marginLeft: 14, flexShrink: 0 },
+  inputIcon: { marginLeft: 12, flexShrink: 0 },
   input: {
     flex: 1,
-    padding: 14,
-    paddingLeft: 10,
+    padding: 12,
+    paddingLeft: 8,
     color: colors.foreground,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '500',
     minWidth: 0,
   },
   passwordInput: {
-    paddingRight: 44,
+    paddingRight: 40,
   },
-  eyeBtn: { position: 'absolute', right: 14, padding: 4 },
+  eyeBtn: { position: 'absolute', right: 12, padding: 4 },
 
   signInBtn: {
-    marginTop: 4,
     backgroundColor: colors.success,
     borderRadius: colors.radius,
-    minHeight: 52,
-    paddingHorizontal: 17,
+    minHeight: 48,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
     shadowColor: colors.success,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.45,
-    shadowRadius: 16,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
     elevation: 8,
+    marginTop: 6,
   },
   signInBtnDisabled: { backgroundColor: colors.muted, shadowOpacity: 0 },
   signInText: {
     color: colors.successForeground,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
-    letterSpacing: 0.2,
-  },
-
-  demoCard: {
-    padding: 16,
-    borderRadius: colors.radius,
-    backgroundColor: colors.successDimMid,
-    borderWidth: 1,
-    borderColor: colors.successBorder,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    marginBottom: 24,
-  },
-  demoCardDesktop: {
-    marginBottom: 20,
-  },
-  demoIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: colors.successDim,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  demoText: {
-    fontSize: 13,
-    color: colors.mutedForeground,
-    lineHeight: 20,
-    flex: 1,
-  },
-  demoTextStrong: {
-    color: colors.success,
-    fontWeight: '700',
+    letterSpacing: 0.1,
   },
 
   securityStrip: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 20,
+    flexDirection: 'column',
+    gap: 10,
     alignItems: 'center',
-    flexWrap: 'wrap',
+    marginTop: 10,
   },
   securityStripDesktop: {
-    gap: 14,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    marginTop: 8,
   },
-  securityItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  securityText: { fontSize: 11, color: colors.mutedForeground, fontWeight: '500' },
+  securityItem: { flexDirection: 'row', alignItems: 'center' },
+  securityText: { fontSize: 11, color: colors.mutedForeground, fontWeight: '600' },
 });
 
 export default LoginPage;

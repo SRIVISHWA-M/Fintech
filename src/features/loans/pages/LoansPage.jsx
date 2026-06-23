@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { loanStore } from '../../../store/loanStore';
+import { NovaLogoIcon } from '../../../components/NovaLogo';
 import { paymentStore } from '../../../store/paymentStore';
 import { LoanProgressChart } from '../../../components/charts/Charts';
 import colors from '../../../theme/colors';
@@ -150,8 +151,8 @@ const LoansPage = () => {
             <CardWaves />
             <View style={styles.cardHeaderRow}>
               <View style={styles.logoCol}>
-                <Ionicons name="flash" size={13} color={colors.success} style={{ marginRight: 5 }} />
-                <Text style={styles.logoText}>NOVA</Text>
+                <NovaLogoIcon size={18} />
+                <Text style={[styles.logoText, { marginLeft: 6 }]}>NOVA</Text>
               </View>
               <View style={styles.networkBadge}>
                 <Text style={styles.networkText}>MASTERCARD</Text>
