@@ -9,7 +9,7 @@ import { loanStore } from '../../../store/loanStore';
 import { NovaLogoIcon } from '../../../components/NovaLogo';
 import { paymentStore } from '../../../store/paymentStore';
 import { LoanProgressChart } from '../../../components/charts/Charts';
-import colors from '../../../theme/colors';
+import { useTheme } from '../../../theme/useTheme';
 import { paymentService } from '../../../services/paymentService';
 import { loanService } from '../../../services/loanService';
 
@@ -26,7 +26,7 @@ const PAYMENT_METHODS = [
   { id: 'netbanking', label: 'Net Banking', iconName: 'cash-outline', sub: 'All major banks' },
 ];
 
-const SimChip = () => (
+const SimChip = ({ styles }) => (
   <View style={styles.simChip}>
     <View style={styles.simInner}>
       <View style={styles.simLineH} />
@@ -52,6 +52,8 @@ const CardWaves = () => (
 );
 
 const LoansPage = () => {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [loan, setLoan] = useState(loanStore.getState());
   const [payments, setPayments] = useState(paymentStore.getState());
   const [selectedMethod, setSelectedMethod] = useState('hdfc');
@@ -152,7 +154,7 @@ const LoansPage = () => {
             <View style={styles.cardHeaderRow}>
               <View style={styles.logoCol}>
                 <NovaLogoIcon size={18} />
-                <Text style={[styles.logoText, { marginLeft: 6 }]}>NOVA</Text>
+                <Text style={[styles.logoText, { marginLeft: 6 }]}>HIDEL</Text>
               </View>
               <View style={styles.networkBadge}>
                 <Text style={styles.networkText}>MASTERCARD</Text>
@@ -160,7 +162,7 @@ const LoansPage = () => {
             </View>
             <View style={styles.cardMiddleRow}>
               <View style={styles.chipAndBalance}>
-                <SimChip />
+                <SimChip styles={styles} />
                 <View>
                   <Text style={styles.balLabel}>Outstanding Balance</Text>
                   <Text style={styles.balValue}>{fmt(loan.outstanding)}</Text>
@@ -169,20 +171,7 @@ const LoansPage = () => {
               <LoanProgressChart outstanding={loan.outstanding} principal={loan.principal} size={60} />
             </View>
             <View style={styles.cardDivider} />
-            <View style={styles.cardBottomRow}>
-              <View>
-                <Text style={styles.cardBottomLabel}>CARD NUMBER</Text>
-                <Text style={styles.cardBottomValue}>•••• •••• •••• 4421</Text>
-              </View>
-              <View style={{ alignItems: 'center' }}>
-                <Text style={styles.cardBottomLabel}>VALID THRU</Text>
-                <Text style={styles.cardBottomValue}>06/28</Text>
-              </View>
-              <View style={{ alignItems: 'flex-end' }}>
-                <Text style={styles.cardBottomLabel}>CVV</Text>
-                <Text style={styles.cardBottomValue}>•••</Text>
-              </View>
-            </View>
+        
           </View>
 
           {/* Progress */}
@@ -237,8 +226,8 @@ const LoansPage = () => {
           <View style={styles.typeRow}>
             {[
               { id: 'emi', label: 'Pay EMI', value: fmt(loan.nextDueAmount) },
-              { id: 'custom', label: 'Custom', value: 'Enter amount' },
-              { id: 'full', label: 'Pay Full', value: fmt(loan.outstanding) },
+              { id: 'custom', label: 'Partial amount', value: 'Enter amount' },
+              { id: 'full', label: 'Full amount', value: fmt(loan.outstanding) },
             ].map(({ id, label, value }) => (
               <TouchableOpacity
                 key={id}
@@ -397,7 +386,7 @@ const LoansPage = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 110, gap: 14 },

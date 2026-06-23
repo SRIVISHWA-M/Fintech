@@ -11,6 +11,7 @@ import LoginScreen from '../features/auth/pages/LoginPage';
 import HomePage from '../features/dashboard/pages/HomePage';
 import DashboardScreen from '../features/dashboard/pages/DashboardPage';
 import LoansScreen from '../features/loans/pages/LoansPage';
+import PersonalLoanDetailsPage from '../features/loans/pages/PersonalLoanDetailsPage';
 import PaymentsScreen from '../features/payments/pages/PaymentsPage';
 import ProfileScreen from '../features/profile/pages/ProfilePage';
 import SuperAdminScreen from '../features/superadmin/SuperAdminScreen';
@@ -196,6 +197,7 @@ const AppNavigator = () => {
         ) : isAuthenticated ? (
           <>
             <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen name="PersonalLoanDetails" component={PersonalLoanDetailsPage} />
           </>
         ) : (
           <Stack.Screen name="Login" component={LoginScreen} />

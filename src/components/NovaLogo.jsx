@@ -101,7 +101,7 @@ export const NovaLogo = ({ size = 64, showText = true, layout = 'column', subtit
       </View>
       {showText && (
         <View style={[styles.textWrapper, isRow ? styles.textRow : styles.textColumn]}>
-          <Text style={[styles.logoText, { fontSize: size * 0.35 }]}>Nova Finance</Text>
+          <Text style={[styles.logoText, { fontSize: size * 0.35 }]}>Hidel Finance</Text>
           {subtitle && (
             <View style={styles.badge}>
               <View style={styles.badgeDot} />

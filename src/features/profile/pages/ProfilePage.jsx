@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { authStore } from '../../../store/authStore';
 import { loanStore } from '../../../store/loanStore';
 import { paymentStore } from '../../../store/paymentStore';
-import colors from '../../../theme/colors';
+import { useTheme } from '../../../theme/useTheme';
 import { authService } from '../../../services/authService';
 import { loanService } from '../../../services/loanService';
 
@@ -15,6 +15,8 @@ const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
 
 const ProfilePage = () => {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [auth, setAuth]         = useState(authStore.getState());
   const [loan, setLoan]         = useState(loanStore.getState());
   const [payments, setPayments] = useState(paymentStore.getState());
@@ -198,8 +200,8 @@ const ProfilePage = () => {
             <Text style={styles.sectionTitle}>Preferences & Alerts</Text>
           </View>
           {[
-            { key: 'notifications', icon: 'notifications-outline', label: 'Push Notifications', sub: 'EMI reminders and payment alerts' },
-            { key: 'loginAlerts', icon: 'lock-closed-outline', label: 'Login Alerts', sub: 'Get notified on new logins' },
+            // { key: 'notifications', icon: 'notifications-outline', label: 'Push Notifications', sub: 'EMI reminders and payment alerts' },
+            // { key: 'loginAlerts', icon: 'lock-closed-outline', label: 'Login Alerts', sub: 'Get notified on new logins' },
             { key: 'darkMode', icon: 'moon-outline', label: 'Dark Mode', sub: 'Current theme preference' },
           ].map(({ key, icon, label, sub }, idx, arr) => (
             <View key={key} style={[styles.prefRow, idx < arr.length - 1 && styles.prefRowBorder]}>
@@ -225,8 +227,8 @@ const ProfilePage = () => {
         <View style={[styles.card, { padding: 0, overflow: 'hidden' }]}>
           {[
             { icon: 'lock-closed-outline', label: 'Change Password', sub: 'Update your account password', color: colors.chartBlue },
-            { icon: 'shield-outline', label: 'Security Settings', sub: '2FA and device management', color: colors.chartPurple },
-            { icon: 'card-outline', label: 'Linked Accounts', sub: 'Manage payment methods', color: colors.warning },
+            // { icon: 'shield-outline', label: 'Security Settings', sub: '2FA and device management', color: colors.chartPurple },
+            // { icon: 'card-outline', label: 'Linked Accounts', sub: 'Manage payment methods', color: colors.warning },
           ].map(({ icon, label, sub, color }, idx, arr) => (
             <TouchableOpacity
               key={label}
@@ -257,21 +259,21 @@ const ProfilePage = () => {
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
 
-        <Text style={styles.versionText}>Nova Finance v1.0.0 · RBI Regulated</Text>
+        <Text style={styles.versionText}>Hidel Finance v1.0.0 · RBI Regulated</Text>
 
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 110, gap: 14 },
 
   // Hero
   heroCard: {
-    backgroundColor: '#0f1820', borderWidth: 1, borderColor: colors.border,
+    backgroundColor: colors.cardElevated, borderWidth: 1, borderColor: colors.border,
     borderRadius: colors.radiusLg, padding: 20, overflow: 'hidden', ...colors.shadowCard,
   },
   heroBlobTL: {
@@ -298,7 +300,7 @@ const styles = StyleSheet.create({
     position: 'absolute', bottom: -2, right: -2,
     width: 20, height: 20, borderRadius: 10,
     backgroundColor: colors.success,
-    borderWidth: 2.5, borderColor: '#0f1820',
+    borderWidth: 2.5, borderColor: colors.cardElevated,
   },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 3 },
   userName: { fontSize: 19, fontWeight: '800', color: colors.foreground, letterSpacing: -0.4, flex: 1 },

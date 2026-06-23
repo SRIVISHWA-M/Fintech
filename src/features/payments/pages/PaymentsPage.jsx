@@ -5,7 +5,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { paymentStore } from '../../../store/paymentStore';
 import { loanStore } from '../../../store/loanStore';
-import colors from '../../../theme/colors';
+import { useTheme } from '../../../theme/useTheme';
 import { paymentService } from '../../../services/paymentService';
 
 const fmt = (n) =>
@@ -18,6 +18,8 @@ const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
 const getFirstDay    = (y, m) => new Date(y, m, 1).getDay();
 
 const PaymentsPage = () => {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const today = new Date();
   const [payments, setPayments] = useState(paymentStore.getState());
   const [loan, setLoan]         = useState(loanStore.getState());
@@ -257,7 +259,7 @@ const PaymentsPage = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 110, gap: 14 },

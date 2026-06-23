@@ -14,7 +14,7 @@ import {
   PaymentTrendChart,
   EmiBreakdownChart,
 } from '../../../components/charts/Charts';
-import colors from '../../../theme/colors';
+import { useTheme } from '../../../theme/useTheme';
 import { loanService } from '../../../services/loanService';
 import { paymentService } from '../../../services/paymentService';
 
@@ -25,7 +25,7 @@ const fmtDate = (d) =>
 const daysUntil = (d) => Math.ceil((new Date(d) - new Date()) / 86400000);
 
 /* ── Mini stat card ─────────────────────────────────────────────────────────── */
-const StatCard = ({ iconName, iconColor = colors.success, label, value, sub, onPress }) => (
+const StatCard = ({ iconName, iconColor, label, value, sub, onPress, styles, colors }) => (
   <TouchableOpacity
     style={styles.statCard}
     onPress={onPress}
@@ -44,7 +44,7 @@ const StatCard = ({ iconName, iconColor = colors.success, label, value, sub, onP
 );
 
 /* ── SIM chip ───────────────────────────────────────────────────────────────── */
-const SimChip = () => (
+const SimChip = ({ styles }) => (
   <View style={styles.simChip}>
     <View style={styles.simInner}>
       <View style={styles.simLineH} />
@@ -72,6 +72,8 @@ const CardWaves = () => (
 
 /* ── Page ────────────────────────────────────────────────────────────────────── */
 const DashboardPage = () => {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const navigation = useNavigation();
   const [loan, setLoan] = useState(loanStore.getState());
   const [payments, setPayments] = useState(paymentStore.getState());
@@ -125,7 +127,7 @@ const DashboardPage = () => {
             <View style={styles.cardHeaderRow}>
               <View style={styles.logoCol}>
                 <NovaLogoIcon size={18} />
-                <Text style={[styles.logoText, { marginLeft: 6 }]}>NOVA</Text>
+                <Text style={[styles.logoText, { marginLeft: 6 }]}>HIDEL</Text>
               </View>
               <View style={styles.networkBadge}>
                 <Text style={styles.networkText}>MASTERCARD</Text>
@@ -134,7 +136,7 @@ const DashboardPage = () => {
 
             <View style={styles.cardMiddleRow}>
               <View style={styles.chipAndBalance}>
-                <SimChip />
+                <SimChip styles={styles} />
                 <View style={styles.balanceCol}>
                   <Text style={styles.balLabel}>Outstanding Balance</Text>
                   <Text style={styles.balValue}>{fmt(loan.outstanding)}</Text>
@@ -146,21 +148,6 @@ const DashboardPage = () => {
             </View>
 
             <View style={styles.cardDivider} />
-
-            <View style={styles.cardBottomRow}>
-              <View>
-                <Text style={styles.cardBottomLabel}>CARD NUMBER</Text>
-                <Text style={styles.cardBottomValue}>•••• •••• •••• 4421</Text>
-              </View>
-              <View style={{ alignItems: 'center' }}>
-                <Text style={styles.cardBottomLabel}>VALID THRU</Text>
-                <Text style={styles.cardBottomValue}>06/28</Text>
-              </View>
-              <View style={{ alignItems: 'flex-end' }}>
-                <Text style={styles.cardBottomLabel}>CARDHOLDER</Text>
-                <Text style={styles.cardBottomValue}>{user?.name?.split(' ')[0]?.toUpperCase()}</Text>
-              </View>
-            </View>
           </View>
 
           {/* Loan progress */}
@@ -210,24 +197,28 @@ const DashboardPage = () => {
         {/* ── Stats Grid ─────────────────────────────────────────────────── */}
         <View style={styles.statsGrid}>
           <StatCard
-            iconName="trending-up" label="Interest Rate"
-            value={`${loan.interestRate}%`} sub="p.a. flat rate"
+            iconName="trending-up" iconColor={colors.success}
+            label="Interest Rate" value="1.90%" sub="per month"
+            styles={styles} colors={colors}
           />
           <StatCard
             iconName="calendar-outline" iconColor={colors.chartBlue}
             label="Remaining" value={`${loan.termMonths - loan.paidEmis} mo`}
             sub={`of ${loan.termMonths} months`}
+            styles={styles} colors={colors}
           />
           <StatCard
             iconName="card-outline" iconColor={colors.chartPurple}
             label="EMI Amount" value={fmt(loan.nextDueAmount)}
             sub={`via ${loan.paymentMethod}`}
             onPress={() => navigation.navigate('Loans')}
+            styles={styles} colors={colors}
           />
           <StatCard
             iconName="shield-checkmark-outline" iconColor={colors.warning}
             label="On-Time Rate" value={`${user?.onTimeRate || 100}%`}
             sub="all-time record"
+            styles={styles} colors={colors}
           />
         </View>
 
@@ -311,7 +302,7 @@ const DashboardPage = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 110, gap: 14 },

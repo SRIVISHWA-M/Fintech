@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { loanStore } from '../../../store/loanStore';
 import { authStore } from '../../../store/authStore';
-import colors from '../../../theme/colors';
+import { useTheme } from '../../../theme/useTheme';
 import { loanService } from '../../../services/loanService';
 
 const fmt = (n) =>
@@ -18,6 +18,8 @@ const fmtDate = (d) => {
 };
 
 const HomePage = () => {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const navigation = useNavigation();
   const [loan, setLoan] = useState(loanStore.getState());
   const [user] = useState(authStore.getState().user);
@@ -135,7 +137,7 @@ const HomePage = () => {
             </View>
             <TouchableOpacity
               style={styles.applyBtn}
-              onPress={() => navigation.navigate('Loans')}
+              onPress={() => navigation.navigate('PersonalLoanDetails')}
               activeOpacity={0.85}
             >
               <Text style={styles.applyBtnText}>Apply now</Text>
@@ -158,12 +160,12 @@ const HomePage = () => {
             </View>
             <View style={styles.loanCardInfo}>
               <Text style={styles.loanLimitLabel}>UP TO</Text>
-              <Text style={styles.loanLimitVal}>₹34,000</Text>
+              <Text style={styles.loanLimitVal}>₹3,00,000</Text>
               <Text style={styles.loanDuration}>9 months</Text>
             </View>
             <TouchableOpacity
               style={styles.applyBtn}
-              onPress={() => navigation.navigate('Loans')}
+              onPress={() => navigation.navigate('PersonalLoanDetails')}
               activeOpacity={0.85}
             >
               <Text style={styles.applyBtnText}>Get now</Text>
@@ -186,12 +188,12 @@ const HomePage = () => {
             </View>
             <View style={styles.loanCardInfo}>
               <Text style={styles.loanLimitLabel}>UP TO</Text>
-              <Text style={styles.loanLimitVal}>₹5,000,000</Text>
+              <Text style={styles.loanLimitVal}>₹10,00,000</Text>
               <Text style={styles.loanDuration}>48 months</Text>
             </View>
             <TouchableOpacity
               style={styles.applyBtn}
-              onPress={() => navigation.navigate('Loans')}
+              onPress={() => navigation.navigate('PersonalLoanDetails')}
               activeOpacity={0.85}
             >
               <Text style={styles.applyBtnText}>Apply now</Text>
@@ -251,7 +253,7 @@ const HomePage = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 110, gap: 16 },

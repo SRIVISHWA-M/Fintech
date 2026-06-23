@@ -3,7 +3,7 @@ export const generateReceiptText = (payment, loan, user) => {
   const divider = '-'.repeat(45);
   
   return `${border}
-              NOVA FINANCE SERVICES
+              HIDEL FINANCE SERVICES
              EMI REPAYMENT RECEIPT
 ${border}
 Receipt Date:   ${payment.date}
@@ -36,6 +36,6 @@ This is a computer-generated transaction receipt and
 does not require a physical signature. For support, 
 please contact support@novafin.example.
 ${border}
-Thank you for banking with Nova Finance.
+Thank you for banking with Hidel Finance.
 `;
 };

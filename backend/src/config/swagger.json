@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Nova Finance API Documentation",
+    "title": "Hidel Finance API Documentation",
     "version": "1.0.0",
-    "description": "Production-ready backend API specifications for Nova Finance mobile application. All authenticated endpoints require a Bearer Access Token in the Authorization header."
+    "description": "Production-ready backend API specifications for Hidel Finance mobile application. All authenticated endpoints require a Bearer Access Token in the Authorization header."
   },
   "servers": [
     {

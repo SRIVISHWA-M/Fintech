@@ -16,7 +16,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Defs, RadialGradient, Stop, Ellipse, Path, LinearGradient } from 'react-native-svg';
 import { authStore } from '../../../store/authStore';
-import colors from '../../../theme/colors';
+import { useTheme } from '../../../theme/useTheme';
 import { authService } from '../../../services/authService';
 import NovaLogo, { NovaLogoIcon } from '../../../components/NovaLogo';
 
@@ -35,7 +35,7 @@ const DEMO_USERS = [
   },
 ];
 
-const DASHBOARD_METRICS = [
+const getDashboardMetrics = (colors) => [
   { label: 'Active loans', value: '1,284', icon: 'layers-outline', color: colors.success },
   { label: 'On-time rate', value: '98.4%', icon: 'checkmark-circle-outline', color: colors.chartBlue },
   { label: 'Collections', value: '42L', icon: 'wallet-outline', color: colors.warning },
@@ -82,7 +82,7 @@ const CardWaves = () => (
   </View>
 );
 
-const DesktopPanel = () => (
+const DesktopPanel = ({ colors, styles }) => (
   <View style={styles.desktopPanel}>
     <View style={styles.desktopBrandRow}>
       <NovaLogo size={46} layout="row" subtitle="Secure loan operations" />
@@ -94,7 +94,7 @@ const DesktopPanel = () => (
       <View style={styles.cardHeaderRow}>
         <View style={styles.logoCol}>
           <NovaLogoIcon size={18} />
-          <Text style={styles.cardLogoText}>NOVA</Text>
+          <Text style={styles.cardLogoText}>HIDEL</Text>
         </View>
         <Text style={styles.cardNetworkText}>PREMIUM MEMBER</Text>
       </View>
@@ -113,12 +113,12 @@ const DesktopPanel = () => (
       </View>
       <View style={styles.cardBottomRow}>
         <Text style={styles.cardNumber}>•••• •••• •••• 8890</Text>
-        <Text style={styles.cardHolder}>NOVA FINANCE INC</Text>
+        <Text style={styles.cardHolder}>HIDEL FINANCE INC</Text>
       </View>
     </View>
 
     <View style={styles.desktopMetricGrid}>
-      {DASHBOARD_METRICS.map(({ label, value, icon, color }) => (
+      {getDashboardMetrics(colors).map(({ label, value, icon, color }) => (
         <View key={label} style={styles.desktopMetric}>
           <View style={[styles.desktopMetricIcon, { backgroundColor: `${color}12` }]}>
             <Ionicons name={icon} size={15} color={color} />
@@ -150,6 +150,8 @@ const DesktopPanel = () => (
 );
 
 const LoginPage = () => {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { width } = useWindowDimensions();
   const isDesktop = width >= 900;
   const [email, setEmail] = useState('aarav.shah@example.com');
@@ -269,6 +271,8 @@ const LoginPage = () => {
                       placeholderTextColor={colors.mutedForeground}
                       onFocus={() => setEmailFocused(true)}
                       onBlur={() => setEmailFocused(false)}
+                      multiline={false}
+                      underlineColorAndroid="transparent"
                     />
                   </View>
                 </View>
@@ -295,6 +299,8 @@ const LoginPage = () => {
                       placeholderTextColor={colors.mutedForeground}
                       onFocus={() => setPwFocused(true)}
                       onBlur={() => setPwFocused(false)}
+                      multiline={false}
+                      underlineColorAndroid="transparent"
                     />
                     <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPw((s) => !s)}>
                       <Ionicons
@@ -339,7 +345,7 @@ const LoginPage = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   keyboard: { flex: 1 },
   scroll: {
@@ -637,19 +643,25 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: colors.radius,
-    overflow: 'hidden',
-    minHeight: 48,
+    height: 48,
   },
   inputWrapperFocused: { borderColor: colors.success },
   inputIcon: { marginLeft: 12, flexShrink: 0 },
   input: {
     flex: 1,
-    padding: 12,
+    paddingHorizontal: 12,
     paddingLeft: 8,
+    paddingVertical: 0,
+    marginVertical: 0,
     color: colors.foreground,
     fontSize: 14,
     fontWeight: '500',
     minWidth: 0,
+    height: '100%',
+    textAlignVertical: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    outlineStyle: 'none',
   },
   passwordInput: {
     paddingRight: 40,

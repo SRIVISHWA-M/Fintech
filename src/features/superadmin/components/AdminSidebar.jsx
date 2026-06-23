@@ -30,7 +30,7 @@ const AdminSidebar = ({ activeTab, onNavigate }) => {
           <Ionicons name="flash" size={18} color={adminColors.accentFg} />
         </View>
         <View>
-          <Text style={styles.brandName}>Nova Finance</Text>
+          <Text style={styles.brandName}>Hidel Finance</Text>
           <Text style={styles.brandRole}>Super Admin</Text>
         </View>
       </View>
