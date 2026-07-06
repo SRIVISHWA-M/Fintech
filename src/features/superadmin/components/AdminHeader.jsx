@@ -19,15 +19,20 @@ const PAGE_TITLES = {
  *   onSearch     — (text) => void
  *   searchQuery  — controlled search value
  */
-const AdminHeader = ({ activeTab, onSearch, searchQuery = '' }) => {
+const AdminHeader = ({ activeTab, onSearch, searchQuery = '', onToggleSidebar }) => {
   const page = PAGE_TITLES[activeTab] || PAGE_TITLES.overview;
 
   return (
     <View style={styles.header}>
-      {/* Left: title block */}
-      <View style={styles.titleBlock}>
-        <Text style={styles.title}>{page.title}</Text>
-        <Text style={styles.sub} numberOfLines={1}>{page.sub}</Text>
+      <View style={styles.leftContainer}>
+        <TouchableOpacity onPress={onToggleSidebar} style={styles.menuBtn} activeOpacity={0.75}>
+          <Ionicons name="menu-outline" size={24} color={adminColors.fg} />
+        </TouchableOpacity>
+        {/* Left: title block */}
+        <View style={styles.titleBlock}>
+          <Text style={styles.title}>{page.title}</Text>
+          <Text style={styles.sub} numberOfLines={1}>{page.sub}</Text>
+        </View>
       </View>
 
       {/* Right: search + actions */}
@@ -76,9 +81,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: adminColors.border,
   },
+  leftContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 24,
+  },
+  menuBtn: {
+    marginRight: 16,
+    padding: 4,
+  },
   titleBlock: {
     flex: 1,
-    marginRight: 24,
   },
   title: {
     fontSize: 17,

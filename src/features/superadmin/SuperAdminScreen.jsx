@@ -3,7 +3,7 @@ import { View, StyleSheet, SafeAreaView } from 'react-native';
 import adminColors from './theme/adminColors';
 import OverviewPage    from './pages/OverviewPage';
 import UnderwritingPage from './pages/UnderwritingPage';
-import UsersPage       from './pages/UsersPage';
+import UserManagementPage from './pages/UserManagementPage';
 import CollectionsPage from './pages/CollectionsPage';
 import ConfigPage      from './pages/ConfigPage';
 
@@ -20,7 +20,7 @@ import ConfigPage      from './pages/ConfigPage';
 const PAGES = {
   overview:     OverviewPage,
   underwriting: UnderwritingPage,
-  users:        UsersPage,
+  users:        UserManagementPage,
   collections:  CollectionsPage,
   config:       ConfigPage,
 };
