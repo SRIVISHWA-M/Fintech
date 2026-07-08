@@ -5,11 +5,12 @@ import adminColors from '../theme/adminColors';
 import { authService } from '../../../services/authService';
 
 const NAV_ITEMS = [
-  { key: 'overview',     label: 'Overview',         icon: 'grid-outline',         iconActive: 'grid' },
-  { key: 'underwriting', label: 'Underwriting Queue', icon: 'documents-outline',   iconActive: 'documents',    badge: 12 },
-  { key: 'users',        label: 'User Management',   icon: 'people-outline',       iconActive: 'people' },
-  { key: 'collections',  label: 'Collections',        icon: 'wallet-outline',       iconActive: 'wallet',       badge: 3 },
-  { key: 'config',       label: 'Platform Config',    icon: 'settings-outline',     iconActive: 'settings' },
+  { key: 'overview', label: 'Overview', icon: 'grid-outline', iconActive: 'grid' },
+  { key: 'underwriting', label: 'Underwriting Queue', icon: 'documents-outline', iconActive: 'documents', badge: 12 },
+  { key: 'users', label: 'User Management', icon: 'people-outline', iconActive: 'people' },
+  { key: 'loan', label: 'Loan Management', icon: 'layers-outline', iconActive: 'layers' },
+  { key: 'collections', label: 'Collections', icon: 'wallet-outline', iconActive: 'wallet', badge: 3 },
+  { key: 'config', label: 'Platform Config', icon: 'settings-outline', iconActive: 'settings' },
 ];
 
 const DIVIDER_AFTER = ['overview'];

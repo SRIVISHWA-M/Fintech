@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setAccessToken } from '../services/api';
 
 const DEFAULT_USER = {
   name: 'Aarav Shah',
@@ -22,9 +23,15 @@ let listeners = [];
 let state = { user: null, isAuthenticated: false };
 
 // Load persisted state asynchronously at startup
-AsyncStorage.getItem('nova_user').then((json) => {
-  if (json) {
-    state = { user: JSON.parse(json), isAuthenticated: true };
+Promise.all([
+  AsyncStorage.getItem('nova_user'),
+  AsyncStorage.getItem('nova_access_token'),
+]).then(([userJson, token]) => {
+  if (token) {
+    setAccessToken(token);
+  }
+  if (userJson && token) {
+    state = { user: JSON.parse(userJson), isAuthenticated: true };
     notify();
   }
 });

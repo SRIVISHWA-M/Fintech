@@ -164,12 +164,12 @@ const UsersPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
     <AdminLayout activeTab={activeTab} onNavigate={onNavigate} searchQuery={searchQuery} onSearch={onSearch}>
       {/* Stats */}
       <View style={styles.kpiRow}>
-        <AdminMetricCard icon="people-outline"         iconColor={adminColors.chartBlue}   label="Total Borrowers"   value={stats.totalBorrowers}   />
-        <AdminMetricCard icon="person-outline"         iconColor={adminColors.accent}       label="Active Borrowers"  value={stats.activeBorrowers}  change="+1,240" positive />
-        <AdminMetricCard icon="shield-checkmark-outline" iconColor={adminColors.success}    label="KYC Tier-2"        value={stats.kycTier2}        />
-        <AdminMetricCard icon="ban-outline"            iconColor={adminColors.danger}       label="Suspended"         value={stats.suspended}        />
-        <AdminMetricCard icon="star-outline"           iconColor={adminColors.chartPurple}  label="Avg Credit Score"  value={stats.avgCreditScore}   />
-        <AdminMetricCard icon="person-add-outline"     iconColor={adminColors.chartTeal}    label="New This Month"    value={stats.newThisMonth}     change="+382" positive />
+        <AdminMetricCard icon="people-outline" iconColor={adminColors.chartBlue} label="Total Borrowers" value={stats.totalBorrowers} />
+        <AdminMetricCard icon="person-outline" iconColor={adminColors.accent} label="Active Borrowers" value={stats.activeBorrowers} change="+1,240" positive />
+        <AdminMetricCard icon="shield-checkmark-outline" iconColor={adminColors.success} label="KYC Tier-2" value={stats.kycTier2} />
+        <AdminMetricCard icon="ban-outline" iconColor={adminColors.danger} label="Suspended" value={stats.suspended} />
+        <AdminMetricCard icon="star-outline" iconColor={adminColors.chartPurple} label="Avg Credit Score" value={stats.avgCreditScore} />
+        <AdminMetricCard icon="person-add-outline" iconColor={adminColors.chartTeal} label="New This Month" value={stats.newThisMonth} change="+382" positive />
       </View>
 
       {/* Table */}

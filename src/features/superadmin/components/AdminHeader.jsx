@@ -7,6 +7,7 @@ const PAGE_TITLES = {
   overview:     { title: 'Overview', sub: 'Wednesday, Jun 3 · Q2 FY26 · positions reconciled at 12:45 PM IST' },
   underwriting: { title: 'Underwriting Queue', sub: '2,418 active applications · ₹612 Cr exposure · SLA breach risk: 7' },
   users:        { title: 'User Management', sub: '1,84,209 borrowers · 1,34,431 active · 73% with verified KYC tier-2' },
+  loan:         { title: 'Loan Management', sub: 'Master loan listing · dashboards, filtering, CRUD & transaction details' },
   collections:  { title: 'Collections', sub: '₹3,365 Cr at-risk across 6,998 delinquent accounts · NPL ratio 2.14%' },
   config:       { title: 'Platform Configuration', sub: 'Underwriting policy v7.3.1 · last published by Aanya K. on Jun 1' },
 };

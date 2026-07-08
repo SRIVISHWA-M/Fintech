@@ -169,12 +169,12 @@ const CollectionsPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
     <AdminLayout activeTab={activeTab} onNavigate={onNavigate} searchQuery={searchQuery} onSearch={onSearch}>
       {/* Stats */}
       <View style={styles.kpiRow}>
-        <AdminMetricCard icon="warning-outline"    iconColor={adminColors.danger}      label="At-Risk Portfolio"     value={stats.atRisk}              />
-        <AdminMetricCard icon="people-outline"     iconColor={adminColors.orange}      label="Delinquent Accounts"   value={stats.delinquentAccounts}   change="-84" positive />
-        <AdminMetricCard icon="trending-down-outline" iconColor={adminColors.warning}  label="NPL Ratio"             value={stats.nplRatio}            change="-0.08%" positive />
-        <AdminMetricCard icon="cash-outline"       iconColor={adminColors.accent}      label="Recovered Today"       value={stats.recoveredToday}      change="+12%" positive />
-        <AdminMetricCard icon="person-outline"     iconColor={adminColors.chartPurple} label="Agent Efficiency"      value={stats.agentEfficiency}     />
-        <AdminMetricCard icon="calendar-outline"   iconColor={adminColors.chartBlue}   label="Avg DPD"               value={stats.avgDPD}              />
+        <AdminMetricCard icon="warning-outline" iconColor={adminColors.danger} label="At-Risk Portfolio" value={stats.atRisk} />
+        <AdminMetricCard icon="people-outline" iconColor={adminColors.orange} label="Delinquent Accounts" value={stats.delinquentAccounts} change="-84" positive />
+        <AdminMetricCard icon="trending-down-outline" iconColor={adminColors.warning} label="NPL Ratio" value={stats.nplRatio} change="-0.08%" positive />
+        <AdminMetricCard icon="cash-outline" iconColor={adminColors.accent} label="Recovered Today" value={stats.recoveredToday} change="+12%" positive />
+        <AdminMetricCard icon="person-outline" iconColor={adminColors.chartPurple} label="Agent Efficiency" value={stats.agentEfficiency} />
+        <AdminMetricCard icon="calendar-outline" iconColor={adminColors.chartBlue} label="Avg DPD" value={stats.avgDPD} />
       </View>
 
       {/* DPD Bucket Summary */}

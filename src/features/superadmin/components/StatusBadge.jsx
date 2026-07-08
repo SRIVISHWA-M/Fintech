@@ -20,6 +20,7 @@ const variants = {
   muted:    { bg: adminColors.muted,       text: adminColors.fgSub,    border: adminColors.border },
   critical: { bg: 'rgba(248,113,113,0.18)', text: '#f87171',           border: 'rgba(248,113,113,0.40)' },
   purple:   { bg: 'rgba(167,139,250,0.12)', text: adminColors.chartPurple, border: 'rgba(167,139,250,0.25)' },
+  teal:     { bg: 'rgba(45,212,191,0.12)', text: adminColors.chartTeal,   border: 'rgba(45,212,191,0.25)' },
 };
 
 const StatusBadge = ({ label, variant = 'muted', size = 'md', dot = false }) => {
@@ -56,6 +57,7 @@ export const getStatusVariant = (status) => {
   if (['flagged', 'critical', 'npa'].includes(s)) return 'critical';
   if (['promise to pay', 'in progress'].includes(s)) return 'orange';
   if (['restricted'].includes(s)) return 'purple';
+  if (['business loan', 'teal'].includes(s)) return 'teal';
   return 'muted';
 };
 

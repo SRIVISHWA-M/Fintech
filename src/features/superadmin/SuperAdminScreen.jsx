@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, SafeAreaView } from 'react-native';
 import adminColors from './theme/adminColors';
-import OverviewPage    from './pages/OverviewPage';
+import OverviewPage from './pages/OverviewPage';
 import UnderwritingPage from './pages/UnderwritingPage';
-import UsersPage       from './pages/UsersPage';
+import UsersPage from './pages/UsersPage';
+import LoanManagementPage from './pages/LoanManagementPage';
 import CollectionsPage from './pages/CollectionsPage';
-import ConfigPage      from './pages/ConfigPage';
+import ConfigPage from './pages/ConfigPage';
 
 /**
  * SuperAdminScreen
@@ -18,15 +19,16 @@ import ConfigPage      from './pages/ConfigPage';
  *   <Stack.Screen name="SuperAdmin" component={SuperAdminScreen} />
  */
 const PAGES = {
-  overview:     OverviewPage,
+  overview: OverviewPage,
   underwriting: UnderwritingPage,
-  users:        UsersPage,
-  collections:  CollectionsPage,
-  config:       ConfigPage,
+  users: UsersPage,
+  loan: LoanManagementPage,
+  collections: CollectionsPage,
+  config: ConfigPage,
 };
 
 const SuperAdminScreen = () => {
-  const [activeTab, setActiveTab]     = useState('overview');
+  const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleNavigate = (key) => {

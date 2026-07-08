@@ -160,12 +160,12 @@ const UnderwritingPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
     <AdminLayout activeTab={activeTab} onNavigate={onNavigate} searchQuery={searchQuery} onSearch={onSearch}>
       {/* Stats */}
       <View style={styles.kpiRow}>
-        <AdminMetricCard icon="documents-outline"     iconColor={adminColors.chartBlue}   label="Active Applications" value={stats.activeApplications}  />
-        <AdminMetricCard icon="layers-outline"        iconColor={adminColors.accent}       label="Total Exposure"      value={stats.totalExposure}       />
-        <AdminMetricCard icon="time-outline"          iconColor={adminColors.danger}       label="SLA Breach Risk"     value={stats.slaBreachRisk.toString()} change="-2" positive />
-        <AdminMetricCard icon="hourglass-outline"     iconColor={adminColors.warning}      label="Avg Processing"      value={stats.avgProcessingTime}   />
-        <AdminMetricCard icon="checkmark-circle-outline" iconColor={adminColors.success}   label="Approval Rate"       value={stats.approvalRate}        />
-        <AdminMetricCard icon="flash-outline"         iconColor={adminColors.chartPurple}  label="Auto-Approved"       value={stats.autoApproved}        />
+        <AdminMetricCard icon="documents-outline" iconColor={adminColors.chartBlue} label="Active Applications" value={stats.activeApplications} />
+        <AdminMetricCard icon="layers-outline" iconColor={adminColors.accent} label="Total Exposure" value={stats.totalExposure} />
+        <AdminMetricCard icon="time-outline" iconColor={adminColors.danger} label="SLA Breach Risk" value={stats.slaBreachRisk.toString()} change="-2" positive />
+        <AdminMetricCard icon="hourglass-outline" iconColor={adminColors.warning} label="Avg Processing" value={stats.avgProcessingTime} />
+        <AdminMetricCard icon="checkmark-circle-outline" iconColor={adminColors.success} label="Approval Rate" value={stats.approvalRate} />
+        <AdminMetricCard icon="flash-outline" iconColor={adminColors.chartPurple} label="Auto-Approved" value={stats.autoApproved} />
       </View>
 
       {/* Filter tabs + table */}
