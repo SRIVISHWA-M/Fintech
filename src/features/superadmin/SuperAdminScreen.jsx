@@ -4,6 +4,7 @@ import adminColors from './theme/adminColors';
 import OverviewPage from './pages/OverviewPage';
 import UnderwritingPage from './pages/UnderwritingPage';
 import UserManagementPage from './pages/UserManagementPage';
+import LoanManagementPage from './pages/LoanManagementPage';
 import CollectionsPage from './pages/CollectionsPage';
 import ConfigPage from './pages/ConfigPage';
 
@@ -21,6 +22,7 @@ const PAGES = {
   overview: OverviewPage,
   underwriting: UnderwritingPage,
   users: UserManagementPage,
+  loan: LoanManagementPage,
   collections: CollectionsPage,
   config: ConfigPage,
 };

@@ -21,11 +21,12 @@ export { default as AdminTable }       from './components/AdminTable';
 export { default as StatusBadge, getStatusVariant } from './components/StatusBadge';
 
 // ── Pages (can be used standalone inside AdminLayout) ────────────────────────
-export { default as OverviewPage }     from './pages/OverviewPage';
-export { default as UnderwritingPage } from './pages/UnderwritingPage';
-export { default as UsersPage }        from './pages/UsersPage';
-export { default as CollectionsPage }  from './pages/CollectionsPage';
-export { default as ConfigPage }       from './pages/ConfigPage';
+export { default as OverviewPage }       from './pages/OverviewPage';
+export { default as UnderwritingPage }   from './pages/UnderwritingPage';
+export { default as UserManagementPage } from './pages/UserManagementPage';
+export { default as LoanManagementPage } from './pages/LoanManagementPage';
+export { default as CollectionsPage }    from './pages/CollectionsPage';
+export { default as ConfigPage }         from './pages/ConfigPage';
 
 // ── Theme & Data ──────────────────────────────────────────────────────────────
 export { default as adminColors }      from './theme/adminColors';
