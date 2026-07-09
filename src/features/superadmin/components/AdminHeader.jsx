@@ -1,13 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import adminColors from '../theme/adminColors';
 
 const PAGE_TITLES = {
-  overview:     { title: 'Overview', sub: 'Wednesday, Jun 3 · Q2 FY26 · positions reconciled at 12:45 PM IST' },
-  underwriting: { title: 'Underwriting Queue', sub: '2,418 active applications · ₹612 Cr exposure · SLA breach risk: 7' },
+  dashboard:    { title: 'Dashboard', sub: 'Wednesday, Jun 3 · Q2 FY26 · positions reconciled at 12:45 PM IST' },
   users:        { title: 'User Management', sub: '1,84,209 borrowers · 1,34,431 active · 73% with verified KYC tier-2' },
   loan:         { title: 'Loan Management', sub: 'Master loan listing · dashboards, filtering, CRUD & transaction details' },
+  revenue:      { title: 'Revenue', sub: 'Track revenue, disbursement income, collections, and lending performance' },
   collections:  { title: 'Collections', sub: '₹3,365 Cr at-risk across 6,998 delinquent accounts · NPL ratio 2.14%' },
   config:       { title: 'Platform Configuration', sub: 'Underwriting policy v7.3.1 · last published by Aanya K. on Jun 1' },
 };
@@ -21,14 +21,18 @@ const PAGE_TITLES = {
  *   searchQuery  — controlled search value
  */
 const AdminHeader = ({ activeTab, onSearch, searchQuery = '', onToggleSidebar }) => {
-  const page = PAGE_TITLES[activeTab] || PAGE_TITLES.overview;
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 900;
+  const page = PAGE_TITLES[activeTab] || PAGE_TITLES.dashboard;
 
   return (
     <View style={styles.header}>
       <View style={styles.leftContainer}>
-        <TouchableOpacity onPress={onToggleSidebar} style={styles.menuBtn} activeOpacity={0.75}>
-          <Ionicons name="menu-outline" size={24} color={adminColors.fg} />
-        </TouchableOpacity>
+        {!isDesktop && (
+          <TouchableOpacity onPress={onToggleSidebar} style={styles.menuBtn} activeOpacity={0.75}>
+            <Ionicons name="menu-outline" size={24} color={adminColors.fg} />
+          </TouchableOpacity>
+        )}
         {/* Left: title block */}
         <View style={styles.titleBlock}>
           <Text style={styles.title}>{page.title}</Text>

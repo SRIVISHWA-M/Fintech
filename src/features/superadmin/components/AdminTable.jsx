@@ -34,7 +34,7 @@ const AdminTable = ({ columns = [], data = [], onRowPress, emptyText = 'No recor
       </View>
 
       {/* Body */}
-      <ScrollView style={[styles.body, maxHeight && { maxHeight }]} nestedScrollEnabled>
+      <ScrollView style={[styles.body, maxHeight && { maxHeight }]} nestedScrollEnabled showsVerticalScrollIndicator={false}>
         {data.length === 0 ? (
           <View style={styles.empty}>
             <Ionicons name="document-outline" size={28} color={adminColors.fgMuted} />
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     minHeight: 52,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.04)',
+    borderBottomColor: adminColors.border,
     backgroundColor: adminColors.card,
   },
   rowAlt: {

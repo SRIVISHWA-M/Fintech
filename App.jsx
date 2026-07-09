@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ThemeProvider } from './src/context/ThemeContext';
 import { AuthProvider } from './src/context/AuthContext';
+import { ToastProvider } from './src/context/ToastContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { restoreSession } from './src/services/authService';
 import IdleTimer from './src/components/IdleTimer';
@@ -16,10 +17,12 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <IdleTimer>
-          <StatusBar style="light" />
-          <AppNavigator />
-        </IdleTimer>
+        <ToastProvider>
+          <IdleTimer>
+            <StatusBar style="light" />
+            <AppNavigator />
+          </IdleTimer>
+        </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
   );

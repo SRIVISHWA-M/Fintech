@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, TextInput 
 import { Ionicons } from '@expo/vector-icons';
 import adminColors from '../theme/adminColors';
 import AdminLayout from '../components/AdminLayout';
+import { useToast } from '../../../context/ToastContext';
 import AdminMetricCard from '../components/AdminMetricCard';
 import AdminTable from '../components/AdminTable';
 import StatusBadge from '../components/StatusBadge';
@@ -39,6 +40,7 @@ const getLoanTypeVariant = (type) => {
 // Page Component
 // ------------------------------------------------------------------
 const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
+  const { showSuccessToast, showDeleteToast } = useToast();
   const [customers, setCustomers] = useState(userManagementCustomers);
   const [activeFilter, setActiveFilter] = useState('All');
   
@@ -88,6 +90,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
   const confirmDelete = () => {
     if (selectedCustomer) {
       setCustomers(prev => prev.filter(c => c.id !== selectedCustomer.id));
+      showDeleteToast("USER DELETED", `User "${selectedCustomer.customerName}" was deleted successfully.`);
     }
     setDeleteModalOpen(false);
     setSelectedCustomer(null);
@@ -139,6 +142,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
       };
       setCustomers(prev => [newCustomer, ...prev]);
       setCreateModalOpen(false);
+      showSuccessToast("USER CREATED", `User "${newCustomer.customerName}" was created successfully.`);
     } else if (isEditModalOpen && selectedCustomer) {
       setCustomers(prev => prev.map(c => 
         c.id === selectedCustomer.id ? {
@@ -150,6 +154,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
       ));
       setEditModalOpen(false);
       setSelectedCustomer(null);
+      showSuccessToast("USER UPDATED", `User "${selectedCustomer.customerName}" was updated successfully.`);
     }
   };
 
@@ -214,7 +219,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
     {
       key: 'actions',
       label: 'Actions',
-      width: 180,
+      width: 220,
       render: (_, row) => (
         <View style={colStyles.actions}>
           <TouchableOpacity style={colStyles.btnAction} onPress={() => openViewModal(row)}>
@@ -223,15 +228,16 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
           <TouchableOpacity style={colStyles.btnAction} onPress={() => openEditModal(row)}>
             <Text style={colStyles.btnActionText}>Edit</Text>
           </TouchableOpacity>
-          {row.status === 'Active' && (
+          {row.status === 'Active' ? (
              <TouchableOpacity style={colStyles.btnActionPause} onPress={() => handlePause(row)}>
                <Text style={colStyles.btnActionTextPause}>Pause</Text>
              </TouchableOpacity>
-          )}
-          {row.status === 'Paused' && (
+          ) : row.status === 'Paused' ? (
              <TouchableOpacity style={colStyles.btnActionResume} onPress={() => handleResume(row)}>
                <Text style={colStyles.btnActionTextResume}>Resume</Text>
              </TouchableOpacity>
+          ) : (
+             <View style={{ width: 58 }} />
           )}
           <TouchableOpacity style={colStyles.btnIcon} onPress={() => openDeleteModal(row)}>
             <Ionicons name="trash-outline" size={14} color={adminColors.danger} />
@@ -347,7 +353,15 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
         </View>
 
         {filteredData.length > 0 ? (
-          <AdminTable columns={COLUMNS} data={filteredData} />
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={true}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
+            <View style={{ flex: 1, minWidth: 850 }}>
+              <AdminTable columns={COLUMNS} data={filteredData} />
+            </View>
+          </ScrollView>
         ) : (
           <View style={styles.emptyState}>
             <Ionicons name="search-outline" size={40} color={adminColors.fgMuted} />
@@ -554,8 +568,9 @@ const colStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(251,146,60,0.25)',
     borderRadius: adminColors.r6,
-    paddingHorizontal: 8,
     paddingVertical: 4,
+    width: 58,
+    alignItems: 'center',
   },
   btnActionTextPause: { fontSize: 10, fontWeight: '700', color: adminColors.orange },
   btnActionResume: {
@@ -563,8 +578,9 @@ const colStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: adminColors.accentBorder,
     borderRadius: adminColors.r6,
-    paddingHorizontal: 8,
     paddingVertical: 4,
+    width: 58,
+    alignItems: 'center',
   },
   btnActionTextResume: { fontSize: 10, fontWeight: '700', color: adminColors.success },
   btnIcon: {

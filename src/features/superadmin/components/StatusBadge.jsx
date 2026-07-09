@@ -12,15 +12,15 @@ import adminColors from '../theme/adminColors';
  *   dot      — show a leading dot indicator (bool)
  */
 const variants = {
-  success:  { bg: adminColors.successDim,  text: adminColors.success,  border: adminColors.accentBorder },
-  warning:  { bg: adminColors.warningDim,  text: adminColors.warning,  border: 'rgba(251,191,36,0.25)' },
-  danger:   { bg: adminColors.dangerDim,   text: adminColors.danger,   border: adminColors.dangerBorder },
-  orange:   { bg: adminColors.orangeDim,   text: adminColors.orange,   border: 'rgba(251,146,60,0.25)' },
-  info:     { bg: 'rgba(96,165,250,0.10)', text: adminColors.chartBlue, border: 'rgba(96,165,250,0.25)' },
-  muted:    { bg: adminColors.muted,       text: adminColors.fgSub,    border: adminColors.border },
-  critical: { bg: 'rgba(248,113,113,0.18)', text: '#f87171',           border: 'rgba(248,113,113,0.40)' },
-  purple:   { bg: 'rgba(167,139,250,0.12)', text: adminColors.chartPurple, border: 'rgba(167,139,250,0.25)' },
-  teal:     { bg: 'rgba(45,212,191,0.12)', text: adminColors.chartTeal,   border: 'rgba(45,212,191,0.25)' },
+  success:  { bg: adminColors.successDim,  text: adminColors.successFg,  border: 'rgba(16, 185, 129, 0.25)' },
+  warning:  { bg: adminColors.warningDim,  text: adminColors.warningFg,  border: 'rgba(245, 158, 11, 0.25)' },
+  danger:   { bg: adminColors.dangerDim,   text: adminColors.dangerFg,   border: 'rgba(239, 68, 68, 0.25)' },
+  orange:   { bg: adminColors.orangeDim,   text: adminColors.orangeFg,   border: 'rgba(249, 115, 22, 0.25)' },
+  info:     { bg: 'rgba(59, 130, 246, 0.08)', text: '#1e40af',           border: 'rgba(59, 130, 246, 0.20)' },
+  muted:    { bg: adminColors.muted,       text: adminColors.fgSub,      border: adminColors.border },
+  critical: { bg: 'rgba(239, 68, 68, 0.12)',  text: '#991b1b',           border: 'rgba(239, 68, 68, 0.30)' },
+  purple:   { bg: 'rgba(139, 92, 246, 0.08)', text: '#5b21b6',           border: 'rgba(139, 92, 246, 0.20)' },
+  teal:     { bg: 'rgba(20, 184, 166, 0.08)',  text: '#0f766e',          border: 'rgba(20, 184, 166, 0.20)' },
 };
 
 const StatusBadge = ({ label, variant = 'muted', size = 'md', dot = false }) => {

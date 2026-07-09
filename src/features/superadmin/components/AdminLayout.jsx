@@ -1,18 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Animated, TouchableWithoutFeedback } from 'react-native';
+import { View, StyleSheet, ScrollView, Animated, TouchableWithoutFeedback, useWindowDimensions } from 'react-native';
 import adminColors from '../theme/adminColors';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 
 /**
- * AdminLayout — reusable shell that wraps every super-admin page.
- *
- * Props:
- *   activeTab     — current route key
- *   onNavigate    — (key) => void
- *   onSearch      — (text) => void
- *   searchQuery   — string
- *   children      — page content
+ * AdminLayout — shell that wraps super-admin pages with collapsible sidebar.
  */
 const AdminLayout = ({
   activeTab,
@@ -21,9 +14,17 @@ const AdminLayout = ({
   searchQuery,
   children,
 }) => {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 900;
+
+  // Drawer sidebar state for mobile/tablet
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const sidebarAnim = useRef(new Animated.Value(-adminColors.sidebarWidth)).current;
   const overlayAnim = useRef(new Animated.Value(0)).current;
+
+  // Hover expansion state for desktop
+  const [isHovered, setIsHovered] = useState(false);
+  const desktopSidebarWidth = useRef(new Animated.Value(76)).current;
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -34,25 +35,58 @@ const AdminLayout = ({
     setIsSidebarOpen(false);
   };
 
+  // Mobile drawer animation
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(sidebarAnim, {
-        toValue: isSidebarOpen ? 0 : -adminColors.sidebarWidth,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(overlayAnim, {
-        toValue: isSidebarOpen ? 1 : 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [isSidebarOpen]);
+    if (!isDesktop) {
+      Animated.parallel([
+        Animated.timing(sidebarAnim, {
+          toValue: isSidebarOpen ? 0 : -adminColors.sidebarWidth,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(overlayAnim, {
+          toValue: isSidebarOpen ? 1 : 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isSidebarOpen, isDesktop]);
+
+  // Desktop hover width animation
+  useEffect(() => {
+    if (isDesktop) {
+      Animated.timing(desktopSidebarWidth, {
+        toValue: isHovered ? 240 : 76,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [isHovered, isDesktop]);
 
   return (
     <View style={styles.root}>
-      {/* Main area */}
-      <View style={styles.main}>
+      {/* Desktop Sidebar (Permanent Collapsible Rail) */}
+      {isDesktop && (
+        <Animated.View
+          style={[
+            styles.desktopSidebarContainer,
+            { width: desktopSidebarWidth },
+            isHovered && styles.shadowExpanded,
+          ]}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <AdminSidebar
+            activeTab={activeTab}
+            onNavigate={onNavigate}
+            isExpanded={isHovered}
+          />
+        </Animated.View>
+      )}
+
+      {/* Main Area */}
+      <View style={[styles.main, isDesktop && { marginLeft: 76 }]}>
         {/* Header */}
         <AdminHeader
           activeTab={activeTab}
@@ -71,8 +105,8 @@ const AdminLayout = ({
         </ScrollView>
       </View>
 
-      {/* Overlay */}
-      {isSidebarOpen && (
+      {/* Mobile/Tablet Overlay */}
+      {!isDesktop && isSidebarOpen && (
         <Animated.View style={[styles.overlay, { opacity: overlayAnim }]}>
           <TouchableWithoutFeedback onPress={() => setIsSidebarOpen(false)}>
             <View style={StyleSheet.absoluteFill} />
@@ -80,15 +114,21 @@ const AdminLayout = ({
         </Animated.View>
       )}
 
-      {/* Sidebar as Drawer */}
-      <Animated.View
-        style={[
-          styles.sidebarContainer,
-          { transform: [{ translateX: sidebarAnim }] },
-        ]}
-      >
-        <AdminSidebar activeTab={activeTab} onNavigate={handleNavigate} />
-      </Animated.View>
+      {/* Mobile/Tablet Sidebar Drawer */}
+      {!isDesktop && (
+        <Animated.View
+          style={[
+            styles.sidebarContainer,
+            { transform: [{ translateX: sidebarAnim }] },
+          ]}
+        >
+          <AdminSidebar
+            activeTab={activeTab}
+            onNavigate={handleNavigate}
+            isExpanded={true}
+          />
+        </Animated.View>
+      )}
     </View>
   );
 };
@@ -123,7 +163,6 @@ const styles = StyleSheet.create({
     left: 0,
     width: adminColors.sidebarWidth,
     zIndex: 20,
-    backgroundColor: adminColors.sidebar,
     shadowColor: '#000',
     shadowOffset: {
       width: 2,
@@ -132,6 +171,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  desktopSidebarContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 30,
+    overflow: 'hidden',
+  },
+  shadowExpanded: {
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 10,
   },
 });
 

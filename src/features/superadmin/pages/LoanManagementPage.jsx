@@ -18,6 +18,7 @@ import AdminMetricCard from '../components/AdminMetricCard';
 import AdminTable from '../components/AdminTable';
 import StatusBadge from '../components/StatusBadge';
 import { loanCustomersList } from '../data/mockData';
+import { useToast } from '../../../context/ToastContext';
 
 // Constants for drop down selections
 const LOAN_TYPES = ['All Loan Types', 'Home Loan', 'Vehicle Loan', 'Personal Loan', 'Business Loan'];
@@ -79,6 +80,7 @@ const getEmiVariant = (status) => {
 };
 
 const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
+    const { showSuccessToast, showDeleteToast } = useToast();
     const [loanData, setLoanData] = useState(() =>
         loanCustomersList.map((item) => ({
             ...item,
@@ -355,6 +357,7 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
 
         setLoanData((prev) => [newLoan, ...prev]);
         setShowAddModal(false);
+        showSuccessToast("LOAN CREATED", `Loan ${newLoan.id} was created successfully.`);
     };
 
     const handleOpenEditModal = (loan) => {
@@ -453,6 +456,7 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
         );
 
         setShowEditModal(false);
+        showSuccessToast("LOAN UPDATED", `Loan ${editFormData.id} was updated successfully.`);
         // Refresh selected loan if viewed
         if (selectedLoan && selectedLoan.id === editFormData.id) {
             const updated = loanData.find(l => l.id === editFormData.id);
@@ -578,13 +582,14 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
             'Are you sure you want to delete this loan record? This action cannot be undone.',
             () => {
                 setLoanData((prev) => prev.filter((loan) => loan.id !== rowId));
+                showDeleteToast("LOAN DELETED", `Loan ${rowId} was deleted successfully.`);
             },
             'Delete',
             adminColors.danger
         );
     };
 
-    // Explicitly define 11 columns in table columns array
+    // Explicitly define columns in table columns array
     const columns = useMemo(
         () => [
             {
@@ -596,7 +601,7 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
             {
                 key: 'customerName',
                 label: 'Customer Name',
-                width: 150,
+                flex: 1,
                 render: (val, row) => {
                     const initials = val
                         .split(' ')
@@ -614,6 +619,12 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
                         </View>
                     );
                 },
+            },
+            {
+                key: 'email',
+                label: 'Email',
+                flex: 1.2,
+                render: (val) => <Text style={colStyles.email} numberOfLines={1}>{val}</Text>,
             },
             {
                 key: 'phone',
@@ -1050,8 +1061,8 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
                 </View>
 
                 {/* Table with horizontally scrollable wrap for responsiveness */}
-                <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-                    <View style={{ minWidth: 1200 }}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerStyle={{ flexGrow: 1 }}>
+                    <View style={{ flex: 1, minWidth: 1350 }}>
                         <AdminTable
                             columns={columns}
                             data={filteredData}
@@ -2191,7 +2202,7 @@ const styles = StyleSheet.create({
     },
     detailsWrap: {
         gap: 8,
-        backgroundColor: 'rgba(255,255,255,0.01)',
+        backgroundColor: 'rgba(15, 23, 42, 0.02)',
         padding: 12,
         borderRadius: adminColors.r12,
         borderWidth: 1,
@@ -2205,7 +2216,7 @@ const styles = StyleSheet.create({
         gap: 20,
         paddingBottom: 8,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.03)',
+        borderBottomColor: adminColors.border,
     },
     detailLabel: {
         fontSize: 12,
@@ -2282,7 +2293,7 @@ const styles = StyleSheet.create({
     txHeaderRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.02)',
+        backgroundColor: 'rgba(15, 23, 42, 0.03)',
         paddingHorizontal: 10,
         paddingVertical: 8,
         borderBottomWidth: 1,
