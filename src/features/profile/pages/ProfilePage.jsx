@@ -17,8 +17,8 @@ const fmt = (n) =>
 const ProfilePage = () => {
   const { colors } = useTheme();
   const styles = getStyles(colors);
-  const [auth, setAuth]         = useState(authStore.getState());
-  const [loan, setLoan]         = useState(loanStore.getState());
+  const [auth, setAuth] = useState(authStore.getState());
+  const [loan, setLoan] = useState(loanStore.getState());
   const [payments, setPayments] = useState(paymentStore.getState());
   const [editMode, setEditMode] = useState(false);
   const [editName, setEditName] = useState('');
@@ -45,12 +45,12 @@ const ProfilePage = () => {
     );
   }
 
-  const totalPaid  = payments.payments.reduce((s, p) => s + p.amount, 0);
-  const progress   = Math.round((loan.paid / loan.principal) * 100);
-  const initials   = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const totalPaid = (payments && payments.payments) ? payments.payments.reduce((s, p) => s + (p.amount || 0), 0) : 0;
+  const progress = (loan && loan.principal) ? Math.round(((loan.paid || 0) / loan.principal) * 100) : 0;
+  const initials = user && user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '';
 
   const startEdit = () => { setEditName(user.name); setEditEmail(user.email); setEditMode(true); };
-  const saveEdit  = async () => {
+  const saveEdit = async () => {
     try {
       await authService.updateProfile({ name: editName, email: editEmail });
     } catch (e) {
@@ -151,8 +151,8 @@ const ProfilePage = () => {
           </View>
           <View style={styles.statsGrid}>
             {[
-              { label: 'Active Loans', value: String(user.activeLoans), icon: 'layers-outline', color: colors.success },
-              { label: 'On-Time Rate', value: `${user.onTimeRate}%`, icon: 'checkmark-circle-outline', color: colors.chartBlue },
+              { label: 'Active Loans', value: String(user.activeLoans ?? 0), icon: 'layers-outline', color: colors.success },
+              { label: 'On-Time Rate', value: `${user.onTimeRate ?? 100}%`, icon: 'checkmark-circle-outline', color: colors.chartBlue },
               { label: 'Total Paid', value: fmt(totalPaid), icon: 'card-outline', color: colors.chartPurple },
               { label: 'Progress', value: `${progress}%`, icon: 'pie-chart-outline', color: colors.warning },
             ].map(({ label, value, icon, color }) => (
@@ -174,11 +174,11 @@ const ProfilePage = () => {
             <Text style={styles.sectionTitle}>Personal Information</Text>
           </View>
           {[
-            { icon: 'person-outline', label: 'Full Name', value: user.name },
-            { icon: 'mail-outline', label: 'Email Address', value: user.email },
-            { icon: 'call-outline', label: 'Mobile Number', value: user.phoneMasked },
-            { icon: 'shield-checkmark-outline', label: 'KYC Status', value: 'Verified ✓', isStatus: true },
-            { icon: 'card-outline', label: 'Customer ID', value: user.customerId },
+            { icon: 'person-outline', label: 'Full Name', value: user.name || 'N/A' },
+            { icon: 'mail-outline', label: 'Email Address', value: user.email || 'N/A' },
+            { icon: 'call-outline', label: 'Mobile Number', value: user.phoneMasked || 'N/A' },
+            { icon: 'shield-checkmark-outline', label: 'KYC Status', value: user.kycStatus === 'verified' ? 'Verified ✓' : 'Pending', isStatus: user.kycStatus === 'verified' },
+            { icon: 'card-outline', label: 'Customer ID', value: user.customerId || 'N/A' },
           ].map(({ icon, label, value, isStatus }, idx, arr) => (
             <View key={label} style={[styles.infoRow, idx < arr.length - 1 && styles.infoRowBorder]}>
               <View style={styles.infoIconBox}>

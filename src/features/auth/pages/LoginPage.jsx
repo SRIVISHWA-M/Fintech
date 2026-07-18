@@ -182,11 +182,10 @@ const LoginPage = () => {
         id: demoUser.email === 'superadmin@novafinance.com' ? 'super-admin' : 'user-aarav',
         name: demoUser.name,
         email: demoUser.email,
-        role: demoUser.role.toLowerCase(),
+        role: demoUser.email === 'superadmin@novafinance.com' ? 'superadmin' : 'user',
       };
       
       authStore.setUser(mappedUser);
-      authStore.login();
     } finally {
       setLoading(false);
     }

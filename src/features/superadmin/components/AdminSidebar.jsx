@@ -5,11 +5,11 @@ import { authService } from '../../../services/authService';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', icon: 'stats-chart-outline', iconActive: 'stats-chart' },
-  { key: 'users', label: 'User Management', icon: 'people-outline', iconActive: 'people' },
-  { key: 'loan', label: 'Loan Management', icon: 'layers-outline', iconActive: 'layers' },
+  { key: 'users', label: 'Customers', icon: 'people-outline', iconActive: 'people' },
+  { key: 'loan', label: 'Loans', icon: 'layers-outline', iconActive: 'layers' },
   { key: 'revenue', label: 'Revenue', icon: 'wallet-outline', iconActive: 'wallet' },
   { key: 'collections', label: 'Collections', icon: 'cash-outline', iconActive: 'cash', badge: 3 },
-  { key: 'config', label: 'Platform Config', icon: 'settings-outline', iconActive: 'settings' },
+  { key: 'config', label: 'Settings', icon: 'settings-outline', iconActive: 'settings' },
 ];
 
 const DIVIDER_AFTER = ['dashboard'];
@@ -30,11 +30,25 @@ const sidebarColors = {
  * AdminSidebar — compact hover-expandable navigation panel.
  *
  * Props:
- *   activeTab   — current page key
- *   onNavigate  — (key) => void
- *   isExpanded  — expanded state for labels & full layouts
+ *   activeTab      — current page key
+ *   onNavigate     — (key) => void
+ *   isExpanded     — expanded state for labels & full layouts
+ *   onToggleExpand — () => void toggle function for expand button
  */
-const AdminSidebar = ({ activeTab, onNavigate, isExpanded = true }) => {
+const AdminSidebar = ({ activeTab, onNavigate, isExpanded = true, onToggleExpand }) => {
+  const [hoveredIndex, setHoveredIndex] = React.useState(null);
+
+  const getTooltipTop = (index) => {
+    let y = 72 + 16;
+    for (let i = 0; i < index; i++) {
+      y += 40 + 4;
+      if (DIVIDER_AFTER.includes(NAV_ITEMS[i].key)) {
+        y += 21;
+      }
+    }
+    return y + 2;
+  };
+
   return (
     <View style={styles.sidebar}>
       {/* Brand / Logo */}
@@ -48,12 +62,25 @@ const AdminSidebar = ({ activeTab, onNavigate, isExpanded = true }) => {
             <Text style={styles.brandRole}>Super Admin</Text>
           </View>
         )}
+        {onToggleExpand && (
+          <TouchableOpacity
+            style={[styles.toggleBtn, !isExpanded && styles.toggleBtnCentered]}
+            onPress={onToggleExpand}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name={isExpanded ? 'chevron-back' : 'chevron-forward'}
+              size={14}
+              color="#94a3b8"
+            />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Nav */}
       <ScrollView style={styles.nav} showsVerticalScrollIndicator={false} contentContainerStyle={!isExpanded && { alignItems: 'center' }}>
         {isExpanded && <Text style={styles.navSection}>COMMAND CENTER</Text>}
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.map((item, index) => {
           const isActive = activeTab === item.key;
           return (
             <React.Fragment key={item.key}>
@@ -64,6 +91,8 @@ const AdminSidebar = ({ activeTab, onNavigate, isExpanded = true }) => {
                   isExpanded ? { paddingHorizontal: 12, width: '100%' } : { justifyContent: 'center', width: 44, alignSelf: 'center' },
                 ]}
                 onPress={() => onNavigate(item.key)}
+                onHoverIn={() => setHoveredIndex(index)}
+                onHoverOut={() => setHoveredIndex(null)}
               >
                 <View style={styles.iconContainer}>
                   <Ionicons
@@ -100,6 +129,19 @@ const AdminSidebar = ({ activeTab, onNavigate, isExpanded = true }) => {
           );
         })}
       </ScrollView>
+
+      {/* Floating Tooltip outside ScrollView to prevent clipping */}
+      {!isExpanded && hoveredIndex !== null && NAV_ITEMS[hoveredIndex] && (
+        <View
+          style={[
+            styles.floatingTooltip,
+            { top: getTooltipTop(hoveredIndex) },
+          ]}
+          pointerEvents="none"
+        >
+          <Text style={styles.tooltipText}>{NAV_ITEMS[hoveredIndex].label}</Text>
+        </View>
+      )}
 
       {/* Footer */}
       <View style={[styles.footer, !isExpanded && { paddingHorizontal: 0 }]}>
@@ -141,7 +183,7 @@ const styles = StyleSheet.create({
     borderRightColor: sidebarColors.border,
     flexDirection: 'column',
     height: '100%',
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   brand: {
     flexDirection: 'row',
@@ -152,6 +194,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: sidebarColors.border,
     height: 72,
+    position: 'relative',
+    overflow: 'visible',
   },
   brandIcon: {
     width: 36,
@@ -168,6 +212,52 @@ const styles = StyleSheet.create({
   },
   brandTextContainer: {
     flexDirection: 'column',
+    flex: 1,
+  },
+  toggleBtn: {
+    position: 'absolute',
+    right: -12,
+    top: 24,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#1e293b',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999,
+    elevation: 8,
+  },
+  toggleBtnCentered: {
+    position: 'absolute',
+    right: -12,
+    top: 24,
+  },
+  floatingTooltip: {
+    position: 'absolute',
+    left: 82,
+    backgroundColor: '#0f172a',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 20,
+    zIndex: 99999,
+    minWidth: 84,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tooltipText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
   brandName: {
     fontSize: 13,
@@ -186,6 +276,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 16,
     paddingHorizontal: 12,
+    overflow: 'visible',
   },
   navSection: {
     fontSize: 9,
@@ -202,8 +293,9 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 8,
     marginBottom: 4,
-    overflow: 'hidden',
+    overflow: 'visible',
     alignSelf: 'stretch',
+    position: 'relative',
   },
   navItemActive: {
     backgroundColor: sidebarColors.accent,

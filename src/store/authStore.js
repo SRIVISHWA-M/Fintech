@@ -30,9 +30,12 @@ Promise.all([
   if (token) {
     setAccessToken(token);
   }
-  if (userJson && token) {
-    state = { user: JSON.parse(userJson), isAuthenticated: true };
-    notify();
+  if (userJson) {
+    try {
+      const parsedUser = JSON.parse(userJson);
+      state = { user: parsedUser, isAuthenticated: true };
+      notify();
+    } catch (_) {}
   }
 });
 
@@ -71,16 +74,27 @@ export const authStore = {
     AsyncStorage.removeItem('nova_user');
     notify();
   },
-  login() {
-    state = { user: DEFAULT_USER, isAuthenticated: true };
-    AsyncStorage.setItem('nova_user', JSON.stringify(DEFAULT_USER));
-    notify();
+  login(userData) {
+    if (userData) {
+      this.setUser(userData);
+    } else {
+      state = { user: DEFAULT_USER, isAuthenticated: true };
+      AsyncStorage.setItem('nova_user', JSON.stringify(DEFAULT_USER));
+      notify();
+    }
   },
-  // Called after a successful real API login with backend user data
+  // Called after a successful real API login or demo login with user data
   setUser(userData) {
-    const baseUser = userData?.role === 'superadmin' ? {} : DEFAULT_USER;
-    state = { user: { ...baseUser, ...userData }, isAuthenticated: true };
-    AsyncStorage.setItem('nova_user', JSON.stringify(state.user));
+    const isSuperAdmin = userData?.role?.toLowerCase() === 'superadmin';
+    const normalizedRole = isSuperAdmin ? 'superadmin' : (userData?.role?.toLowerCase() || 'user');
+    const baseUser = isSuperAdmin ? {} : DEFAULT_USER;
+    const finalUser = {
+      ...baseUser,
+      ...userData,
+      role: normalizedRole,
+    };
+    state = { user: finalUser, isAuthenticated: true };
+    AsyncStorage.setItem('nova_user', JSON.stringify(finalUser));
     notify();
   },
 };

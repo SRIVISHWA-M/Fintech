@@ -22,12 +22,16 @@ const AdminLayout = ({
   const sidebarAnim = useRef(new Animated.Value(-adminColors.sidebarWidth)).current;
   const overlayAnim = useRef(new Animated.Value(0)).current;
 
-  // Hover expansion state for desktop
-  const [isHovered, setIsHovered] = useState(false);
+  // Desktop expand / collapse state (click arrow button to toggle)
+  const [isExpanded, setIsExpanded] = useState(false);
   const desktopSidebarWidth = useRef(new Animated.Value(76)).current;
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const toggleExpand = () => {
+    setIsExpanded((prev) => !prev);
   };
 
   const handleNavigate = (key) => {
@@ -53,16 +57,16 @@ const AdminLayout = ({
     }
   }, [isSidebarOpen, isDesktop]);
 
-  // Desktop hover width animation
+  // Desktop width animation (only toggled on arrow click)
   useEffect(() => {
     if (isDesktop) {
       Animated.timing(desktopSidebarWidth, {
-        toValue: isHovered ? 240 : 76,
+        toValue: isExpanded ? 240 : 76,
         duration: 200,
         useNativeDriver: false,
       }).start();
     }
-  }, [isHovered, isDesktop]);
+  }, [isExpanded, isDesktop]);
 
   return (
     <View style={styles.root}>
@@ -72,21 +76,20 @@ const AdminLayout = ({
           style={[
             styles.desktopSidebarContainer,
             { width: desktopSidebarWidth },
-            isHovered && styles.shadowExpanded,
+            isExpanded && styles.shadowExpanded,
           ]}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
         >
           <AdminSidebar
             activeTab={activeTab}
             onNavigate={onNavigate}
-            isExpanded={isHovered}
+            isExpanded={isExpanded}
+            onToggleExpand={toggleExpand}
           />
         </Animated.View>
       )}
 
       {/* Main Area */}
-      <View style={[styles.main, isDesktop && { marginLeft: 76 }]}>
+      <View style={[styles.main, isDesktop && { marginLeft: isExpanded ? 240 : 76 }]}>
         {/* Header */}
         <AdminHeader
           activeTab={activeTab}
@@ -178,7 +181,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     zIndex: 30,
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   shadowExpanded: {
     shadowColor: '#000',

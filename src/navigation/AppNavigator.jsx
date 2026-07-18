@@ -185,7 +185,7 @@ const AppNavigator = () => {
   }, []);
 
   const isAuthenticated = authState.isAuthenticated;
-  const isSuperAdmin = authState.user?.role === 'superadmin';
+  const isSuperAdmin = authState.user?.role?.toLowerCase() === 'superadmin';
 
   return (
     <NavigationContainer>
