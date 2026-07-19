@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, TextInput, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import adminColors from '../theme/adminColors';
 import AdminLayout from '../components/AdminLayout';
@@ -8,16 +8,50 @@ import AdminMetricCard from '../components/AdminMetricCard';
 import AdminTable from '../components/AdminTable';
 import StatusBadge from '../components/StatusBadge';
 import { userManagementStats, userManagementCustomers } from '../data/userManagementData';
+import { apiRequest } from '../../../services/api';
 
-const FILTER_TABS = ['All', 'Active', 'Paused', 'Suspended', 'KYC Pending'];
-
-const getKycVariant = (kyc) => {
-  const s = (kyc || '').toLowerCase();
-  if (s === 'verified') return 'success';
-  if (s === 'pending') return 'warning';
-  if (s === 'rejected') return 'danger';
-  return 'muted';
+const DropdownField = ({ label, value, options, onChange }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <View style={[styles.inputGroup, { flex: 1, zIndex: open ? 100 : 1 }]}>
+      <Text style={styles.inputLabel}>{label}</Text>
+      <TouchableOpacity style={[styles.input, { justifyContent: 'center' }]} onPress={() => setOpen(!open)}>
+        <Text style={{ color: adminColors.fg }}>{value}</Text>
+      </TouchableOpacity>
+      {open && (
+        <View style={{ 
+          position: 'absolute',
+          top: 65,
+          left: 0,
+          right: 0,
+          backgroundColor: adminColors.muted, 
+          borderRadius: 8, 
+          overflow: 'hidden', 
+          borderWidth: 1, 
+          borderColor: adminColors.border,
+          zIndex: 1000,
+          elevation: 5,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 6,
+        }}>
+          {options.map(opt => (
+            <TouchableOpacity 
+              key={opt} 
+              style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: adminColors.border, backgroundColor: adminColors.card }}
+              onPress={() => { onChange(opt); setOpen(false); }}
+            >
+              <Text style={{ color: adminColors.fg, fontSize: 13 }}>{opt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+    </View>
+  );
 };
+
+const FILTER_TABS = ['All', 'Active', 'Paused', 'Suspended'];
 
 const getStatusVariant = (status) => {
   const s = (status || '').toLowerCase();
@@ -43,7 +77,46 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
   const { showSuccessToast, showDeleteToast } = useToast();
   const [customers, setCustomers] = useState(userManagementCustomers);
   const [activeFilter, setActiveFilter] = useState('All');
+  const [penaltyCharge, setPenaltyCharge] = useState('0');
   
+  useEffect(() => {
+    fetchUsers();
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const response = await apiRequest('/admin/settings', { method: 'GET' });
+      if (response.config && response.config.penalty_charge) {
+        setPenaltyCharge(response.config.penalty_charge);
+      }
+    } catch (err) {
+      console.error('Failed to fetch settings:', err);
+    }
+  };
+
+  const handleSavePenalty = async () => {
+    try {
+      await apiRequest('/admin/settings', {
+        method: 'PUT',
+        body: { penalty_charge: penaltyCharge }
+      });
+      showSuccessToast("PENALTY SAVED", "Global late due fee updated successfully.");
+    } catch (e) {
+      alert('Failed to save penalty: ' + e.message);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await apiRequest('/admin/users', { method: 'GET' });
+      if (response.success && response.data) {
+        setCustomers(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  };
   // Modals state
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
@@ -51,10 +124,13 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
   const [isViewModalOpen, setViewModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
+  const [newCredentials, setNewCredentials] = useState(null);
+  const [isCredentialsModalOpen, setCredentialsModalOpen] = useState(false);
+
   // Form State (used for Create & Edit)
   const [formData, setFormData] = useState({
-    customerName: '', phone: '', email: '', kycStatus: 'Pending', status: 'Active',
-    loanCount: '0', totalLoanAmount: '0', address: '', notes: ''
+    customerName: '', phone: '', email: '', loanType: 'Personal Loan - Salaried', status: 'Active',
+    loanCount: '0', totalLoanAmount: '0', termMonths: '36', startDate: new Date().toISOString().split('T')[0], address: '', notes: ''
   });
 
   // Filter Data
@@ -74,12 +150,34 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
   // ------------------------------------------------------------------
   // Handlers
   // ------------------------------------------------------------------
-  const handlePause = (customer) => {
-    setCustomers(prev => prev.map(c => c.id === customer.id ? { ...c, status: 'Paused' } : c));
+  const handlePause = async (customer) => {
+    try {
+      const response = await apiRequest(`/admin/users/${customer.id}`, {
+        method: 'PUT',
+        body: { status: 'Paused' }
+      });
+      if (response.success) {
+        setCustomers(prev => prev.map(c => c.id === customer.id ? { ...c, status: 'Paused' } : c));
+        showSuccessToast("USER PAUSED", `User "${customer.customerName}" was paused.`);
+      }
+    } catch (error) {
+      alert(error.message || 'Failed to pause user');
+    }
   };
 
-  const handleResume = (customer) => {
-    setCustomers(prev => prev.map(c => c.id === customer.id ? { ...c, status: 'Active' } : c));
+  const handleResume = async (customer) => {
+    try {
+      const response = await apiRequest(`/admin/users/${customer.id}`, {
+        method: 'PUT',
+        body: { status: 'Active' }
+      });
+      if (response.success) {
+        setCustomers(prev => prev.map(c => c.id === customer.id ? { ...c, status: 'Active' } : c));
+        showSuccessToast("USER RESUMED", `User "${customer.customerName}" was resumed.`);
+      }
+    } catch (error) {
+      alert(error.message || 'Failed to resume user');
+    }
   };
 
   const openDeleteModal = (customer) => {
@@ -87,10 +185,17 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
     setDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (selectedCustomer) {
-      setCustomers(prev => prev.filter(c => c.id !== selectedCustomer.id));
-      showDeleteToast("USER DELETED", `User "${selectedCustomer.customerName}" was deleted successfully.`);
+      try {
+        const response = await apiRequest(`/admin/users/${selectedCustomer.id}`, { method: 'DELETE' });
+        if (response.success) {
+          setCustomers(prev => prev.filter(c => c.id !== selectedCustomer.id));
+          showDeleteToast("USER DELETED", `User "${selectedCustomer.customerName}" was deleted successfully.`);
+        }
+      } catch (error) {
+        alert(error.message || 'Failed to delete user');
+      }
     }
     setDeleteModalOpen(false);
     setSelectedCustomer(null);
@@ -103,8 +208,8 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
 
   const openCreateModal = () => {
     setFormData({
-      customerName: '', phone: '', email: '', kycStatus: 'Pending', status: 'Active',
-      loanCount: '0', totalLoanAmount: '0', address: '', notes: ''
+      customerName: '', phone: '', email: '', loanType: 'Personal Loan - Salaried', status: 'Active',
+      loanCount: '0', totalLoanAmount: '0', termMonths: '36', startDate: new Date().toISOString().split('T')[0], dueDate: '', monthlyEmi: '', address: '', notes: ''
     });
     setCreateModalOpen(true);
   };
@@ -115,46 +220,88 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
       customerName: customer.customerName,
       phone: customer.phone,
       email: customer.email,
-      kycStatus: customer.kycStatus,
+      loanType: (customer.loans && customer.loans.length > 0) ? customer.loans[0].loanType : 'Personal Loan - Salaried',
       status: customer.status,
       loanCount: String(customer.loanCount),
       totalLoanAmount: String(customer.totalLoanAmount),
+      termMonths: (customer.loans && customer.loans.length > 0) ? String(customer.loans[0].termMonths || '36') : '36',
+      startDate: (customer.loans && customer.loans.length > 0) ? customer.loans[0].applicationDate : new Date().toISOString().split('T')[0],
+      dueDate: customer.dueDate || '',
+      monthlyEmi: '', // Monthly EMI is not passed back, so we leave it empty unless overriding
       address: customer.address || '',
       notes: customer.notes || ''
     });
     setEditModalOpen(true);
   };
 
-  const saveCustomer = () => {
+  const saveCustomer = async () => {
     const parsedLoanCount = parseInt(formData.loanCount) || 0;
     const parsedTotalLoanAmount = parseInt(formData.totalLoanAmount) || 0;
 
     if (isCreateModalOpen) {
-      const newId = `CUS-${1000 + customers.length + 1}`;
-      const newCustomer = {
-        id: newId,
-        ...formData,
-        loanCount: parsedLoanCount,
-        totalLoanAmount: parsedTotalLoanAmount,
-        createdDate: new Date().toISOString().split('T')[0],
-        loans: [],
-        transactions: []
-      };
-      setCustomers(prev => [newCustomer, ...prev]);
-      setCreateModalOpen(false);
-      showSuccessToast("USER CREATED", `User "${newCustomer.customerName}" was created successfully.`);
+      try {
+        const response = await apiRequest('/admin/users', {
+          method: 'POST',
+          body: {
+            ...formData,
+            loanCount: parsedLoanCount,
+            totalLoanAmount: parsedTotalLoanAmount,
+            termMonths: parseInt(formData.termMonths) || 36,
+            startDate: formData.startDate
+          }
+        });
+
+        if (response.success) {
+          const { user, credentials, loan } = response.data;
+          
+          const newCustomer = {
+            id: user.customerId,
+            ...formData,
+            loanCount: loan ? 1 : 0,
+            totalLoanAmount: loan ? loan.principal : 0,
+            createdDate: new Date().toISOString().split('T')[0],
+            loans: loan ? [loan] : [],
+            transactions: []
+          };
+          setCustomers(prev => [newCustomer, ...prev]);
+          setCreateModalOpen(false);
+          showSuccessToast("USER CREATED", `User "${user.name}" created successfully.`);
+          
+          setNewCredentials({ customerId: user.customerId, password: credentials.password });
+          setCredentialsModalOpen(true);
+        }
+      } catch (error) {
+        alert(error.message || 'Failed to create user');
+      }
     } else if (isEditModalOpen && selectedCustomer) {
-      setCustomers(prev => prev.map(c => 
-        c.id === selectedCustomer.id ? {
-          ...c,
-          ...formData,
-          loanCount: parsedLoanCount,
-          totalLoanAmount: parsedTotalLoanAmount
-        } : c
-      ));
-      setEditModalOpen(false);
-      setSelectedCustomer(null);
-      showSuccessToast("USER UPDATED", `User "${selectedCustomer.customerName}" was updated successfully.`);
+      try {
+        const response = await apiRequest(`/admin/users/${selectedCustomer.id}`, {
+          method: 'PUT',
+          body: {
+            ...formData,
+            loanCount: parsedLoanCount,
+            totalLoanAmount: parsedTotalLoanAmount,
+            termMonths: parseInt(formData.termMonths) || 36,
+            startDate: formData.startDate
+          }
+        });
+
+        if (response.success) {
+          setCustomers(prev => prev.map(c => 
+            c.id === selectedCustomer.id ? {
+              ...c,
+              ...formData,
+              loanCount: parsedLoanCount,
+              totalLoanAmount: parsedTotalLoanAmount
+            } : c
+          ));
+          setEditModalOpen(false);
+          setSelectedCustomer(null);
+          showSuccessToast("USER UPDATED", `User "${selectedCustomer.customerName}" was updated successfully.`);
+        }
+      } catch (error) {
+        alert(error.message || 'Failed to update user');
+      }
     }
   };
 
@@ -164,13 +311,20 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
   const COLUMNS = [
     {
       key: 'id',
-      label: 'Customer ID',
-      width: 100,
-      render: (val) => <Text style={colStyles.id}>{val}</Text>,
+      label: 'Credentials (ID & Pass)',
+      width: 150,
+      render: (val, row) => (
+        <View>
+          <Text style={colStyles.id}>{val}</Text>
+          <Text style={[colStyles.subMuted, { fontFamily: 'monospace', marginTop: 4, fontSize: 11 }]}>
+            🔑 *******
+          </Text>
+        </View>
+      ),
     },
     {
       key: 'customerName',
-      label: 'Name & Contact',
+      label: 'Customer Name',
       flex: 1,
       render: (val, row) => (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -181,17 +335,25 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
           </View>
           <View>
             <Text style={colStyles.name}>{val}</Text>
-            <Text style={colStyles.sub}>{row.phone}</Text>
-            <Text style={colStyles.subMuted}>{row.email}</Text>
           </View>
         </View>
       ),
     },
     {
-      key: 'kycStatus',
-      label: 'KYC Status',
-      width: 90,
-      render: (val) => <StatusBadge label={val} variant={getKycVariant(val)} size="sm" />,
+      key: 'phone',
+      label: 'Phone Number',
+      width: 130,
+      render: (_, row) => (
+        <Text style={colStyles.sub}>{row.phone}</Text>
+      ),
+    },
+    {
+      key: 'email',
+      label: 'Email Address',
+      flex: 1,
+      render: (_, row) => (
+        <Text style={colStyles.subMuted}>{row.email}</Text>
+      ),
     },
     {
       key: 'status',
@@ -205,8 +367,8 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
       width: 110,
       render: (val, row) => (
         <View>
-          <Text style={colStyles.amt}>₹{val.toLocaleString()}</Text>
-          <Text style={colStyles.sub}>{row.loanCount} Loan(s)</Text>
+          <Text style={colStyles.amt}>₹{(val || 0).toLocaleString()}</Text>
+          <Text style={colStyles.sub}>Due: {row.dueDate || 'N/A'}</Text>
         </View>
       ),
     },
@@ -268,26 +430,54 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
               <Text style={styles.inputLabel}>Email</Text>
               <TextInput style={styles.input} value={formData.email} onChangeText={t => setFormData({...formData, email: t})} placeholder="email@example.com" placeholderTextColor={adminColors.fgSub} />
             </View>
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <View style={[styles.inputGroup, { flex: 1 }]}>
-                <Text style={styles.inputLabel}>KYC Status</Text>
-                {/* Simplified as TextInput for mock purposes, ideally a dropdown */}
-                <TextInput style={styles.input} value={formData.kycStatus} onChangeText={t => setFormData({...formData, kycStatus: t})} placeholder="Verified / Pending / Rejected" placeholderTextColor={adminColors.fgSub} />
-              </View>
-              <View style={[styles.inputGroup, { flex: 1 }]}>
-                <Text style={styles.inputLabel}>Status</Text>
-                <TextInput style={styles.input} value={formData.status} onChangeText={t => setFormData({...formData, status: t})} placeholder="Active / Paused / Suspended" placeholderTextColor={adminColors.fgSub} />
-              </View>
+            <View style={{ flexDirection: 'row', gap: 10, zIndex: 10 }}>
+              <DropdownField 
+                label="Loan Type" 
+                value={formData.loanType} 
+                options={['Personal Loan - Salaried', 'Personal Loan', 'Business Loan']} 
+                onChange={(v) => setFormData({...formData, loanType: v})} 
+              />
+              <DropdownField 
+                label="Status" 
+                value={formData.status} 
+                options={['Active', 'Paused', 'Suspended']} 
+                onChange={(v) => setFormData({...formData, status: v})} 
+              />
             </View>
-            <View style={{ flexDirection: 'row', gap: 10 }}>
+            <View style={{ flexDirection: 'row', gap: 10, zIndex: 5 }}>
               <View style={[styles.inputGroup, { flex: 1 }]}>
-                <Text style={styles.inputLabel}>Loan Count</Text>
-                <TextInput style={styles.input} keyboardType="numeric" value={formData.loanCount} onChangeText={t => setFormData({...formData, loanCount: t})} placeholder="0" placeholderTextColor={adminColors.fgSub} />
+                <Text style={styles.inputLabel}>Due Date</Text>
+                {Platform.OS === 'web' ? (
+                  <input type="date" value={formData.dueDate || ''} onChange={e => setFormData({...formData, dueDate: e.target.value})} style={{...StyleSheet.flatten(styles.input), outline: 'none', backgroundColor: 'transparent', color: adminColors.fg, border: 'none'}} />
+                ) : (
+                  <TextInput style={styles.input} value={formData.dueDate} onChangeText={t => setFormData({...formData, dueDate: t})} placeholder="YYYY-MM-DD" placeholderTextColor={adminColors.fgSub} />
+                )}
               </View>
               <View style={[styles.inputGroup, { flex: 1 }]}>
                 <Text style={styles.inputLabel}>Total Loan Amount</Text>
                 <TextInput style={styles.input} keyboardType="numeric" value={formData.totalLoanAmount} onChangeText={t => setFormData({...formData, totalLoanAmount: t})} placeholder="0" placeholderTextColor={adminColors.fgSub} />
               </View>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 10, zIndex: 4 }}>
+              <View style={[styles.inputGroup, { flex: 1 }]}>
+                <Text style={styles.inputLabel}>Term (Months)</Text>
+                <TextInput style={styles.input} keyboardType="numeric" value={formData.termMonths} onChangeText={t => setFormData({...formData, termMonths: t})} placeholder="36" placeholderTextColor={adminColors.fgSub} />
+              </View>
+              <View style={[styles.inputGroup, { flex: 1 }]}>
+                <Text style={styles.inputLabel}>Loan Start Date</Text>
+                {Platform.OS === 'web' ? (
+                  <input type="date" value={formData.startDate || ''} onChange={e => setFormData({...formData, startDate: e.target.value})} style={{...StyleSheet.flatten(styles.input), outline: 'none', backgroundColor: 'transparent', color: adminColors.fg, border: 'none'}} />
+                ) : (
+                  <TextInput style={styles.input} value={formData.startDate} onChangeText={t => setFormData({...formData, startDate: t})} placeholder="YYYY-MM-DD" placeholderTextColor={adminColors.fgSub} />
+                )}
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 10, zIndex: 3 }}>
+              <View style={[styles.inputGroup, { flex: 1 }]}>
+                <Text style={styles.inputLabel}>Monthly EMI (₹)</Text>
+                <TextInput style={styles.input} keyboardType="numeric" value={formData.monthlyEmi} onChangeText={t => setFormData({...formData, monthlyEmi: t})} placeholder="Auto-calculated if empty" placeholderTextColor={adminColors.fgSub} />
+              </View>
+              <View style={{ flex: 1 }} />
             </View>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Address</Text>
@@ -318,12 +508,44 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
 
       {/* Stats */}
       <View style={styles.kpiRow}>
-        <AdminMetricCard icon="people-outline" iconColor={adminColors.chartBlue} label="Total Customers" value={userManagementStats.totalCustomers} />
-        <AdminMetricCard icon="person-outline" iconColor={adminColors.success} label="Active Customers" value={userManagementStats.activeCustomers} />
-        <AdminMetricCard icon="pause-outline" iconColor={adminColors.orange} label="Paused Customers" value={userManagementStats.pausedCustomers} />
-        <AdminMetricCard icon="ban-outline" iconColor={adminColors.danger} label="Suspended" value={userManagementStats.suspendedCustomers} />
-        <AdminMetricCard icon="wallet-outline" iconColor={adminColors.chartPurple} label="Loan Customers" value={userManagementStats.totalLoanCustomers} />
-        <AdminMetricCard icon="person-add-outline" iconColor={adminColors.chartTeal} label="New This Month" value={userManagementStats.newCustomersThisMonth} />
+        <AdminMetricCard icon="people-outline" iconColor={adminColors.chartBlue} label="Total Customers" value={customers.length} />
+        <AdminMetricCard icon="person-outline" iconColor={adminColors.success} label="Active Customers" value={customers.filter(c => c.status === 'Active').length} />
+        <AdminMetricCard icon="pause-outline" iconColor={adminColors.orange} label="Paused Customers" value={customers.filter(c => c.status === 'Paused').length} />
+        <AdminMetricCard icon="ban-outline" iconColor={adminColors.danger} label="Suspended" value={customers.filter(c => c.status === 'Suspended').length} />
+        <AdminMetricCard icon="wallet-outline" iconColor={adminColors.chartPurple} label="Loan Customers" value={customers.filter(c => c.loanCount > 0).length} />
+        <AdminMetricCard icon="person-add-outline" iconColor={adminColors.chartTeal} label="New This Month" value={customers.filter(c => {
+          if (!c.createdDate) return false;
+          const d = new Date(c.createdDate);
+          const now = new Date();
+          return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        }).length} />
+      </View>
+
+      {/* Global Settings */}
+      <View style={[styles.tableCard, { minHeight: 0, padding: 18, marginBottom: 16 }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View>
+            <Text style={styles.tableTitle}>Global Settings</Text>
+            <Text style={{ fontSize: 12, color: adminColors.fgSub, marginTop: 4 }}>
+              Configure platform-wide rules like late payment penalties.
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 12 }}>
+            <View style={{ width: 200 }}>
+              <Text style={styles.inputLabel}>Late Due Fee (₹)</Text>
+              <TextInput 
+                style={[styles.input, { height: 38 }]} 
+                keyboardType="numeric" 
+                value={String(penaltyCharge)} 
+                onChangeText={setPenaltyCharge} 
+                placeholderTextColor={adminColors.fgSub} 
+              />
+            </View>
+            <TouchableOpacity style={[styles.btnSave, { height: 38, justifyContent: 'center' }]} onPress={handleSavePenalty}>
+              <Text style={styles.btnSaveText}>Save Fee</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
       {/* Table Section */}
@@ -435,13 +657,14 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
                     <Text style={styles.detailValue}>{selectedCustomer.email}</Text>
                   </View>
                   <View style={styles.detailItem}>
+                    <Text style={styles.detailLabel}>Password</Text>
+                    <Text style={[styles.detailValue, { fontFamily: 'monospace' }]}>{selectedCustomer.plainPassword}</Text>
+                  </View>
+                  <View style={styles.detailItem}>
                     <Text style={styles.detailLabel}>Status</Text>
                     <StatusBadge label={selectedCustomer.status} variant={getStatusVariant(selectedCustomer.status)} size="sm" dot />
                   </View>
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailLabel}>KYC Status</Text>
-                    <StatusBadge label={selectedCustomer.kycStatus} variant={getKycVariant(selectedCustomer.kycStatus)} size="sm" />
-                  </View>
+
                   <View style={styles.detailItem}>
                     <Text style={styles.detailLabel}>Join Date</Text>
                     <Text style={styles.detailValue}>{selectedCustomer.createdDate}</Text>
@@ -456,16 +679,16 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
                 <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Loan Summary</Text>
                 <View style={styles.summaryRow}>
                   <View style={styles.summaryBox}>
-                    <Text style={styles.summaryLabel}>Total Loans</Text>
-                    <Text style={styles.summaryVal}>{selectedCustomer.loanCount}</Text>
+                    <Text style={styles.summaryLabel}>Next Due</Text>
+                    <Text style={styles.summaryVal}>{selectedCustomer.dueDate || 'N/A'}</Text>
                   </View>
                   <View style={styles.summaryBox}>
                     <Text style={styles.summaryLabel}>Total Amount</Text>
-                    <Text style={styles.summaryVal}>₹{selectedCustomer.totalLoanAmount.toLocaleString()}</Text>
+                    <Text style={styles.summaryVal}>₹{(selectedCustomer.totalLoanAmount || 0).toLocaleString()}</Text>
                   </View>
                   <View style={styles.summaryBox}>
-                    <Text style={styles.summaryLabel}>Active Amount</Text>
-                    <Text style={styles.summaryVal}>₹{(selectedCustomer.totalLoanAmount * 0.8).toLocaleString()}</Text>
+                    <Text style={styles.summaryLabel}>Outstanding Amount</Text>
+                    <Text style={styles.summaryVal}>₹{(selectedCustomer.outstandingAmount || 0).toLocaleString()}</Text>
                   </View>
                   <View style={styles.summaryBox}>
                     <Text style={styles.summaryLabel}>Closed Loans</Text>
@@ -487,7 +710,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
                           <StatusBadge label={loan.loanType} variant={getLoanTypeVariant(loan.loanType)} size="sm" />
                         </View>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.listAmt}>₹{loan.loanAmount.toLocaleString()}</Text>
+                          <Text style={styles.listAmt}>₹{(loan.loanAmount || 0).toLocaleString()}</Text>
                         </View>
                         <View style={{ flex: 1, alignItems: 'flex-end' }}>
                           <Text style={[styles.listSub, { color: adminColors.fg, fontWeight: '600' }]}>{loan.status}</Text>
@@ -514,7 +737,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
                           <Text style={styles.listSub}>{txn.paymentMethod}</Text>
                         </View>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.listAmt}>₹{txn.amount.toLocaleString()}</Text>
+                          <Text style={styles.listAmt}>₹{(txn.amount || 0).toLocaleString()}</Text>
                         </View>
                         <View style={{ flex: 1, alignItems: 'flex-end' }}>
                           <StatusBadge label={txn.status} variant={txn.status === 'Success' ? 'success' : 'danger'} size="sm" />
@@ -529,6 +752,42 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
                 <View style={{ height: 40 }} />
               </ScrollView>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Credentials Modal */}
+      <Modal visible={isCredentialsModalOpen} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxWidth: 400 }]}>
+            <View style={styles.viewHeader}>
+              <Text style={styles.modalTitle}>User Created Successfully</Text>
+              <TouchableOpacity onPress={() => { setCredentialsModalOpen(false); setNewCredentials(null); }}>
+                <Ionicons name="close" size={24} color={adminColors.fgMuted} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalText}>
+              Please securely share these credentials with the user. The password is encrypted in our database and cannot be recovered if lost.
+            </Text>
+            
+            {newCredentials && (
+              <View style={{ backgroundColor: adminColors.muted, padding: 16, borderRadius: adminColors.r8, marginBottom: 20 }}>
+                <View style={{ marginBottom: 12 }}>
+                  <Text style={styles.inputLabel}>Customer ID</Text>
+                  <Text style={{ fontSize: 16, fontWeight: '700', color: adminColors.fg }}>{newCredentials.customerId}</Text>
+                </View>
+                <View>
+                  <Text style={styles.inputLabel}>Generated Password</Text>
+                  <Text style={{ fontSize: 16, fontWeight: '700', color: adminColors.fg }}>{newCredentials.password}</Text>
+                </View>
+              </View>
+            )}
+            
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.btnSave} onPress={() => { setCredentialsModalOpen(false); setNewCredentials(null); }}>
+                <Text style={styles.btnSaveText}>Done</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>

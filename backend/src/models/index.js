@@ -3,6 +3,7 @@ const User = require('./User');
 const UserPreference = require('./UserPreference');
 const Loan = require('./Loan');
 const Payment = require('./Payment');
+const SystemSetting = require('./SystemSetting');
 
 // Associations
 User.hasOne(UserPreference, { foreignKey: 'userId', as: 'preferences', onDelete: 'CASCADE' });
@@ -23,4 +24,5 @@ module.exports = {
   UserPreference,
   Loan,
   Payment,
+  SystemSetting,
 };

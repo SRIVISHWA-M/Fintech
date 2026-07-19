@@ -20,7 +20,7 @@ const DEFAULT_USER = {
 };
 
 let listeners = [];
-let state = { user: null, isAuthenticated: false };
+let state = { user: null, isAuthenticated: false, isHydrated: false };
 
 // Load persisted state asynchronously at startup
 Promise.all([
@@ -33,9 +33,15 @@ Promise.all([
   if (userJson) {
     try {
       const parsedUser = JSON.parse(userJson);
-      state = { user: parsedUser, isAuthenticated: true };
+      state = { user: parsedUser, isAuthenticated: true, isHydrated: true };
       notify();
-    } catch (_) {}
+    } catch (_) {
+      state = { ...state, isHydrated: true };
+      notify();
+    }
+  } else {
+    state = { ...state, isHydrated: true };
+    notify();
   }
 });
 

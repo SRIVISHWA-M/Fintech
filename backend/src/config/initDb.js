@@ -1,11 +1,10 @@
-const { sequelize, User, UserPreference, Loan, Payment } = require('../models');
+const { sequelize, User, UserPreference, Loan, Payment, SystemSetting } = require('../models');
 const logger = require('./logger');
 
 const seedDatabase = async () => {
   try {
-    // Sync database (force: false preserves existing data, force: true recreate)
-    // We will do force: false but seed only if Users table is empty
-    await sequelize.sync({ force: false });
+    // Sync database with alter: true to safely add new columns
+    await sequelize.sync({ alter: true });
 
     const userCount = await User.count();
     if (userCount > 0) {
@@ -73,6 +72,12 @@ const seedDatabase = async () => {
         loanId: loan.id,
       });
     }
+
+    // 5. Initialize System Settings
+    await SystemSetting.create({
+      key: 'penalty_charge',
+      value: '0'
+    });
 
     logger.info('Database successfully seeded!');
   } catch (error) {

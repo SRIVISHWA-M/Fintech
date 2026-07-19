@@ -51,9 +51,12 @@ const CardWaves = () => (
   </View>
 );
 
+import { useNavigation } from '@react-navigation/native';
+
 const LoansPage = () => {
   const { colors } = useTheme();
   const styles = getStyles(colors);
+  const navigation = useNavigation();
   const [loan, setLoan] = useState(loanStore.getState());
   const [payments, setPayments] = useState(paymentStore.getState());
   const [selectedMethod, setSelectedMethod] = useState('hdfc');
@@ -84,7 +87,7 @@ const LoansPage = () => {
     if (payAmount <= 0 || payAmount > loan.outstanding) return;
     setLoading(true);
     try {
-      const response = await paymentService.makePayment(payAmount, methodLabel);
+      const response = await paymentService.makePayment(payAmount, methodLabel, payType);
       setSuccess({
         amount: payAmount,
         method: methodLabel,
@@ -134,9 +137,16 @@ const LoansPage = () => {
             ))}
           </View>
 
-          <TouchableOpacity style={styles.payAgainBtn} onPress={() => setSuccess(null)} activeOpacity={0.85}>
-            <Ionicons name="card-outline" size={16} color={colors.successForeground} />
-            <Text style={styles.payAgainText}>Make Another Payment</Text>
+          <TouchableOpacity 
+            style={styles.payAgainBtn} 
+            onPress={() => {
+              setSuccess(null);
+              navigation.navigate('Home');
+            }} 
+            activeOpacity={0.85}
+          >
+            <Ionicons name="home-outline" size={16} color={colors.successForeground} />
+            <Text style={styles.payAgainText}>Back to Home</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>

@@ -1052,11 +1052,6 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
                             <Ionicons name="refresh-outline" size={13} color={adminColors.fgMuted} />
                             <Text style={styles.resetBtnText}>Reset</Text>
                         </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.addBtn} onPress={handleOpenAddModal}>
-                            <Ionicons name="add-circle-outline" size={14} color={adminColors.accentFg} />
-                            <Text style={styles.addBtnText}>Add Loan</Text>
-                        </TouchableOpacity>
                     </View>
                 </View>
 

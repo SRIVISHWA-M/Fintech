@@ -59,7 +59,7 @@ const ProfilePage = () => {
     setEditMode(false);
   };
   const handlePrefToggle = async (key) => {
-    const newVal = !user.preferences[key];
+    const newVal = !(user?.preferences?.[key]);
     try {
       await authService.updatePreferences({ [key]: newVal });
     } catch (e) {
@@ -205,15 +205,15 @@ const ProfilePage = () => {
             { key: 'darkMode', icon: 'moon-outline', label: 'Dark Mode', sub: 'Current theme preference' },
           ].map(({ key, icon, label, sub }, idx, arr) => (
             <View key={key} style={[styles.prefRow, idx < arr.length - 1 && styles.prefRowBorder]}>
-              <View style={[styles.prefIconBox, user.preferences[key] && styles.prefIconBoxActive]}>
-                <Ionicons name={icon} size={15} color={user.preferences[key] ? colors.success : colors.mutedForeground} />
+              <View style={[styles.prefIconBox, (user?.preferences?.[key]) && styles.prefIconBoxActive]}>
+                <Ionicons name={icon} size={15} color={user?.preferences?.[key] ? colors.success : colors.mutedForeground} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.prefLabel}>{label}</Text>
                 <Text style={styles.prefSub}>{sub}</Text>
               </View>
               <Switch
-                value={user.preferences[key]}
+                value={!!user?.preferences?.[key]}
                 onValueChange={() => handlePrefToggle(key)}
                 trackColor={{ false: colors.mutedAlt, true: colors.success }}
                 thumbColor="white"

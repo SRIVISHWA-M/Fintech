@@ -1,4 +1,4 @@
-const { Payment, Loan, User, sequelize } = require('../models');
+const { Payment, Loan, User, SystemSetting, sequelize } = require('../models');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
 const logger = require('../config/logger');
 
@@ -17,14 +17,21 @@ const getPayments = async (userId, status, limit = 10, offset = 0) => {
 
   return {
     count,
-    payments: rows.map(r => ({
-      id: r.transactionReference,
-      emiNo: r.emiNo,
-      date: r.date,
-      method: r.method,
-      amount: parseFloat(r.amount),
-      status: r.status,
-    })),
+    payments: rows.map(r => {
+      let typeLabel = 'EMI Payment';
+      if (r.paymentType === 'custom') typeLabel = 'Partial Payment';
+      if (r.paymentType === 'full') typeLabel = 'Total Payment';
+      
+      return {
+        id: r.transactionReference,
+        emiNo: r.emiNo,
+        date: r.date,
+        method: r.method,
+        amount: parseFloat(r.amount),
+        status: r.status,
+        type: typeLabel,
+      };
+    }),
   };
 };
 
@@ -52,7 +59,7 @@ const getCalendarEvents = async (userId, year, month) => {
   };
 };
 
-const processRepayment = async (userId, amount, method) => {
+const processRepayment = async (userId, amount, method, paymentType) => {
   const numericAmount = parseFloat(amount);
   if (isNaN(numericAmount) || numericAmount <= 0) {
     throw new BadRequestError('Invalid payment amount');
@@ -65,32 +72,62 @@ const processRepayment = async (userId, amount, method) => {
       throw new NotFoundError('No active loan found to process payment');
     }
 
-    const outstanding = parseFloat(loan.outstanding);
-    if (numericAmount > outstanding) {
-      throw new BadRequestError(`Payment amount cannot exceed outstanding balance of ${outstanding}`);
+    // Calculate penalty if overdue
+    const penaltySetting = await SystemSetting.findOne({ where: { key: 'penalty_charge' }, transaction: t });
+    const penaltyCharge = penaltySetting && !isNaN(parseFloat(penaltySetting.value)) ? parseFloat(penaltySetting.value) : 0;
+    
+    let currentOutstanding = parseFloat(loan.outstanding);
+    if (loan.nextDueDate) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const dueDate = new Date(loan.nextDueDate); dueDate.setHours(0,0,0,0);
+      if (today > dueDate && currentOutstanding > 0) {
+        currentOutstanding += penaltyCharge;
+      }
+    }
+
+    if (numericAmount > currentOutstanding) {
+      throw new BadRequestError(`Payment amount cannot exceed outstanding balance of ${currentOutstanding}`);
     }
 
     const emiValue = parseFloat(loan.nextDueAmount);
     const emiCountPaid = Math.floor(numericAmount / emiValue) || 1;
-    const newOutstanding = Math.max(0, outstanding - numericAmount);
+    const newOutstanding = Math.max(0, currentOutstanding - numericAmount);
     const newPaid = parseFloat(loan.paid) + numericAmount;
     const newPaidEmis = Math.min(loan.termMonths, loan.paidEmis + emiCountPaid);
 
-    // Calculate new due date
-    const currentDate = new Date(loan.nextDueDate);
-    currentDate.setMonth(currentDate.getMonth() + emiCountPaid);
-    const year = currentDate.getFullYear();
-    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-    const day = String(currentDate.getDate()).padStart(2, '0');
-    const newDueDate = `${year}-${month}-${day}`;
+    // Calculate new due date capping to month length
+    const [y, m, d] = loan.nextDueDate.split('-');
+    let newYear = parseInt(y, 10);
+    let newMonth = parseInt(m, 10) + emiCountPaid;
+    const originalDay = parseInt(d, 10);
+    
+    while (newMonth > 12) {
+      newMonth -= 12;
+      newYear += 1;
+    }
+    
+    const maxDays = new Date(newYear, newMonth, 0).getDate();
+    const adjustedDay = Math.min(originalDay, maxDays);
+    const newDueDate = `${newYear}-${String(newMonth).padStart(2, '0')}-${String(adjustedDay).padStart(2, '0')}`;
 
     // Get next EMI sequence number
     const paymentCount = await Payment.count({ where: { userId }, transaction: t });
     const nextEmiNo = String(paymentCount + 1).padStart(3, '0');
+    
+    // Generate unique transaction reference to avoid unique constraint violations
+    const uniqueTxRef = `TX-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000)}`;
+
+    // Generate strict dynamic type fallback just in case
+    let finalPaymentType = paymentType;
+    if (!finalPaymentType) {
+      if (numericAmount === emiValue) finalPaymentType = 'emi';
+      else if (numericAmount >= currentOutstanding) finalPaymentType = 'full';
+      else finalPaymentType = 'custom';
+    }
 
     // Create payment
     const payment = await Payment.create({
-      transactionReference: `TX-${nextEmiNo}`,
+      transactionReference: uniqueTxRef,
       userId,
       loanId: loan.id,
       emiNo: nextEmiNo,
@@ -98,6 +135,7 @@ const processRepayment = async (userId, amount, method) => {
       date: new Date().toISOString().split('T')[0],
       method: method || 'HDFC Bank ••4421',
       status: 'Paid',
+      paymentType: finalPaymentType,
     }, { transaction: t });
 
     // Update loan

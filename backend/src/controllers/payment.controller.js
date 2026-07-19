@@ -36,8 +36,8 @@ const getCalendar = async (req, res, next) => {
 const processPayment = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { amount, method } = req.body;
-    const result = await paymentService.processRepayment(userId, amount, method);
+    const { amount, method, paymentType } = req.body;
+    const result = await paymentService.processRepayment(userId, amount, method, paymentType);
 
     res.status(200).json({
       success: true,

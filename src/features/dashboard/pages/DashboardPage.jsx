@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { NovaLogoIcon } from '../../../components/NovaLogo';
 import { loanStore } from '../../../store/loanStore';
@@ -79,14 +79,16 @@ const DashboardPage = () => {
   const [payments, setPayments] = useState(paymentStore.getState());
   const [user] = useState(authStore.getState().user);
 
-  useEffect(() => {
-    const u1 = loanStore.subscribe(setLoan);
-    const u2 = paymentStore.subscribe(setPayments);
-    // Fetch latest data from backend on mount
-    loanService.getActiveLoan().catch(e => console.log('Loan API unavailable:', e.message));
-    paymentService.getPayments().catch(e => console.log('Payments API unavailable:', e.message));
-    return () => { u1(); u2(); };
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const u1 = loanStore.subscribe(setLoan);
+      const u2 = paymentStore.subscribe(setPayments);
+      // Fetch latest data from backend on focus
+      loanService.getActiveLoan().catch(e => console.log('Loan API unavailable:', e.message));
+      paymentService.getPayments().catch(e => console.log('Payments API unavailable:', e.message));
+      return () => { u1(); u2(); };
+    }, [])
+  );
 
   const daysLeft = daysUntil(loan.nextDueDate);
   const progress = Math.round((loan.paid / loan.principal) * 100);
@@ -253,6 +255,7 @@ const DashboardPage = () => {
               { label: 'Principal', value: loan.breakdown.principal, color: colors.success },
               { label: 'Interest', value: loan.breakdown.interest, color: colors.chartBlue },
               { label: 'Fees', value: loan.breakdown.fees, color: colors.chartPurple },
+              { label: 'Penalty', value: loan.breakdown.penalty || 0, color: colors.danger },
             ].map(({ label, value, color }) => (
               <View key={label} style={styles.breakdownRow}>
                 <View style={styles.breakdownLeft}>

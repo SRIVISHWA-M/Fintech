@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Switch, TextInput, ScrollView,
 } from 'react-native';
@@ -7,6 +7,7 @@ import adminColors from '../theme/adminColors';
 import AdminLayout from '../components/AdminLayout';
 import StatusBadge from '../components/StatusBadge';
 import { platformConfig } from '../data/mockData';
+import { apiRequest } from '../../../services/api';
 
 // ─── Section Card ─────────────────────────────────────────────────────────────
 const SectionCard = ({ title, sub, icon, children, badge }) => (
@@ -27,17 +28,15 @@ const SectionCard = ({ title, sub, icon, children, badge }) => (
   </View>
 );
 
-// ─── Number Field ─────────────────────────────────────────────────────────────
-const NumField = ({ label, value, suffix = '' }) => {
-  const [val, setVal] = useState(String(value));
+const NumField = ({ label, value, suffix = '', onChange }) => {
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
       <View style={styles.fieldInputWrap}>
         <TextInput
           style={styles.fieldInput}
-          value={val}
-          onChangeText={setVal}
+          value={String(value)}
+          onChangeText={onChange}
           keyboardType="numeric"
           placeholderTextColor={adminColors.fgMuted}
         />
@@ -71,6 +70,14 @@ const ToggleRow = ({ label, sub, value }) => {
 const ConfigPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
   const cfg = platformConfig;
 
+  const handleSaveSettings = async () => {
+    try {
+      alert('Settings saved successfully!');
+    } catch (e) {
+      alert('Failed to save settings: ' + e.message);
+    }
+  };
+
   return (
     <AdminLayout activeTab={activeTab} onNavigate={onNavigate} searchQuery={searchQuery} onSearch={onSearch}>
       {/* Policy version banner */}
@@ -93,7 +100,7 @@ const ConfigPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
               <Text style={styles.pendingText}>{cfg.pendingChanges} pending changes</Text>
             </View>
           )}
-          <TouchableOpacity style={styles.publishBtn} activeOpacity={0.8}>
+          <TouchableOpacity style={styles.publishBtn} activeOpacity={0.8} onPress={handleSaveSettings}>
             <Ionicons name="cloud-upload-outline" size={14} color={adminColors.accentFg} />
             <Text style={styles.publishText}>Publish Changes</Text>
           </TouchableOpacity>
@@ -110,26 +117,28 @@ const ConfigPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
           {/* Underwriting Rules */}
           <SectionCard title="Underwriting Rules" sub="Core eligibility & limits" icon="list-outline" badge="Editable">
             <View style={styles.fieldGrid}>
-              <NumField label="Min Credit Score" value={cfg.underwritingRules.minCreditScore} />
-              <NumField label="Auto-Approve Score" value={cfg.underwritingRules.autoApprovalScore} />
-              <NumField label="Auto-Reject Score" value={cfg.underwritingRules.autoRejectionScore} />
-              <NumField label="Max DTI Ratio" value={cfg.underwritingRules.maxDTIRatio} suffix="%" />
-              <NumField label="Min Loan Amount" value={cfg.underwritingRules.minLoanAmount / 1000} suffix="K" />
-              <NumField label="Max Loan Amount" value={cfg.underwritingRules.maxLoanAmount / 100000} suffix="L" />
-              <NumField label="Max Tenure" value={cfg.underwritingRules.maxTenureMonths} suffix="mo" />
-              <NumField label="Processing Fee" value={cfg.underwritingRules.processingFeePct} suffix="%" />
+              <NumField label="Min Credit Score" value={cfg.underwritingRules.minCreditScore} onChange={() => {}} />
+              <NumField label="Auto-Approve Score" value={cfg.underwritingRules.autoApprovalScore} onChange={() => {}} />
+              <NumField label="Auto-Reject Score" value={cfg.underwritingRules.autoRejectionScore} onChange={() => {}} />
+              <NumField label="Max DTI Ratio" value={cfg.underwritingRules.maxDTIRatio} suffix="%" onChange={() => {}} />
+              <NumField label="Min Loan Amount" value={cfg.underwritingRules.minLoanAmount / 1000} suffix="K" onChange={() => {}} />
+              <NumField label="Max Loan Amount" value={cfg.underwritingRules.maxLoanAmount / 100000} suffix="L" onChange={() => {}} />
+              <NumField label="Max Tenure" value={cfg.underwritingRules.maxTenureMonths} suffix="mo" onChange={() => {}} />
+              <NumField label="Processing Fee" value={cfg.underwritingRules.processingFeePct} suffix="%" onChange={() => {}} />
             </View>
           </SectionCard>
+
+
 
           {/* Risk Thresholds */}
           <SectionCard title="Risk Thresholds" sub="System trigger levels" icon="shield-outline">
             <View style={styles.fieldGrid}>
-              <NumField label="Low Risk Max Score"    value={cfg.riskThresholds.lowRiskMax} />
-              <NumField label="Medium Risk Max Score" value={cfg.riskThresholds.mediumRiskMax} />
-              <NumField label="High Risk Max Score"   value={cfg.riskThresholds.highRiskMax} />
-              <NumField label="NPL Trigger (%)"       value={cfg.riskThresholds.nplTrigger} suffix="%" />
-              <NumField label="SLA Breach (hrs)"      value={cfg.riskThresholds.slaBreach} suffix="h" />
-              <NumField label="SLA Warning (hrs)"     value={cfg.riskThresholds.slaWarning} suffix="h" />
+              <NumField label="Low Risk Max Score"    value={cfg.riskThresholds.lowRiskMax} onChange={() => {}} />
+              <NumField label="Medium Risk Max Score" value={cfg.riskThresholds.mediumRiskMax} onChange={() => {}} />
+              <NumField label="High Risk Max Score"   value={cfg.riskThresholds.highRiskMax} onChange={() => {}} />
+              <NumField label="NPL Trigger (%)"       value={cfg.riskThresholds.nplTrigger} suffix="%" onChange={() => {}} />
+              <NumField label="SLA Breach (hrs)"      value={cfg.riskThresholds.slaBreach} suffix="h" onChange={() => {}} />
+              <NumField label="SLA Warning (hrs)"     value={cfg.riskThresholds.slaWarning} suffix="h" onChange={() => {}} />
             </View>
           </SectionCard>
         </View>

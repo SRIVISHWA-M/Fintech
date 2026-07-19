@@ -36,6 +36,11 @@ const Payment = sequelize.define('Payment', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  paymentType: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'User chosen payment option: emi, custom, or full',
+  },
   status: {
     type: DataTypes.ENUM('Paid', 'Pending', 'Failed'),
     defaultValue: 'Pending',

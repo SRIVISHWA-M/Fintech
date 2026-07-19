@@ -15,10 +15,10 @@ export const paymentService = {
     return data;
   },
 
-  makePayment: async (amount, method) => {
+  makePayment: async (amount, method, paymentType) => {
     const data = await apiRequest('/payments', {
       method: 'POST',
-      body: { amount, method },
+      body: { amount, method, paymentType },
     });
     // Sync updated loan and new payment into local stores
     if (data.updatedLoan) {

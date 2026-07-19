@@ -40,44 +40,12 @@ const TabBarButton = ({ route, label, isFocused, onPress, onLongPress }) => {
     ]).start();
   }, [isFocused]);
 
-  const isHome = route.name === 'Home';
 
-  // Highlight and raise the Home button as the center menu
-  if (isHome) {
-    return (
-      <TouchableOpacity
-        onPress={onPress}
-        onLongPress={onLongPress}
-        style={styles.centerButtonOuter}
-        activeOpacity={0.85}
-      >
-        <Animated.View style={[
-          styles.centerButton,
-          {
-            transform: [{ scale: scaleValue }],
-            backgroundColor: isFocused ? colors.success : colors.cardElevated,
-            borderColor: isFocused ? colors.success : colors.borderStrong,
-            shadowColor: isFocused ? colors.success : '#000',
-            shadowOpacity: isFocused ? 0.5 : 0.35,
-            shadowRadius: isFocused ? 10 : 5,
-          }
-        ]}>
-          <Ionicons
-            name={isFocused ? 'home' : 'home-outline'}
-            size={20}
-            color={isFocused ? colors.successForeground : colors.foreground}
-          />
-        </Animated.View>
-        <Text style={[styles.tabLabel, { color: isFocused ? colors.success : colors.mutedForeground, marginTop: 4 }]}>
-          Home
-        </Text>
-      </TouchableOpacity>
-    );
-  }
 
   const icons = {
     Dashboard: { active: 'analytics', inactive: 'analytics-outline' },
     Loans:     { active: 'card', inactive: 'card-outline' },
+    Home:      { active: 'home', inactive: 'home-outline' },
     Payments:  { active: 'calendar', inactive: 'calendar-outline' },
     Profile:   { active: 'person', inactive: 'person-outline' },
   };
@@ -96,12 +64,27 @@ const TabBarButton = ({ route, label, isFocused, onPress, onLongPress }) => {
       activeOpacity={0.7}
     >
       <Animated.View style={{ transform: [{ scale: scaleValue }], opacity: opacityValue, alignItems: 'center' }}>
-        <Ionicons
-          name={getIconName()}
-          size={20}
-          color={isFocused ? colors.success : colors.foregroundSecondary}
-        />
-        <Text style={[styles.tabLabel, { color: isFocused ? colors.success : colors.mutedForeground }]}>
+        <View style={{
+          width: 42,
+          height: 28,
+          borderRadius: 14,
+          backgroundColor: isFocused ? 'rgba(255, 255, 255, 0.25)' : 'transparent',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 3,
+          shadowColor: isFocused ? '#000' : 'transparent',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: isFocused ? 0.1 : 0,
+          shadowRadius: 3,
+          elevation: isFocused ? 2 : 0,
+        }}>
+          <Ionicons
+            name={getIconName()}
+            size={18}
+            color={isFocused ? '#0A4A28' : 'rgba(255,255,255,0.75)'}
+          />
+        </View>
+        <Text style={[styles.tabLabel, { color: isFocused ? '#FFFFFF' : 'rgba(255,255,255,0.7)' }]}>
           {label}
         </Text>
       </Animated.View>
@@ -173,6 +156,27 @@ const MainTabs = () => (
   </Tab.Navigator>
 );
 
+const linking = {
+  prefixes: ['http://localhost:8081', 'http://localhost:19006', 'fintech://'],
+  config: {
+    screens: {
+      SuperAdmin: 'super-admin',
+      Main: {
+        path: 'user',
+        screens: {
+          Home: '',
+          Dashboard: 'dashboard',
+          Loans: 'loans',
+          Payments: 'payments',
+          Profile: 'profile',
+        },
+      },
+      PersonalLoanDetails: 'user/loan-details',
+      Login: 'login',
+    },
+  },
+};
+
 const AppNavigator = () => {
   const [authState, setAuthState] = useState(authStore.getState());
 
@@ -187,8 +191,12 @@ const AppNavigator = () => {
   const isAuthenticated = authState.isAuthenticated;
   const isSuperAdmin = authState.user?.role?.toLowerCase() === 'superadmin';
 
+  if (!authState.isHydrated) {
+    return <View style={{ flex: 1, backgroundColor: colors.background }} />;
+  }
+
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator
         screenOptions={{ headerShown: false, animation: 'fade' }}
       >
@@ -212,19 +220,22 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     left: 0,
-    right: 0,
-    height: Platform.OS === 'ios' ? 102 : 86,
-    backgroundColor: colors.background,
+    width: '100%',
+    height: Platform.OS === 'ios' ? 88 : 74,
+    backgroundColor: 'transparent',
     justifyContent: 'flex-start',
     alignItems: 'center',
   },
   tabContainer: {
-    width: '92%',
-    height: 62,
-    borderRadius: 20,
-    backgroundColor: colors.card,
+    width: '94%',
+    maxWidth: 440,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(36, 185, 120, 0.45)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(0,0,0,0.1)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
@@ -260,9 +271,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
   },
   tabLabel: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontWeight: '700',
-    marginTop: 3,
+    marginTop: 2,
     letterSpacing: 0.1,
   }
 });

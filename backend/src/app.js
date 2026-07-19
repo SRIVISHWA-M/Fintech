@@ -11,6 +11,9 @@ const { NotFoundError } = require('./utils/errors');
 
 const app = express();
 
+// Disable ETags to prevent 304 Not Modified caching responses
+app.disable('etag');
+
 // CORS config
 app.use(cors({
   origin: '*', // Allow all origins for testing/development

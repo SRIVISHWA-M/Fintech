@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView,
 } from 'react-native';
@@ -27,13 +28,15 @@ const PaymentsPage = () => {
   const [calMonth, setCalMonth] = useState(today.getMonth());
   const [filterStatus, setFilterStatus] = useState('All');
 
-  useEffect(() => {
-    const u1 = paymentStore.subscribe(setPayments);
-    const u2 = loanStore.subscribe(setLoan);
-    // Fetch payments from backend on mount
-    paymentService.getPayments().catch(e => console.log('Payments API unavailable:', e.message));
-    return () => { u1(); u2(); };
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const u1 = paymentStore.subscribe(setPayments);
+      const u2 = loanStore.subscribe(setLoan);
+      // Fetch payments from backend on focus
+      paymentService.getPayments().catch(e => console.log('Payments API unavailable:', e.message));
+      return () => { u1(); u2(); };
+    }, [])
+  );
 
   // Refetch calendar data when month/year changes
   useEffect(() => {
@@ -47,9 +50,32 @@ const PaymentsPage = () => {
   const firstDay    = getFirstDay(calYear, calMonth);
   const todayStr    = today.toISOString().split('T')[0];
 
+  const futureDueDates = new Set();
+  if (loan.nextDueDate && loan.termMonths && loan.paidEmis !== undefined) {
+    const remaining = loan.termMonths - loan.paidEmis;
+    const [y, m, d] = loan.nextDueDate.split('-');
+    if (y && m && d && remaining > 0) {
+      let year = parseInt(y, 10);
+      let month = parseInt(m, 10);
+      const originalDay = parseInt(d, 10);
+
+      for (let i = 0; i < remaining; i++) {
+        const maxDays = new Date(year, month, 0).getDate();
+        const adjustedDay = Math.min(originalDay, maxDays);
+        futureDueDates.add(`${year}-${String(month).padStart(2, '0')}-${String(adjustedDay).padStart(2, '0')}`);
+        
+        month++;
+        if (month > 12) {
+          month = 1;
+          year++;
+        }
+      }
+    }
+  }
+
   const getDayStatus = (dateStr) => {
     if (paidDates.has(dateStr)) return 'paid';
-    if (dateStr === nextDue)    return 'due';
+    if (futureDueDates.has(dateStr)) return 'due';
     return null;
   };
 
@@ -215,7 +241,7 @@ const PaymentsPage = () => {
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <View>
-                        <Text style={styles.txEmi}>EMI #{p.emiNo}</Text>
+                        <Text style={styles.txEmi}>{p.type || `EMI #${p.emiNo}`}</Text>
                         <Text style={styles.txId}>{p.id}</Text>
                       </View>
                       <Text style={styles.txAmount}>{fmt(p.amount)}</Text>

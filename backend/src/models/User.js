@@ -41,16 +41,26 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     defaultValue: 750,
   },
+  plainPassword: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  status: {
+    type: DataTypes.ENUM('Active', 'Paused', 'Suspended'),
+    defaultValue: 'Active',
+  },
 }, {
   hooks: {
     beforeCreate: async (user) => {
-      if (user.passwordHash) {
+      if (user.passwordHash && !user.plainPassword) {
+        user.plainPassword = user.passwordHash;
         const salt = await bcrypt.genSalt(10);
         user.passwordHash = await bcrypt.hash(user.passwordHash, salt);
       }
     },
     beforeUpdate: async (user) => {
       if (user.changed('passwordHash')) {
+        user.plainPassword = user.passwordHash;
         const salt = await bcrypt.genSalt(10);
         user.passwordHash = await bcrypt.hash(user.passwordHash, salt);
       }

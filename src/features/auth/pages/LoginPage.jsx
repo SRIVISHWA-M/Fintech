@@ -161,6 +161,11 @@ const LoginPage = () => {
   const [emailFocused, setEmailFocused] = useState(false);
   const [pwFocused, setPwFocused] = useState(false);
 
+  // Forgot password flow states
+  const [mode, setMode] = useState('login'); // 'login' | 'forgot' | 'reset'
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+
   const handleLogin = async () => {
     setLoading(true);
     try {
@@ -174,6 +179,7 @@ const LoginPage = () => {
 
       if (!demoUser) {
         Alert.alert('Login failed', 'Incorrect email or password.');
+        setLoading(false);
         return;
       }
 
@@ -186,6 +192,47 @@ const LoginPage = () => {
       };
       
       authStore.setUser(mappedUser);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter your email or Customer ID');
+      return;
+    }
+    setLoading(true);
+    try {
+      await authService.forgotPassword(email);
+      Alert.alert('Success', 'An OTP has been sent to your registered email and mobile number. (Check your backend terminal logs to see the generated code).');
+      setMode('reset');
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to send OTP');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!otp || otp.length !== 6) {
+      Alert.alert('Error', 'Please enter a valid 6-digit OTP');
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
+      return;
+    }
+    setLoading(true);
+    try {
+      await authService.resetPassword(email, otp, newPassword);
+      Alert.alert('Success', 'Your password has been successfully reset. You can now login with your new password.');
+      setPassword(newPassword);
+      setMode('login');
+      setOtp('');
+      setNewPassword('');
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to reset password');
     } finally {
       setLoading(false);
     }
@@ -251,81 +298,162 @@ const LoginPage = () => {
                   </View>
                 </View>
 
-                {/* Form fields */}
-                <View style={styles.fieldGroup}>
-                  <Text style={styles.label}>Email Address</Text>
-                  <View style={[styles.inputWrapper, emailFocused && styles.inputWrapperFocused]}>
-                    <Ionicons
-                      name="mail-outline"
-                      size={16}
-                      color={emailFocused ? colors.success : colors.mutedForeground}
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      style={styles.input}
-                      value={email}
-                      onChangeText={setEmail}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      placeholderTextColor={colors.mutedForeground}
-                      onFocus={() => setEmailFocused(true)}
-                      onBlur={() => setEmailFocused(false)}
-                      multiline={false}
-                      underlineColorAndroid="transparent"
-                    />
-                  </View>
-                </View>
+                {/* Form fields based on Mode */}
+                {mode === 'login' ? (
+                  <>
+                    <View style={styles.fieldGroup}>
+                      <Text style={styles.label}>Email Address or Customer ID</Text>
+                      <View style={[styles.inputWrapper, emailFocused && styles.inputWrapperFocused]}>
+                        <Ionicons
+                          name="mail-outline"
+                          size={16}
+                          color={emailFocused ? colors.success : colors.mutedForeground}
+                          style={styles.inputIcon}
+                        />
+                        <TextInput
+                          style={styles.input}
+                          value={email}
+                          onChangeText={setEmail}
+                          keyboardType="email-address"
+                          autoCapitalize="none"
+                          placeholderTextColor={colors.mutedForeground}
+                          onFocus={() => setEmailFocused(true)}
+                          onBlur={() => setEmailFocused(false)}
+                          multiline={false}
+                          underlineColorAndroid="transparent"
+                        />
+                      </View>
+                    </View>
 
-                <View style={styles.fieldGroup}>
-                  <View style={styles.labelRow}>
-                    <Text style={styles.label}>Security Password</Text>
-                    <TouchableOpacity>
-                      <Text style={styles.forgotText}>Forgot?</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={[styles.inputWrapper, pwFocused && styles.inputWrapperFocused]}>
-                    <Ionicons
-                      name="lock-closed-outline"
-                      size={16}
-                      color={pwFocused ? colors.success : colors.mutedForeground}
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      style={[styles.input, styles.passwordInput]}
-                      value={password}
-                      onChangeText={setPassword}
-                      secureTextEntry={!showPw}
-                      placeholderTextColor={colors.mutedForeground}
-                      onFocus={() => setPwFocused(true)}
-                      onBlur={() => setPwFocused(false)}
-                      multiline={false}
-                      underlineColorAndroid="transparent"
-                    />
-                    <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPw((s) => !s)}>
-                      <Ionicons
-                        name={showPw ? 'eye-off-outline' : 'eye-outline'}
-                        size={17}
-                        color={colors.mutedForeground}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
+                    <View style={styles.fieldGroup}>
+                      <View style={styles.labelRow}>
+                        <Text style={styles.label}>Security Password</Text>
+                        <TouchableOpacity onPress={() => setMode('forgot')}>
+                          <Text style={styles.forgotText}>Forgot?</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <View style={[styles.inputWrapper, pwFocused && styles.inputWrapperFocused]}>
+                        <Ionicons
+                          name="lock-closed-outline"
+                          size={16}
+                          color={pwFocused ? colors.success : colors.mutedForeground}
+                          style={styles.inputIcon}
+                        />
+                        <TextInput
+                          style={[styles.input, styles.passwordInput]}
+                          value={password}
+                          onChangeText={setPassword}
+                          secureTextEntry={!showPw}
+                          placeholderTextColor={colors.mutedForeground}
+                          onFocus={() => setPwFocused(true)}
+                          onBlur={() => setPwFocused(false)}
+                          multiline={false}
+                          underlineColorAndroid="transparent"
+                        />
+                        <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPw((s) => !s)}>
+                          <Ionicons
+                            name={showPw ? 'eye-off-outline' : 'eye-outline'}
+                            size={17}
+                            color={colors.mutedForeground}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
 
-                <TouchableOpacity
-                  style={[styles.signInBtn, loading && styles.signInBtnDisabled]}
-                  onPress={handleLogin}
-                  disabled={loading}
-                  activeOpacity={0.85}
-                >
-                  {loading ? (
-                    <ActivityIndicator color={colors.successForeground} />
-                  ) : (
-                    <>
-                      <Text style={styles.signInText}>Sign In Securely</Text>
-                      <Ionicons name="arrow-forward" size={16} color={colors.successForeground} />
-                    </>
-                  )}
-                </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.signInBtn, loading && styles.signInBtnDisabled]}
+                      onPress={handleLogin}
+                      disabled={loading}
+                      activeOpacity={0.85}
+                    >
+                      {loading ? (
+                        <ActivityIndicator color={colors.successForeground} />
+                      ) : (
+                        <>
+                          <Text style={styles.signInText}>Sign In Securely</Text>
+                          <Ionicons name="arrow-forward" size={16} color={colors.successForeground} />
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </>
+                ) : mode === 'forgot' ? (
+                  <>
+                    <View style={styles.fieldGroup}>
+                      <Text style={styles.label}>Enter Email or Customer ID</Text>
+                      <View style={[styles.inputWrapper, emailFocused && styles.inputWrapperFocused]}>
+                        <Ionicons name="mail-outline" size={16} color={emailFocused ? colors.success : colors.mutedForeground} style={styles.inputIcon} />
+                        <TextInput
+                          style={styles.input}
+                          value={email}
+                          onChangeText={setEmail}
+                          autoCapitalize="none"
+                          placeholderTextColor={colors.mutedForeground}
+                          onFocus={() => setEmailFocused(true)}
+                          onBlur={() => setEmailFocused(false)}
+                        />
+                      </View>
+                    </View>
+                    
+                    <TouchableOpacity
+                      style={[styles.signInBtn, loading && styles.signInBtnDisabled]}
+                      onPress={handleForgotPassword}
+                      disabled={loading}
+                      activeOpacity={0.85}
+                    >
+                      {loading ? <ActivityIndicator color={colors.successForeground} /> : <Text style={styles.signInText}>Send Reset Code</Text>}
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setMode('login')} style={{ alignItems: 'center', marginTop: 10 }}>
+                      <Text style={{ color: colors.mutedForeground, fontSize: 13, fontWeight: '600' }}>Back to Login</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <>
+                    <View style={styles.fieldGroup}>
+                      <Text style={styles.label}>Enter 6-Digit OTP</Text>
+                      <View style={[styles.inputWrapper, { borderColor: colors.border }]}>
+                        <Ionicons name="keypad-outline" size={16} color={colors.mutedForeground} style={styles.inputIcon} />
+                        <TextInput
+                          style={styles.input}
+                          value={otp}
+                          onChangeText={setOtp}
+                          keyboardType="numeric"
+                          maxLength={6}
+                          placeholder="e.g. 123456"
+                          placeholderTextColor={colors.mutedForeground}
+                        />
+                      </View>
+                    </View>
+
+                    <View style={styles.fieldGroup}>
+                      <Text style={styles.label}>New Password</Text>
+                      <View style={[styles.inputWrapper, { borderColor: colors.border }]}>
+                        <Ionicons name="lock-closed-outline" size={16} color={colors.mutedForeground} style={styles.inputIcon} />
+                        <TextInput
+                          style={styles.input}
+                          value={newPassword}
+                          onChangeText={setNewPassword}
+                          secureTextEntry={!showPw}
+                          placeholderTextColor={colors.mutedForeground}
+                        />
+                        <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPw((s) => !s)}>
+                          <Ionicons name={showPw ? 'eye-off-outline' : 'eye-outline'} size={17} color={colors.mutedForeground} />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+
+                    <TouchableOpacity
+                      style={[styles.signInBtn, loading && styles.signInBtnDisabled]}
+                      onPress={handleResetPassword}
+                      disabled={loading}
+                      activeOpacity={0.85}
+                    >
+                      {loading ? <ActivityIndicator color={colors.successForeground} /> : <Text style={styles.signInText}>Confirm New Password</Text>}
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setMode('login')} style={{ alignItems: 'center', marginTop: 10 }}>
+                      <Text style={{ color: colors.mutedForeground, fontSize: 13, fontWeight: '600' }}>Back to Login</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
               </View>
 
               <View style={[styles.securityStrip, isDesktop && styles.securityStripDesktop]}>

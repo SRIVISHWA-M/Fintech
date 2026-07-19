@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 const { User, UserPreference } = require('../models');
 const { UnauthorizedError, NotFoundError, BadRequestError } = require('../utils/errors');
 
@@ -49,12 +50,21 @@ const login = async (email, password) => {
   }
 
   const user = await User.findOne({
-    where: { email: normalizedEmail },
+    where: {
+      [Op.or]: [
+        { email: normalizedEmail },
+        { customerId: email.trim() }
+      ]
+    },
     include: [{ model: UserPreference, as: 'preferences' }],
   });
 
   if (!user || !(await user.comparePassword(password))) {
-    throw new UnauthorizedError('Incorrect email or password');
+    throw new UnauthorizedError('Incorrect email/customer ID or password');
+  }
+
+  if (user.status === 'Paused' || user.status === 'Suspended') {
+    throw new UnauthorizedError(`Account is ${user.status.toLowerCase()}. Please contact support.`);
   }
 
   const accessToken = generateAccessToken(user);
@@ -94,6 +104,10 @@ const refreshAccessToken = async (token) => {
       throw new UnauthorizedError('User does not exist');
     }
 
+    if (user.status === 'Paused' || user.status === 'Suspended') {
+      throw new UnauthorizedError(`Account is ${user.status.toLowerCase()}`);
+    }
+
     const newAccessToken = generateAccessToken(user);
     return newAccessToken;
   } catch (error) {
@@ -101,28 +115,70 @@ const refreshAccessToken = async (token) => {
   }
 };
 
+// In-memory OTP cache for demo purposes. Maps email -> otp
+const otpCache = new Map();
+
 const forgotPassword = async (email) => {
-  const user = await User.findOne({ where: { email } });
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await User.findOne({
+    where: {
+      [Op.or]: [
+        { email: normalizedEmail },
+        { customerId: email.trim() }
+      ]
+    }
+  });
   if (!user) {
-    throw new NotFoundError('No account with that email address exists');
+    throw new NotFoundError('No account with that email address or customer ID exists');
   }
-  // In production, dispatch OTP code here. For demo, we return success with mocked dispatch.
+
+  // Generate a random 6-digit OTP
+  const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  
+  // Store it in memory for 10 minutes
+  otpCache.set(user.email, generatedOtp);
+  setTimeout(() => otpCache.delete(user.email), 10 * 60 * 1000);
+
+  // Simulate sending to both Email and Mobile
+  console.log('\n=============================================');
+  console.log(`[OTP SERVICE] Sending OTP ${generatedOtp} via SMS to ${user.phone}`);
+  console.log(`[OTP SERVICE] Sending OTP ${generatedOtp} via Email to ${user.email}`);
+  console.log('=============================================\n');
+
   return true;
 };
 
 const resetPassword = async (email, otp, newPassword) => {
-  // Simple validation for demo OTP: any 6 digit number works, or specific mock "592104"
   if (!otp || otp.length !== 6) {
     throw new BadRequestError('Invalid OTP code format');
   }
 
-  const user = await User.findOne({ where: { email } });
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await User.findOne({
+    where: {
+      [Op.or]: [
+        { email: normalizedEmail },
+        { customerId: email.trim() }
+      ]
+    }
+  });
+  
   if (!user) {
     throw new NotFoundError('User not found');
   }
 
+  const validOtp = otpCache.get(user.email);
+  if (!validOtp || validOtp !== otp) {
+    throw new BadRequestError('Invalid or expired OTP code');
+  }
+
   user.passwordHash = newPassword;
+  user.plainPassword = newPassword; // For demo purposes, keep plain password so admin can see it masked
   await user.save();
+  
+  // Clear the OTP after successful use
+  otpCache.delete(user.email);
+  
   return true;
 };
 

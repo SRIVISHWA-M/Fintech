@@ -79,6 +79,37 @@
     }
   },
   "paths": {
+    "/admin/users/{id}": {
+      "put": {
+        "summary": "Update User Details",
+        "description": "Updates customer details in the super admin panel.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "schema": { "type": "string" }, "required": true }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customerName": { "type": "string", "example": "Aarav Shah" },
+                  "phone": { "type": "string", "example": "+91 9876543210" },
+                  "email": { "type": "string", "example": "aarav.shah@example.com" },
+                  "kycStatus": { "type": "string", "example": "Verified" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully"
+          }
+        }
+      }
+    },
     "/auth/login": {
       "post": {
         "summary": "User Login",

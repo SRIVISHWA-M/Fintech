@@ -6,6 +6,8 @@ const paymentRoutes = require('./payment.routes');
 
 const router = express.Router();
 
+router.use('/admin', require('./admin.routes'));
+
 router.use('/auth', authRoutes);
 router.use('/profile', profileRoutes);
 router.use('/loans', loanRoutes);

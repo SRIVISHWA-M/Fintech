@@ -1,9 +1,9 @@
 const Joi = require('joi');
 
 const loginSchema = Joi.object({
-  email: Joi.string().email().required().messages({
-    'string.email': 'Please enter a valid email address',
-    'any.required': 'Email is required',
+  email: Joi.string().required().messages({
+    'any.required': 'Email or Customer ID is required',
+    'string.empty': 'Please enter your email or Customer ID'
   }),
   password: Joi.string().min(6).required().messages({
     'string.min': 'Password must be at least 6 characters',
@@ -12,14 +12,14 @@ const loginSchema = Joi.object({
 });
 
 const forgotPasswordSchema = Joi.object({
-  email: Joi.string().email().required().messages({
-    'string.email': 'Please enter a valid email address',
-    'any.required': 'Email is required',
+  email: Joi.string().required().messages({
+    'any.required': 'Email or Customer ID is required',
+    'string.empty': 'Please enter your email or Customer ID'
   }),
 });
 
 const resetPasswordSchema = Joi.object({
-  email: Joi.string().email().required(),
+  email: Joi.string().required(),
   otp: Joi.string().length(6).required().messages({
     'string.length': 'OTP must be exactly 6 digits',
     'any.required': 'OTP is required',

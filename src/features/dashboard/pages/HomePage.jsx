@@ -32,7 +32,7 @@ const HomePage = () => {
     return unsubscribe;
   }, []);
 
-  const initials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const initials = user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'US';
 
   // Check if they are an existing user with active/outstanding loan
   const isExistingUser = loan && loan.outstanding > 0;
@@ -43,7 +43,7 @@ const HomePage = () => {
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Welcome back,</Text>
-          <Text style={styles.userName}>{user?.name?.split(' ')[0]} 👋</Text>
+          <Text style={styles.userName}>{user?.name ? user.name.split(' ')[0] : 'User'} 👋</Text>
         </View>
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.notifBtn} activeOpacity={0.75}>
