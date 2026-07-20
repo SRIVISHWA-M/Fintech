@@ -161,10 +161,16 @@ const LoginPage = () => {
   const [emailFocused, setEmailFocused] = useState(false);
   const [pwFocused, setPwFocused] = useState(false);
 
-  // Forgot password flow states
-  const [mode, setMode] = useState('login'); // 'login' | 'forgot' | 'reset'
+  // Forgot password & Signup flow states
+  const [mode, setMode] = useState('login'); // 'login' | 'signup' | 'forgot' | 'reset'
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  
+  // Signup specific states
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [nameFocused, setNameFocused] = useState(false);
+  const [phoneFocused, setPhoneFocused] = useState(false);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -192,6 +198,21 @@ const LoginPage = () => {
       };
       
       authStore.setUser(mappedUser);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignup = async () => {
+    if (!name.trim() || !email.trim() || !phone.trim() || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    setLoading(true);
+    try {
+      await authService.signup(name, email, phone, password);
+    } catch (error) {
+      Alert.alert('Signup Failed', error.message || 'An error occurred during registration.');
     } finally {
       setLoading(false);
     }
@@ -265,7 +286,8 @@ const LoginPage = () => {
               <View style={[styles.formCard, isDesktop && styles.formCardDesktop]}>
                 
                 {/* Pre-filled Account Quick Select */}
-                <View style={styles.quickSelectSection}>
+                {mode === 'login' && (
+                  <View style={styles.quickSelectSection}>
                   <Text style={styles.quickSelectTitle}>Quick Sign-In</Text>
                   <View style={styles.quickSelectRow}>
                     {DEMO_USERS.map((user) => (
@@ -297,6 +319,7 @@ const LoginPage = () => {
                     ))}
                   </View>
                 </View>
+                )}
 
                 {/* Form fields based on Mode */}
                 {mode === 'login' ? (
@@ -375,6 +398,110 @@ const LoginPage = () => {
                         </>
                       )}
                     </TouchableOpacity>
+
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16 }}>
+                      <Text style={{ color: colors.mutedForeground, fontSize: 13 }}>New to Hidel? </Text>
+                      <TouchableOpacity onPress={() => {
+                        setMode('signup');
+                        setEmail('');
+                        setPassword('');
+                      }}>
+                        <Text style={{ color: colors.success, fontSize: 13, fontWeight: '700' }}>Create an Account</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                ) : mode === 'signup' ? (
+                  <>
+                    <View style={styles.fieldGroup}>
+                      <Text style={styles.label}>Full Name</Text>
+                      <View style={[styles.inputWrapper, nameFocused && styles.inputWrapperFocused]}>
+                        <Ionicons name="person-outline" size={16} color={nameFocused ? colors.success : colors.mutedForeground} style={styles.inputIcon} />
+                        <TextInput
+                          style={styles.input}
+                          value={name}
+                          onChangeText={setName}
+                          placeholderTextColor={colors.mutedForeground}
+                          onFocus={() => setNameFocused(true)}
+                          onBlur={() => setNameFocused(false)}
+                        />
+                      </View>
+                    </View>
+
+                    <View style={styles.fieldGroup}>
+                      <Text style={styles.label}>Email Address</Text>
+                      <View style={[styles.inputWrapper, emailFocused && styles.inputWrapperFocused]}>
+                        <Ionicons name="mail-outline" size={16} color={emailFocused ? colors.success : colors.mutedForeground} style={styles.inputIcon} />
+                        <TextInput
+                          style={styles.input}
+                          value={email}
+                          onChangeText={setEmail}
+                          keyboardType="email-address"
+                          autoCapitalize="none"
+                          placeholderTextColor={colors.mutedForeground}
+                          onFocus={() => setEmailFocused(true)}
+                          onBlur={() => setEmailFocused(false)}
+                        />
+                      </View>
+                    </View>
+
+                    <View style={styles.fieldGroup}>
+                      <Text style={styles.label}>Phone Number</Text>
+                      <View style={[styles.inputWrapper, phoneFocused && styles.inputWrapperFocused]}>
+                        <Ionicons name="call-outline" size={16} color={phoneFocused ? colors.success : colors.mutedForeground} style={styles.inputIcon} />
+                        <TextInput
+                          style={styles.input}
+                          value={phone}
+                          onChangeText={setPhone}
+                          keyboardType="phone-pad"
+                          placeholderTextColor={colors.mutedForeground}
+                          onFocus={() => setPhoneFocused(true)}
+                          onBlur={() => setPhoneFocused(false)}
+                        />
+                      </View>
+                    </View>
+
+                    <View style={styles.fieldGroup}>
+                      <Text style={styles.label}>Password</Text>
+                      <View style={[styles.inputWrapper, pwFocused && styles.inputWrapperFocused]}>
+                        <Ionicons name="lock-closed-outline" size={16} color={pwFocused ? colors.success : colors.mutedForeground} style={styles.inputIcon} />
+                        <TextInput
+                          style={[styles.input, styles.passwordInput]}
+                          value={password}
+                          onChangeText={setPassword}
+                          secureTextEntry={!showPw}
+                          placeholderTextColor={colors.mutedForeground}
+                          onFocus={() => setPwFocused(true)}
+                          onBlur={() => setPwFocused(false)}
+                        />
+                        <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPw((s) => !s)}>
+                          <Ionicons name={showPw ? 'eye-off-outline' : 'eye-outline'} size={17} color={colors.mutedForeground} />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+
+                    <TouchableOpacity
+                      style={[styles.signInBtn, loading && styles.signInBtnDisabled]}
+                      onPress={handleSignup}
+                      disabled={loading}
+                      activeOpacity={0.85}
+                    >
+                      {loading ? (
+                        <ActivityIndicator color={colors.successForeground} />
+                      ) : (
+                        <Text style={styles.signInText}>Register Account</Text>
+                      )}
+                    </TouchableOpacity>
+
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16 }}>
+                      <Text style={{ color: colors.mutedForeground, fontSize: 13 }}>Already have an account? </Text>
+                      <TouchableOpacity onPress={() => {
+                        setMode('login');
+                        setEmail('aarav.shah@example.com');
+                        setPassword('password123');
+                      }}>
+                        <Text style={{ color: colors.success, fontSize: 13, fontWeight: '700' }}>Sign In</Text>
+                      </TouchableOpacity>
+                    </View>
                   </>
                 ) : mode === 'forgot' ? (
                   <>

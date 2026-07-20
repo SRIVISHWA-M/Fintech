@@ -4,6 +4,7 @@ const validate = require('../middleware/validation.middleware');
 const { protect } = require('../middleware/auth.middleware');
 const {
   loginSchema,
+  signupSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
 } = require('../utils/validationSchemas');
@@ -11,6 +12,7 @@ const {
 const router = express.Router();
 
 router.post('/login', validate(loginSchema), authController.login);
+router.post('/signup', validate(signupSchema), authController.signup);
 router.post('/refresh', authController.refresh);
 router.post('/forgot-password', validate(forgotPasswordSchema), authController.forgotPassword);
 router.post('/reset-password', validate(resetPasswordSchema), authController.resetPassword);

@@ -184,6 +184,16 @@ const AppNavigator = () => {
     // Subscribe to auth state — automatically navigate when user logs in/out
     const unsubscribe = authStore.subscribe((state) => {
       setAuthState(state);
+      
+      // Fix for React Native Web: When auth state changes, if the URL is still /login,
+      // React Navigation will render a blank screen because Login is no longer in the stack.
+      // We manually update the URL to match the new stack's initial route.
+      if (Platform.OS === 'web' && typeof window !== 'undefined' && state.isAuthenticated) {
+        if (window.location.pathname === '/login' || window.location.pathname === '/') {
+          const targetPath = state.user?.role?.toLowerCase() === 'superadmin' ? '/super-admin' : '/user';
+          window.history.replaceState(null, '', targetPath);
+        }
+      }
     });
     return unsubscribe;
   }, []);
@@ -198,7 +208,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer linking={linking}>
       <Stack.Navigator
-        screenOptions={{ headerShown: false, animation: 'fade' }}
+        screenOptions={{ headerShown: false }}
       >
         {isAuthenticated && isSuperAdmin ? (
           <Stack.Screen name="SuperAdmin" component={SuperAdminScreen} />

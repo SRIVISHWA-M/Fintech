@@ -33,6 +33,22 @@ export const authService = {
     return data.user;
   },
 
+  signup: async (name, email, phone, password) => {
+    const data = await apiRequest('/auth/signup', {
+      method: 'POST',
+      body: { name, email, phone, password },
+    });
+
+    // Persist tokens
+    setAccessToken(data.accessToken);
+    await AsyncStorage.setItem(TOKEN_KEY, data.accessToken);
+    await AsyncStorage.setItem(REFRESH_KEY, data.refreshToken);
+
+    // Sync local store with real user data from backend
+    authStore.setUser(data.user);
+    return data.user;
+  },
+
   logout: async () => {
     try {
       await apiRequest('/auth/logout', { method: 'POST' });

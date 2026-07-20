@@ -63,9 +63,71 @@ const login = async (email, password) => {
     throw new UnauthorizedError('Incorrect email/customer ID or password');
   }
 
+  if (user.status === 'Pending') {
+    throw new UnauthorizedError(`Account is pending approval. Please wait until a Super Admin approves your account.`);
+  }
+
+  if (user.status === 'Rejected') {
+    throw new UnauthorizedError(`Account has been rejected. Please contact support.`);
+  }
+
   if (user.status === 'Paused' || user.status === 'Suspended') {
     throw new UnauthorizedError(`Account is ${user.status.toLowerCase()}. Please contact support.`);
   }
+
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+  return {
+    user: {
+      id: user.id,
+      name: user.name,
+      customerId: user.customerId,
+      email: user.email,
+      role: 'user',
+      phoneMasked: user.phone.replace(/(\+\d{2} \d{2})\d{3} \d{2}(\d{3})/, '$1••• ••$2'),
+      kycStatus: user.kycStatus,
+      creditScore: user.creditScore,
+      preferences: user.preferences,
+    },
+    accessToken,
+    refreshToken,
+  };
+};
+
+const signup = async (userData) => {
+  const { name, email, phone, password } = userData;
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const existingUser = await User.findOne({ where: { email: normalizedEmail } });
+  if (existingUser) {
+    throw new BadRequestError('Email address is already in use');
+  }
+
+  // Generate a temporary Customer ID
+  const customerId = `PENDING-${Math.floor(100000 + Math.random() * 900000)}`;
+
+  const newUser = await User.create({
+    name,
+    email: normalizedEmail,
+    phone,
+    passwordHash: password,
+    customerId,
+    status: 'Pending',
+  });
+
+  // Create default preferences
+  await UserPreference.create({
+    userId: newUser.id,
+    darkMode: true,
+    notifications: true,
+    loginAlerts: true,
+  });
+
+  // Fetch with preferences to return matching structure
+  const user = await User.findByPk(newUser.id, {
+    include: [{ model: UserPreference, as: 'preferences' }],
+  });
 
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
@@ -104,7 +166,7 @@ const refreshAccessToken = async (token) => {
       throw new UnauthorizedError('User does not exist');
     }
 
-    if (user.status === 'Paused' || user.status === 'Suspended') {
+    if (['Paused', 'Suspended', 'Pending', 'Rejected'].includes(user.status)) {
       throw new UnauthorizedError(`Account is ${user.status.toLowerCase()}`);
     }
 
@@ -184,6 +246,7 @@ const resetPassword = async (email, otp, newPassword) => {
 
 module.exports = {
   login,
+  signup,
   refreshAccessToken,
   forgotPassword,
   resetPassword,

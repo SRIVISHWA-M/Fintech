@@ -18,6 +18,7 @@ const createUser = async (req, res, next) => {
       termMonths,
       startDate,
       monthlyEmi,
+      interestRate,
       address, 
       notes 
     } = req.body;
@@ -40,6 +41,8 @@ const createUser = async (req, res, next) => {
       passwordHash: generatedPassword, // Hook will hash it
       kycStatus: 'pending', // Default to pending since we removed KYC status from the form
       creditScore: 750, // Default for new customers
+      address,
+      notes,
     });
 
     // Handle Loan Creation if totalLoanAmount > 0
@@ -58,12 +61,11 @@ const createUser = async (req, res, next) => {
       nextDueDate.setMonth(nextDueDate.getMonth() + 1);
     }
 
-    // Calculate exact EMI using standard amortization formula
-    const interestRate = 10.5; // 10.5% Annual
-    const monthlyRate = interestRate / 100 / 12;
-    const calculatedEmi = amount > 0 && term > 0 
-      ? Math.round((amount * monthlyRate * Math.pow(1 + monthlyRate, term)) / (Math.pow(1 + monthlyRate, term) - 1))
-      : 0;
+    // Calculate EMI using flat rate simple interest
+    const appliedInterestRate = interestRate && parseFloat(interestRate) > 0 ? parseFloat(interestRate) : 10.5;
+    const termInYears = term / 12;
+    const totalInterest = amount * (appliedInterestRate / 100) * termInYears;
+    const calculatedEmi = term > 0 ? Math.round((amount + totalInterest) / term) : 0;
       
     // Use manually provided EMI if available, otherwise fallback to calculation
     const emi = monthlyEmi && parseFloat(monthlyEmi) > 0 ? parseFloat(monthlyEmi) : calculatedEmi;
@@ -75,17 +77,17 @@ const createUser = async (req, res, next) => {
         userId: newUser.id,
         type: loanType || 'Personal Loan', // Use selected loan type
         principal: amount,
-        outstanding: amount,
+        outstanding: emi * term,
         paid: 0,
-        interestRate: interestRate,
+        interestRate: appliedInterestRate,
         termMonths: term,
         paidEmis: 0,
         nextDueAmount: emi,
         nextDueDate: nextDueDate, // Next month from start date
         paymentMethod: 'Manual Pay',
-        principalBreakdown: amount * 0.7,
-        interestBreakdown: amount * 0.2,
-        feesBreakdown: amount * 0.1,
+        principalBreakdown: amount,
+        interestBreakdown: totalInterest,
+        feesBreakdown: 0,
       });
     }
 
@@ -134,7 +136,12 @@ const getUsers = async (req, res, next) => {
       const payments = userObj.payments || [];
       const loanCount = loans.length;
       const totalLoanAmount = loans.reduce((sum, loan) => sum + Number(loan.principal || 0), 0);
-      const outstandingAmount = loans.reduce((sum, loan) => sum + Number(loan.outstanding || 0), 0);
+      const outstandingAmount = loans.reduce((sum, loan) => {
+        const expectedTotalAmount = parseFloat(loan.nextDueAmount) * loan.termMonths;
+        const loanPayments = payments.filter(p => p.loanId === loan.id && p.status === 'Paid');
+        const totalPaid = loanPayments.reduce((s, p) => s + parseFloat(p.amount), 0);
+        return sum + Math.max(0, expectedTotalAmount - totalPaid);
+      }, 0);
       const dueDate = loans.length > 0 && loans[0].nextDueDate ? new Date(loans[0].nextDueDate).toISOString().split('T')[0] : null;
       
       // format kycStatus to match frontend expected format e.g. "verified" -> "Verified"
@@ -155,14 +162,22 @@ const getUsers = async (req, res, next) => {
         outstandingAmount,
         plainPassword: userObj.plainPassword || 'password123', // Default for old users we'll reset
         createdDate: new Date(userObj.createdAt).toISOString().split('T')[0],
-        loans: loans.map(l => ({
-          loanId: l.loanReference,
-          applicationDate: new Date(l.createdAt).toISOString().split('T')[0],
-          loanType: l.type,
-          loanAmount: l.principal,
-          outstanding: l.outstanding,
-          status: l.status || 'Active' // Default to Active if status not present
-        })),
+        loans: loans.map(l => {
+          const expectedTotalAmount = parseFloat(l.nextDueAmount) * l.termMonths;
+          const loanPayments = payments.filter(p => p.loanId === l.id && p.status === 'Paid');
+          const totalPaid = loanPayments.reduce((s, p) => s + parseFloat(p.amount), 0);
+          const trueOutstanding = Math.max(0, expectedTotalAmount - totalPaid);
+
+          return {
+            loanId: l.loanReference,
+            applicationDate: new Date(l.createdAt).toISOString().split('T')[0],
+            loanType: l.type,
+            loanAmount: l.principal,
+            interestRate: l.interestRate,
+            outstanding: trueOutstanding,
+            status: l.status || 'Active' // Default to Active if status not present
+          };
+        }),
         transactions: payments.map(p => {
           const loanForTx = loans.find(l => l.id === p.loanId);
           const expectedEmi = loanForTx ? parseFloat(loanForTx.nextDueAmount) : 0;
@@ -186,8 +201,8 @@ const getUsers = async (req, res, next) => {
             status: p.status === 'Paid' ? 'Success' : 'Failed'
           };
         }).sort((a, b) => new Date(b.date) - new Date(a.date)), // Sort by date descending
-        address: '', // Mocking address as empty
-        notes: '', // Mocking notes as empty
+        address: userObj.address || '',
+        notes: userObj.notes || '',
       };
     });
 
@@ -213,6 +228,7 @@ const updateUser = async (req, res, next) => {
       totalLoanAmount,
       dueDate,
       monthlyEmi,
+      interestRate,
       address, 
       notes 
     } = req.body;
@@ -225,6 +241,8 @@ const updateUser = async (req, res, next) => {
     if (customerName) user.name = customerName;
     if (phone) user.phone = phone;
     if (email) user.email = email.toLowerCase();
+    if (address !== undefined) user.address = address;
+    if (notes !== undefined) user.notes = notes;
     
     const loan = await Loan.findOne({ 
       where: { userId: user.id },
@@ -238,7 +256,7 @@ const updateUser = async (req, res, next) => {
         const amt = parseFloat(totalLoanAmount);
         if (!isNaN(amt) && amt !== loan.principal) {
           loan.principal = amt;
-          loan.outstanding = amt;
+          loan.outstanding = loan.nextDueAmount * loan.termMonths;
           amountChanged = true;
         }
       }
@@ -255,26 +273,75 @@ const updateUser = async (req, res, next) => {
         loan.nextDueDate = dueDate;
       }
 
-      // Recalculate EMI if amount, term changed, or manual EMI provided
+      if (interestRate !== undefined) {
+        const rate = parseFloat(interestRate);
+        if (!isNaN(rate) && rate !== loan.interestRate) {
+          loan.interestRate = rate;
+          amountChanged = true;
+        }
+      }
+
+      // Recalculate EMI using flat rate simple interest if amount, term changed, interestRate changed, or manual EMI provided
       if (amountChanged || monthlyEmi !== undefined) {
-        const interestRate = 10.5;
-        const monthlyRate = interestRate / 100 / 12;
-        const calculatedEmi = loan.principal > 0 && loan.termMonths > 0 
-          ? Math.round((loan.principal * monthlyRate * Math.pow(1 + monthlyRate, loan.termMonths)) / (Math.pow(1 + monthlyRate, loan.termMonths) - 1))
-          : 0;
+        const appliedInterestRate = loan.interestRate || 10.5;
+        const termInYears = loan.termMonths / 12;
+        const totalInterest = loan.principal * (appliedInterestRate / 100) * termInYears;
+        const calculatedEmi = loan.termMonths > 0 ? Math.round((loan.principal + totalInterest) / loan.termMonths) : 0;
           
         loan.nextDueAmount = monthlyEmi && parseFloat(monthlyEmi) > 0 ? parseFloat(monthlyEmi) : calculatedEmi;
+        loan.outstanding = loan.nextDueAmount * loan.termMonths;
+        
+        if (amountChanged) {
+          loan.principalBreakdown = loan.principal;
+          loan.interestBreakdown = totalInterest;
+          loan.feesBreakdown = 0;
+        }
       }
       
       await loan.save();
+    } else if (totalLoanAmount && parseFloat(totalLoanAmount) > 0) {
+      // User has no loan, but admin is assigning one during update (e.g. approving a new user)
+      const amount = parseFloat(totalLoanAmount);
+      const term = parseInt(termMonths) || 36;
+      const loanStartDate = new Date();
+      let nextDueDate = new Date();
+      if (dueDate) {
+        nextDueDate = new Date(dueDate);
+      } else {
+        nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+      }
+
+      const appliedInterestRate = interestRate && parseFloat(interestRate) > 0 ? parseFloat(interestRate) : 10.5;
+      const termInYears = term / 12;
+      const totalInterest = amount * (appliedInterestRate / 100) * termInYears;
+      const calculatedEmi = term > 0 ? Math.round((amount + totalInterest) / term) : 0;
+      const emi = monthlyEmi && parseFloat(monthlyEmi) > 0 ? parseFloat(monthlyEmi) : calculatedEmi;
+
+      await Loan.create({
+        loanReference: `LN-${Math.floor(10000 + Math.random() * 90000)}`,
+        userId: user.id,
+        type: loanType || 'Personal Loan',
+        principal: amount,
+        outstanding: emi * term,
+        paid: 0,
+        interestRate: appliedInterestRate,
+        termMonths: term,
+        paidEmis: 0,
+        nextDueAmount: emi,
+        nextDueDate: nextDueDate,
+        paymentMethod: 'Manual Pay',
+        principalBreakdown: amount,
+        interestBreakdown: totalInterest,
+        feesBreakdown: 0,
+      });
     }
     
     if (status) {
+      if (status === 'Active' && user.status === 'Pending') {
+        user.customerId = `NV-${Math.floor(10000000 + Math.random() * 90000000)}`;
+      }
       user.status = status;
     }
-    
-    // address and notes are not currently fields in the User model in this demo.
-    // In a real app we would update them. For demo, we just save the existing model fields.
     
     await user.save();
 

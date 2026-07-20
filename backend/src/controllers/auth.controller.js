@@ -24,6 +24,28 @@ const login = async (req, res, next) => {
   }
 };
 
+const signup = async (req, res, next) => {
+  try {
+    const data = await authService.signup(req.body);
+
+    res.cookie('refreshToken', data.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(201).json({
+      success: true,
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      user: data.user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const refresh = async (req, res, next) => {
   try {
     const refreshToken = req.body.refreshToken || req.cookies?.refreshToken;
@@ -87,6 +109,7 @@ const logout = async (req, res, next) => {
 
 module.exports = {
   login,
+  signup,
   refresh,
   forgotPassword,
   resetPassword,

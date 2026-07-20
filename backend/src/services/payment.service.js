@@ -38,7 +38,7 @@ const getPayments = async (userId, status, limit = 10, offset = 0) => {
 const getCalendarEvents = async (userId, year, month) => {
   const loan = await Loan.findOne({ where: { userId } });
   if (!loan) {
-    throw new NotFoundError('No active loans for user');
+    return { paidDates: [], dueDates: [] };
   }
 
   // Get all paid dates

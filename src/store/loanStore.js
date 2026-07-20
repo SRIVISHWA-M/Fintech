@@ -1,26 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const DEFAULT_LOAN = {
-  id: 'LN-48211',
-  type: 'Personal Loan',
-  principal: 48000,
-  outstanding: 22320,
-  paid: 25680,
-  interestRate: 8.4,
-  termMonths: 36,
-  paidEmis: 9,
-  nextDueAmount: 1240,
-  nextDueDate: '2026-06-05',
-  paymentMethod: 'HDFC Bank ••4421',
-  breakdown: {
-    principal: 980,
-    interest: 210,
-    fees: 50,
-  },
-};
-
 let listeners = [];
-let state = DEFAULT_LOAN;
+let state = null;
 
 AsyncStorage.getItem('nova_loan').then((json) => {
   if (json) {
@@ -72,19 +53,23 @@ export const loanStore = {
     notify();
   },
   resetStore() {
-    state = DEFAULT_LOAN;
-    AsyncStorage.setItem('nova_loan', JSON.stringify(DEFAULT_LOAN));
+    state = null;
+    AsyncStorage.removeItem('nova_loan');
     notify();
   },
   // Populate store fully from backend loan object
   setLoan(loanData) {
-    state = {
-      ...state,
-      ...loanData,
-      // Map backend field names to store field names
-      paymentMethod: loanData.paymentMethod || state.paymentMethod,
-    };
-    AsyncStorage.setItem('nova_loan', JSON.stringify(state));
+    if (!loanData) {
+      state = null;
+      AsyncStorage.removeItem('nova_loan');
+    } else {
+      state = {
+        ...(state || {}),
+        ...loanData,
+        paymentMethod: loanData.paymentMethod || (state ? state.paymentMethod : 'HDFC Bank ••4421'),
+      };
+      AsyncStorage.setItem('nova_loan', JSON.stringify(state));
+    }
     notify();
   },
   // Partial update after a payment (outstanding, paid, paidEmis, nextDueDate)

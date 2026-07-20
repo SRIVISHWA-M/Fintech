@@ -7,7 +7,7 @@ const getActiveLoanByUserId = async (userId) => {
   });
 
   if (!loan) {
-    throw new NotFoundError('No active loans found for this user');
+    return null;
   }
 
   // Dynamically calculate paid amounts and EMIs from the Payment table
@@ -17,7 +17,8 @@ const getActiveLoanByUserId = async (userId) => {
 
   const totalPaid = payments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
   const calculatedPaidEmis = payments.length;
-  const calculatedOutstanding = Math.max(0, parseFloat(loan.principal) - totalPaid);
+  const expectedTotalAmount = parseFloat(loan.nextDueAmount) * loan.termMonths;
+  const calculatedOutstanding = Math.max(0, expectedTotalAmount - totalPaid);
 
   // Calculate dynamic next due date based on paid EMIs
   const baseDate = new Date();

@@ -51,7 +51,7 @@ const DropdownField = ({ label, value, options, onChange }) => {
   );
 };
 
-const FILTER_TABS = ['All', 'Active', 'Paused', 'Suspended'];
+const FILTER_TABS = ['All', 'Active', 'Pending', 'Paused', 'Suspended', 'Rejected'];
 
 const getStatusVariant = (status) => {
   const s = (status || '').toLowerCase();
@@ -130,7 +130,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
   // Form State (used for Create & Edit)
   const [formData, setFormData] = useState({
     customerName: '', phone: '', email: '', loanType: 'Personal Loan - Salaried', status: 'Active',
-    loanCount: '0', totalLoanAmount: '0', termMonths: '36', startDate: new Date().toISOString().split('T')[0], address: '', notes: ''
+    loanCount: '0', totalLoanAmount: '0', termMonths: '36', interestRate: '10.5', startDate: new Date().toISOString().split('T')[0], address: '', notes: ''
   });
 
   // Filter Data
@@ -180,6 +180,36 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
     }
   };
 
+  const handleApprove = async (customer) => {
+    try {
+      const response = await apiRequest(`/admin/users/${customer.id}`, {
+        method: 'PUT',
+        body: { status: 'Active' }
+      });
+      if (response.success) {
+        setCustomers(prev => prev.map(c => c.id === customer.id ? { ...c, status: 'Active', id: response.data.id } : c));
+        showSuccessToast("USER APPROVED", `User "${customer.customerName}" was approved.`);
+      }
+    } catch (error) {
+      alert(error.message || 'Failed to approve user');
+    }
+  };
+
+  const handleReject = async (customer) => {
+    try {
+      const response = await apiRequest(`/admin/users/${customer.id}`, {
+        method: 'PUT',
+        body: { status: 'Rejected' }
+      });
+      if (response.success) {
+        setCustomers(prev => prev.map(c => c.id === customer.id ? { ...c, status: 'Rejected' } : c));
+        showSuccessToast("USER REJECTED", `User "${customer.customerName}" was rejected.`);
+      }
+    } catch (error) {
+      alert(error.message || 'Failed to reject user');
+    }
+  };
+
   const openDeleteModal = (customer) => {
     setSelectedCustomer(customer);
     setDeleteModalOpen(true);
@@ -209,7 +239,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
   const openCreateModal = () => {
     setFormData({
       customerName: '', phone: '', email: '', loanType: 'Personal Loan - Salaried', status: 'Active',
-      loanCount: '0', totalLoanAmount: '0', termMonths: '36', startDate: new Date().toISOString().split('T')[0], dueDate: '', monthlyEmi: '', address: '', notes: ''
+      loanCount: '0', totalLoanAmount: '0', termMonths: '36', interestRate: '10.5', startDate: new Date().toISOString().split('T')[0], dueDate: '', monthlyEmi: '', address: '', notes: ''
     });
     setCreateModalOpen(true);
   };
@@ -225,6 +255,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
       loanCount: String(customer.loanCount),
       totalLoanAmount: String(customer.totalLoanAmount),
       termMonths: (customer.loans && customer.loans.length > 0) ? String(customer.loans[0].termMonths || '36') : '36',
+      interestRate: (customer.loans && customer.loans.length > 0) ? String(customer.loans[0].interestRate || '10.5') : '10.5',
       startDate: (customer.loans && customer.loans.length > 0) ? customer.loans[0].applicationDate : new Date().toISOString().split('T')[0],
       dueDate: customer.dueDate || '',
       monthlyEmi: '', // Monthly EMI is not passed back, so we leave it empty unless overriding
@@ -384,22 +415,35 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
       width: 220,
       render: (_, row) => (
         <View style={colStyles.actions}>
-          <TouchableOpacity style={colStyles.btnAction} onPress={() => openViewModal(row)}>
-            <Text style={colStyles.btnActionText}>View</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={colStyles.btnAction} onPress={() => openEditModal(row)}>
-            <Text style={colStyles.btnActionText}>Edit</Text>
-          </TouchableOpacity>
-          {row.status === 'Active' ? (
-             <TouchableOpacity style={colStyles.btnActionPause} onPress={() => handlePause(row)}>
-               <Text style={colStyles.btnActionTextPause}>Pause</Text>
-             </TouchableOpacity>
-          ) : row.status === 'Paused' ? (
-             <TouchableOpacity style={colStyles.btnActionResume} onPress={() => handleResume(row)}>
-               <Text style={colStyles.btnActionTextResume}>Resume</Text>
-             </TouchableOpacity>
+          {row.status === 'Pending' ? (
+            <>
+              <TouchableOpacity style={colStyles.btnActionApprove} onPress={() => handleApprove(row)}>
+                <Text style={colStyles.btnActionTextApprove}>Approve</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={colStyles.btnActionReject} onPress={() => handleReject(row)}>
+                <Text style={colStyles.btnActionTextReject}>Reject</Text>
+              </TouchableOpacity>
+            </>
           ) : (
-             <View style={{ width: 58 }} />
+            <>
+              <TouchableOpacity style={colStyles.btnAction} onPress={() => openViewModal(row)}>
+                <Text style={colStyles.btnActionText}>View</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={colStyles.btnAction} onPress={() => openEditModal(row)}>
+                <Text style={colStyles.btnActionText}>Edit</Text>
+              </TouchableOpacity>
+              {row.status === 'Active' ? (
+                 <TouchableOpacity style={colStyles.btnActionPause} onPress={() => handlePause(row)}>
+                   <Text style={colStyles.btnActionTextPause}>Pause</Text>
+                 </TouchableOpacity>
+              ) : row.status === 'Paused' ? (
+                 <TouchableOpacity style={colStyles.btnActionResume} onPress={() => handleResume(row)}>
+                   <Text style={colStyles.btnActionTextResume}>Resume</Text>
+                 </TouchableOpacity>
+              ) : (
+                 <View style={{ width: 58 }} />
+              )}
+            </>
           )}
           <TouchableOpacity style={colStyles.btnIcon} onPress={() => openDeleteModal(row)}>
             <Ionicons name="trash-outline" size={14} color={adminColors.danger} />
@@ -462,6 +506,10 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
               <View style={[styles.inputGroup, { flex: 1 }]}>
                 <Text style={styles.inputLabel}>Term (Months)</Text>
                 <TextInput style={styles.input} keyboardType="numeric" value={formData.termMonths} onChangeText={t => setFormData({...formData, termMonths: t})} placeholder="36" placeholderTextColor={adminColors.fgSub} />
+              </View>
+              <View style={[styles.inputGroup, { flex: 1 }]}>
+                <Text style={styles.inputLabel}>Interest Rate (%)</Text>
+                <TextInput style={styles.input} keyboardType="numeric" value={formData.interestRate} onChangeText={t => setFormData({...formData, interestRate: t})} placeholder="10.5" placeholderTextColor={adminColors.fgSub} />
               </View>
               <View style={[styles.inputGroup, { flex: 1 }]}>
                 <Text style={styles.inputLabel}>Loan Start Date</Text>
@@ -687,11 +735,15 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
                     <Text style={styles.summaryVal}>₹{(selectedCustomer.totalLoanAmount || 0).toLocaleString()}</Text>
                   </View>
                   <View style={styles.summaryBox}>
-                    <Text style={styles.summaryLabel}>Outstanding Amount</Text>
+                    <Text style={styles.summaryLabel}>Interest Rate</Text>
+                    <Text style={styles.summaryVal}>{selectedCustomer.loans && selectedCustomer.loans.length > 0 ? selectedCustomer.loans[0].interestRate + '%' : 'N/A'}</Text>
+                  </View>
+                  <View style={styles.summaryBox}>
+                    <Text style={styles.summaryLabel}>Outstanding</Text>
                     <Text style={styles.summaryVal}>₹{(selectedCustomer.outstandingAmount || 0).toLocaleString()}</Text>
                   </View>
                   <View style={styles.summaryBox}>
-                    <Text style={styles.summaryLabel}>Closed Loans</Text>
+                    <Text style={styles.summaryLabel}>Closed</Text>
                     <Text style={styles.summaryVal}>{selectedCustomer.loans ? selectedCustomer.loans.filter(l => l.status === 'Closed').length : 0}</Text>
                   </View>
                 </View>
@@ -842,6 +894,26 @@ const colStyles = StyleSheet.create({
     alignItems: 'center',
   },
   btnActionTextResume: { fontSize: 10, fontWeight: '700', color: adminColors.success },
+  btnActionApprove: {
+    backgroundColor: adminColors.successDim,
+    borderWidth: 1,
+    borderColor: adminColors.success,
+    borderRadius: adminColors.r6,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+  },
+  btnActionTextApprove: { fontSize: 10, fontWeight: '700', color: adminColors.success },
+  btnActionReject: {
+    backgroundColor: adminColors.dangerDim,
+    borderWidth: 1,
+    borderColor: adminColors.danger,
+    borderRadius: adminColors.r6,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+  },
+  btnActionTextReject: { fontSize: 10, fontWeight: '700', color: adminColors.danger },
   btnIcon: {
     width: 26,
     height: 26,

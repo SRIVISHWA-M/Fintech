@@ -46,8 +46,16 @@ const User = sequelize.define('User', {
     allowNull: true,
   },
   status: {
-    type: DataTypes.ENUM('Active', 'Paused', 'Suspended'),
+    type: DataTypes.ENUM('Active', 'Paused', 'Suspended', 'Pending', 'Rejected'),
     defaultValue: 'Active',
+  },
+  address: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  notes: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   },
 }, {
   hooks: {
