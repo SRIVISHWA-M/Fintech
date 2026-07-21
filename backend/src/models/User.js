@@ -49,6 +49,10 @@ const User = sequelize.define('User', {
     type: DataTypes.ENUM('Active', 'Paused', 'Suspended', 'Pending', 'Rejected'),
     defaultValue: 'Active',
   },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: 'user',
+  },
   address: {
     type: DataTypes.TEXT,
     allowNull: true,

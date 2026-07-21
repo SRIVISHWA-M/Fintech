@@ -6,7 +6,7 @@ const { UnauthorizedError, NotFoundError, BadRequestError } = require('../utils/
 const SUPER_ADMIN = {
   id: 'super-admin',
   name: 'Super Admin',
-  email: process.env.SUPERADMIN_EMAIL || 'superadmin@novafinance.com',
+  email: process.env.SUPERADMIN_EMAIL || 'superadmin@hidelfinance.com',
   password: process.env.SUPERADMIN_PASSWORD || 'superadmin123',
   role: 'superadmin',
 };
@@ -84,7 +84,7 @@ const login = async (email, password) => {
       name: user.name,
       customerId: user.customerId,
       email: user.email,
-      role: 'user',
+      role: user.role ? user.role.toLowerCase() : 'user',
       phoneMasked: user.phone.replace(/(\+\d{2} \d{2})\d{3} \d{2}(\d{3})/, '$1••• ••$2'),
       kycStatus: user.kycStatus,
       creditScore: user.creditScore,
@@ -138,7 +138,7 @@ const signup = async (userData) => {
       name: user.name,
       customerId: user.customerId,
       email: user.email,
-      role: 'user',
+      role: user.role ? user.role.toLowerCase() : 'user',
       phoneMasked: user.phone.replace(/(\+\d{2} \d{2})\d{3} \d{2}(\d{3})/, '$1••• ••$2'),
       kycStatus: user.kycStatus,
       creditScore: user.creditScore,

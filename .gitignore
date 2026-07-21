@@ -7,12 +7,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node modules & builds
 node_modules
+**/node_modules
 dist
 dist-ssr
-*.local
+.expo
+**/.expo
 
-# Editor directories and files
+# Environment & database
+.env
+*.env
+*.sqlite
+**/database.sqlite
+
+# Editor directories and OS files
 .vscode/*
 !.vscode/extensions.json
 .idea

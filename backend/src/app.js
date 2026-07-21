@@ -14,9 +14,22 @@ const app = express();
 // Disable ETags to prevent 304 Not Modified caching responses
 app.disable('etag');
 
-// CORS config
+// CORS config - Support configured FRONTEND_URL and local dev origins
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:8081',
+  'http://localhost:19006',
+  'http://localhost:3000'
+].filter(Boolean);
+
 app.use(cors({
-  origin: '*', // Allow all origins for testing/development
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman) or matching allowedOrigins
+    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   credentials: true,
 }));
 
