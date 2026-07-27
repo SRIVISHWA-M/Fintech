@@ -28,18 +28,9 @@ const signup = async (req, res, next) => {
   try {
     const data = await authService.signup(req.body);
 
-    res.cookie('refreshToken', data.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
     res.status(201).json({
       success: true,
-      accessToken: data.accessToken,
-      refreshToken: data.refreshToken,
-      user: data.user,
+      message: data.message,
     });
   } catch (error) {
     next(error);
@@ -107,6 +98,19 @@ const logout = async (req, res, next) => {
   }
 };
 
+const verifyEmail = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+    await authService.verifyEmail(token);
+    res.status(200).json({
+      success: true,
+      message: 'Email verified successfully. You can now log in.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   login,
   signup,
@@ -114,4 +118,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   logout,
+  verifyEmail,
 };

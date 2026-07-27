@@ -14,8 +14,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { useEventListener } from 'expo';
-import { useVideoPlayer, VideoView } from 'expo-video';
 import { authStore } from '../../../store/authStore';
 import { useTheme } from '../../../theme/useTheme';
 import { authService } from '../../../services/authService';
@@ -42,16 +40,14 @@ const SECURITY_ITEMS = [
   { icon: 'lock-closed-outline', text: 'Encrypted DB' },
 ];
 
-const videoSource = 'https://res.cloudinary.com/wowukaao/video/upload/v1784646221/Frame_need_exact_logo_animate_202607212031_yqnfjh.mp4';
-
 const LoginPage = () => {
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const { width } = useWindowDimensions();
   const isDesktop = width >= 900;
 
-  const [email, setEmail] = useState('aarav.shah@example.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
@@ -67,18 +63,6 @@ const LoginPage = () => {
   const [phone, setPhone] = useState('');
   const [nameFocused, setNameFocused] = useState(false);
   const [phoneFocused, setPhoneFocused] = useState(false);
-
-  const player = useVideoPlayer(videoSource, player => {
-    player.loop = true;
-    player.muted = true;
-    player.play();
-  });
-
-  useEventListener(player, 'statusChange', ({ status }) => {
-    if (status === 'readyToPlay' && !player.playing) {
-      player.play();
-    }
-  });
 
   const handleLogin = async () => {
     setLoading(true);
@@ -118,7 +102,11 @@ const LoginPage = () => {
     }
     setLoading(true);
     try {
-      await authService.signup(name, email, phone, password);
+      const res = await authService.signup(name, email, phone, password);
+      Alert.alert('Success', res.message || 'Signup successful. Please check your email to verify your account.');
+      setMode('login');
+      setEmail('');
+      setPassword('');
     } catch (error) {
       Alert.alert('Signup Failed', error.message || 'An error occurred during registration.');
     } finally {
@@ -169,16 +157,6 @@ const LoginPage = () => {
 
   return (
     <View style={styles.container}>
-      <VideoView
-        style={StyleSheet.absoluteFillObject}
-        player={player}
-        allowsFullscreen={false}
-        allowsPictureInPicture={false}
-        showsPlaybackControls={false}
-        nativeControls={false}
-        contentFit="cover"
-      />
-      <View style={styles.overlay} />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -190,10 +168,10 @@ const LoginPage = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.shell}>
-            <BlurView intensity={45} tint="dark" style={styles.formCard}>
+            <View style={styles.formCard}>
               
               <View style={styles.logoArea}>
-                <NovaLogo size={42} layout="row" subtitle="Secure Banking" />
+                <NovaLogo size={80} layout="column" subtitle={null} titleColor="#111827" />
               </View>
 
               <Text style={styles.heading}>
@@ -221,6 +199,9 @@ const LoginPage = () => {
                         onChangeText={setEmail}
                         keyboardType="email-address"
                         autoCapitalize="none"
+                        autoComplete="off"
+                        autoCorrect={false}
+                        textContentType="none"
                         placeholderTextColor={colors.mutedForeground}
                         onFocus={() => setEmailFocused(true)}
                         onBlur={() => setEmailFocused(false)}
@@ -242,6 +223,9 @@ const LoginPage = () => {
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry={!showPw}
+                        autoComplete="off"
+                        autoCorrect={false}
+                        textContentType="none"
                         placeholderTextColor={colors.mutedForeground}
                         onFocus={() => setPwFocused(true)}
                         onBlur={() => setPwFocused(false)}
@@ -371,7 +355,7 @@ const LoginPage = () => {
                     {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.signInText}>Send Reset Code</Text>}
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setMode('login')} style={{ alignItems: 'center', marginTop: 10 }}>
-                    <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: '600' }}>Back to Login</Text>
+                    <Text style={{ color: '#64748B', fontSize: 13, fontWeight: '600' }}>Back to Login</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -416,22 +400,13 @@ const LoginPage = () => {
                     {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.signInText}>Confirm New Password</Text>}
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setMode('login')} style={{ alignItems: 'center', marginTop: 10 }}>
-                    <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: '600' }}>Back to Login</Text>
+                    <Text style={{ color: '#64748B', fontSize: 13, fontWeight: '600' }}>Back to Login</Text>
                   </TouchableOpacity>
                 </>
               )}
 
-              {/* Security Badges */}
-              <View style={styles.securityStrip}>
-                {SECURITY_ITEMS.map(({ icon, text }) => (
-                  <View key={text} style={styles.securityItem}>
-                    <Ionicons name={icon} size={12} color={colors.success} style={{ marginRight: 4 }} />
-                    <Text style={styles.securityText}>{text}</Text>
-                  </View>
-                ))}
-              </View>
 
-            </BlurView>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -442,11 +417,7 @@ const LoginPage = () => {
 const getStyles = (colors) => StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: '#000',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Darkens video to make form pop
+    backgroundColor: '#F8FAFC',
   },
   keyboard: { flex: 1 },
   scroll: {
@@ -462,12 +433,17 @@ const getStyles = (colors) => StyleSheet.create({
     maxWidth: 420, // Clean, centered column
   },
   formCard: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 32,
     gap: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-    overflow: 'hidden',
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 2,
   },
   logoArea: { 
     alignItems: 'center', 
@@ -476,14 +452,14 @@ const getStyles = (colors) => StyleSheet.create({
   heading: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#0F172A',
     marginBottom: 4,
     textAlign: 'center',
     letterSpacing: -0.5,
   },
   subheading: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.7)',
+    color: '#64748B',
     marginBottom: 24,
     textAlign: 'center',
     lineHeight: 18,
@@ -497,7 +473,7 @@ const getStyles = (colors) => StyleSheet.create({
     marginBottom: 6,
   },
   label: {
-    color: 'rgba(255,255,255,0.85)',
+    color: '#334155',
     fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
@@ -505,24 +481,24 @@ const getStyles = (colors) => StyleSheet.create({
     marginBottom: 6,
   },
   forgotText: {
-    color: colors.success,
+    color: '#10B981',
     fontSize: 12,
     fontWeight: '600',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darker translucent background for inputs
+    backgroundColor: '#F1F5F9',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: '#E2E8F0',
     borderRadius: 12,
     height: 48,
     paddingHorizontal: 14,
   },
   inputWrapperFocused: {
-    borderColor: colors.success,
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
-    shadowColor: colors.success,
+    borderColor: '#A3E635',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#A3E635',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -533,7 +509,7 @@ const getStyles = (colors) => StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: '#ffffff',
+    color: '#0F172A',
     fontSize: 14,
     height: '100%',
     outlineStyle: 'none', // for web
@@ -542,14 +518,14 @@ const getStyles = (colors) => StyleSheet.create({
     padding: 4,
   },
   signInBtn: {
-    backgroundColor: colors.success,
+    backgroundColor: '#A3E635',
     borderRadius: 12,
     height: 48,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-    shadowColor: colors.success,
+    shadowColor: '#84CC16',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
@@ -567,11 +543,11 @@ const getStyles = (colors) => StyleSheet.create({
     marginTop: 16 
   },
   switchModeText: { 
-    color: 'rgba(255,255,255,0.6)', 
+    color: '#64748B', 
     fontSize: 13 
   },
   switchModeAction: { 
-    color: colors.success, 
+    color: '#10B981', 
     fontSize: 13, 
     fontWeight: '700' 
   },
@@ -583,14 +559,14 @@ const getStyles = (colors) => StyleSheet.create({
     marginTop: 24,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    borderTopColor: '#E2E8F0',
   },
   securityItem: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   securityText: {
-    color: 'rgba(255,255,255,0.5)',
+    color: '#64748B',
     fontSize: 10,
     fontWeight: '600',
     letterSpacing: 0.5,

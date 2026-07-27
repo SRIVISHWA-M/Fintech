@@ -77,14 +77,15 @@ const LoansPage = () => {
     return () => { u1(); u2(); };
   }, []);
 
-  const payAmount =
+  const payAmount = loan ? (
     payType === 'emi' ? loan.nextDueAmount
     : payType === 'full' ? loan.outstanding
-    : parseFloat(customAmount) || 0;
+    : parseFloat(customAmount) || 0
+  ) : 0;
 
   const methodLabel = PAYMENT_METHODS.find((m) => m.id === selectedMethod)?.label || '';
-  const progress = Math.round((loan.paid / loan.principal) * 100);
-  const daysLeft = daysUntil(loan.nextDueDate);
+  const progress = loan ? Math.round((loan.paid / loan.principal) * 100) : 0;
+  const daysLeft = loan ? daysUntil(loan.nextDueDate) : 0;
 
   const handlePayment = async () => {
     if (payAmount <= 0 || payAmount > loan.outstanding) return;
@@ -184,13 +185,29 @@ const LoansPage = () => {
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-        {/* ── Loan Card ────────────────────────────────────────────────── */}
-        <View style={styles.heroCard}>
-          <View style={styles.creditCardVisual}>
+        {!loan ? (
+          <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, paddingVertical: 80, paddingHorizontal: 20 }}>
+            <Ionicons name="folder-open-outline" size={64} color={colors.mutedForeground} style={{ marginBottom: 16 }} />
+            <Text style={{ fontSize: 20, fontWeight: '700', color: colors.foreground, marginBottom: 8 }}>There is no data</Text>
+            <Text style={{ fontSize: 14, color: colors.mutedForeground, textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
+              Loan details and payment options will appear here once your loan is approved and active.
+            </Text>
+            <TouchableOpacity 
+              style={[styles.payBtn, { alignSelf: 'center', paddingHorizontal: 32 }]} 
+              onPress={() => navigation.navigate('Home')}
+            >
+              <Text style={styles.payBtnText}>Explore Loans</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            {/* ── Loan Card ────────────────────────────────────────────────── */}
+            <View style={styles.heroCard}>
+              <View style={styles.creditCardVisual}>
             {/* Metallic Glass Glare Effects */}
             <View style={styles.cardGlare} />
             
-            <Text style={styles.cardBrandTitle}>FinTrust</Text>
+            <Text style={styles.cardBrandTitle}>Hidel</Text>
             
             <View style={styles.cardMidSection}>
               <Text style={styles.outstandingLabel}>Current Balance</Text>
@@ -349,8 +366,10 @@ const LoansPage = () => {
               </>
             )}
           </TouchableOpacity>
-          <Text style={styles.secureNote}>🔒 256-bit SSL encrypted · RBI compliant</Text>
-        </View>
+            <Text style={styles.secureNote}>🔒 256-bit SSL encrypted · RBI compliant</Text>
+          </View>
+          </>
+        )}
 
 
 

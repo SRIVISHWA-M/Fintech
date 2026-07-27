@@ -61,6 +61,18 @@ const User = sequelize.define('User', {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  isVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  verificationToken: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  verificationExpires: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
 }, {
   hooks: {
     beforeCreate: async (user) => {

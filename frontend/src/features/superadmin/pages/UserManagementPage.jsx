@@ -19,15 +19,15 @@ const DropdownField = ({ label, value, options, onChange }) => {
         <Text style={{ color: adminColors.fg }}>{value}</Text>
       </TouchableOpacity>
       {open && (
-        <View style={{ 
+        <View style={{
           position: 'absolute',
           top: 65,
           left: 0,
           right: 0,
-          backgroundColor: adminColors.muted, 
-          borderRadius: 8, 
-          overflow: 'hidden', 
-          borderWidth: 1, 
+          backgroundColor: adminColors.muted,
+          borderRadius: 8,
+          overflow: 'hidden',
+          borderWidth: 1,
           borderColor: adminColors.border,
           zIndex: 1000,
           elevation: 5,
@@ -37,8 +37,8 @@ const DropdownField = ({ label, value, options, onChange }) => {
           shadowRadius: 6,
         }}>
           {options.map(opt => (
-            <TouchableOpacity 
-              key={opt} 
+            <TouchableOpacity
+              key={opt}
               style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: adminColors.border, backgroundColor: adminColors.card }}
               onPress={() => { onChange(opt); setOpen(false); }}
             >
@@ -78,7 +78,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
   const [customers, setCustomers] = useState(userManagementCustomers);
   const [activeFilter, setActiveFilter] = useState('All');
   const [penaltyCharge, setPenaltyCharge] = useState('0');
-  
+
   useEffect(() => {
     fetchUsers();
     fetchSettings();
@@ -135,9 +135,9 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
 
   // Filter Data
   const filteredData = customers.filter((row) => {
-    const matchSearch = !searchQuery || 
+    const matchSearch = !searchQuery ||
       row.id.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
     let matchFilter = activeFilter === 'All';
     if (activeFilter === 'Active') matchFilter = row.status === 'Active';
     if (activeFilter === 'Paused') matchFilter = row.status === 'Paused';
@@ -284,7 +284,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
 
         if (response.success) {
           const { user, credentials, loan } = response.data;
-          
+
           const newCustomer = {
             id: user.customerId,
             ...formData,
@@ -297,7 +297,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
           setCustomers(prev => [newCustomer, ...prev]);
           setCreateModalOpen(false);
           showSuccessToast("USER CREATED", `User "${user.name}" created successfully.`);
-          
+
           setNewCredentials({ customerId: user.customerId, password: credentials.password });
           setCredentialsModalOpen(true);
         }
@@ -318,7 +318,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
         });
 
         if (response.success) {
-          setCustomers(prev => prev.map(c => 
+          setCustomers(prev => prev.map(c =>
             c.id === selectedCustomer.id ? {
               ...c,
               ...formData,
@@ -433,15 +433,15 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
                 <Text style={colStyles.btnActionText}>Edit</Text>
               </TouchableOpacity>
               {row.status === 'Active' ? (
-                 <TouchableOpacity style={colStyles.btnActionPause} onPress={() => handlePause(row)}>
-                   <Text style={colStyles.btnActionTextPause}>Pause</Text>
-                 </TouchableOpacity>
+                <TouchableOpacity style={colStyles.btnActionPause} onPress={() => handlePause(row)}>
+                  <Text style={colStyles.btnActionTextPause}>Pause</Text>
+                </TouchableOpacity>
               ) : row.status === 'Paused' ? (
-                 <TouchableOpacity style={colStyles.btnActionResume} onPress={() => handleResume(row)}>
-                   <Text style={colStyles.btnActionTextResume}>Resume</Text>
-                 </TouchableOpacity>
+                <TouchableOpacity style={colStyles.btnActionResume} onPress={() => handleResume(row)}>
+                  <Text style={colStyles.btnActionTextResume}>Resume</Text>
+                </TouchableOpacity>
               ) : (
-                 <View style={{ width: 58 }} />
+                <View style={{ width: 58 }} />
               )}
             </>
           )}
@@ -464,76 +464,76 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
           <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Customer Name</Text>
-              <TextInput style={styles.input} value={formData.customerName} onChangeText={t => setFormData({...formData, customerName: t})} placeholder="John Doe" placeholderTextColor={adminColors.fgSub} />
+              <TextInput style={styles.input} value={formData.customerName} onChangeText={t => setFormData({ ...formData, customerName: t })} placeholder="John Doe" placeholderTextColor={adminColors.fgSub} />
             </View>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Phone Number</Text>
-              <TextInput style={styles.input} value={formData.phone} onChangeText={t => setFormData({...formData, phone: t})} placeholder="+91 XXXXX XXXXX" placeholderTextColor={adminColors.fgSub} />
+              <TextInput style={styles.input} value={formData.phone} onChangeText={t => setFormData({ ...formData, phone: t })} placeholder="+91 XXXXX XXXXX" placeholderTextColor={adminColors.fgSub} />
             </View>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Email</Text>
-              <TextInput style={styles.input} value={formData.email} onChangeText={t => setFormData({...formData, email: t})} placeholder="email@example.com" placeholderTextColor={adminColors.fgSub} />
+              <TextInput style={styles.input} value={formData.email} onChangeText={t => setFormData({ ...formData, email: t })} placeholder="email@example.com" placeholderTextColor={adminColors.fgSub} />
             </View>
             <View style={{ flexDirection: 'row', gap: 10, zIndex: 10 }}>
-              <DropdownField 
-                label="Loan Type" 
-                value={formData.loanType} 
-                options={['Personal Loan - Salaried', 'Personal Loan', 'Business Loan']} 
-                onChange={(v) => setFormData({...formData, loanType: v})} 
+              <DropdownField
+                label="Loan Type"
+                value={formData.loanType}
+                options={['Personal Loan - Salaried', 'Personal Loan', 'Business Loan']}
+                onChange={(v) => setFormData({ ...formData, loanType: v })}
               />
-              <DropdownField 
-                label="Status" 
-                value={formData.status} 
-                options={['Active', 'Paused', 'Suspended']} 
-                onChange={(v) => setFormData({...formData, status: v})} 
+              <DropdownField
+                label="Status"
+                value={formData.status}
+                options={['Active', 'Paused', 'Suspended']}
+                onChange={(v) => setFormData({ ...formData, status: v })}
               />
             </View>
             <View style={{ flexDirection: 'row', gap: 10, zIndex: 5 }}>
               <View style={[styles.inputGroup, { flex: 1 }]}>
                 <Text style={styles.inputLabel}>Due Date</Text>
                 {Platform.OS === 'web' ? (
-                  <input type="date" value={formData.dueDate || ''} onChange={e => setFormData({...formData, dueDate: e.target.value})} style={{...StyleSheet.flatten(styles.input), outline: 'none', backgroundColor: 'transparent', color: adminColors.fg, border: 'none'}} />
+                  <input type="date" value={formData.dueDate || ''} onChange={e => setFormData({ ...formData, dueDate: e.target.value })} style={{ ...StyleSheet.flatten(styles.input), outline: 'none', backgroundColor: 'transparent', color: adminColors.fg, border: 'none' }} />
                 ) : (
-                  <TextInput style={styles.input} value={formData.dueDate} onChangeText={t => setFormData({...formData, dueDate: t})} placeholder="YYYY-MM-DD" placeholderTextColor={adminColors.fgSub} />
+                  <TextInput style={styles.input} value={formData.dueDate} onChangeText={t => setFormData({ ...formData, dueDate: t })} placeholder="YYYY-MM-DD" placeholderTextColor={adminColors.fgSub} />
                 )}
               </View>
               <View style={[styles.inputGroup, { flex: 1 }]}>
                 <Text style={styles.inputLabel}>Total Loan Amount</Text>
-                <TextInput style={styles.input} keyboardType="numeric" value={formData.totalLoanAmount} onChangeText={t => setFormData({...formData, totalLoanAmount: t})} placeholder="0" placeholderTextColor={adminColors.fgSub} />
+                <TextInput style={styles.input} keyboardType="numeric" value={formData.totalLoanAmount} onChangeText={t => setFormData({ ...formData, totalLoanAmount: t })} placeholder="0" placeholderTextColor={adminColors.fgSub} />
               </View>
             </View>
             <View style={{ flexDirection: 'row', gap: 10, zIndex: 4 }}>
               <View style={[styles.inputGroup, { flex: 1 }]}>
                 <Text style={styles.inputLabel}>Term (Months)</Text>
-                <TextInput style={styles.input} keyboardType="numeric" value={formData.termMonths} onChangeText={t => setFormData({...formData, termMonths: t})} placeholder="36" placeholderTextColor={adminColors.fgSub} />
+                <TextInput style={styles.input} keyboardType="numeric" value={formData.termMonths} onChangeText={t => setFormData({ ...formData, termMonths: t })} placeholder="36" placeholderTextColor={adminColors.fgSub} />
               </View>
               <View style={[styles.inputGroup, { flex: 1 }]}>
                 <Text style={styles.inputLabel}>Interest Rate (%)</Text>
-                <TextInput style={styles.input} keyboardType="numeric" value={formData.interestRate} onChangeText={t => setFormData({...formData, interestRate: t})} placeholder="10.5" placeholderTextColor={adminColors.fgSub} />
+                <TextInput style={styles.input} keyboardType="numeric" value={formData.interestRate} onChangeText={t => setFormData({ ...formData, interestRate: t })} placeholder="10.5" placeholderTextColor={adminColors.fgSub} />
               </View>
               <View style={[styles.inputGroup, { flex: 1 }]}>
                 <Text style={styles.inputLabel}>Loan Start Date</Text>
                 {Platform.OS === 'web' ? (
-                  <input type="date" value={formData.startDate || ''} onChange={e => setFormData({...formData, startDate: e.target.value})} style={{...StyleSheet.flatten(styles.input), outline: 'none', backgroundColor: 'transparent', color: adminColors.fg, border: 'none'}} />
+                  <input type="date" value={formData.startDate || ''} onChange={e => setFormData({ ...formData, startDate: e.target.value })} style={{ ...StyleSheet.flatten(styles.input), outline: 'none', backgroundColor: 'transparent', color: adminColors.fg, border: 'none' }} />
                 ) : (
-                  <TextInput style={styles.input} value={formData.startDate} onChangeText={t => setFormData({...formData, startDate: t})} placeholder="YYYY-MM-DD" placeholderTextColor={adminColors.fgSub} />
+                  <TextInput style={styles.input} value={formData.startDate} onChangeText={t => setFormData({ ...formData, startDate: t })} placeholder="YYYY-MM-DD" placeholderTextColor={adminColors.fgSub} />
                 )}
               </View>
             </View>
             <View style={{ flexDirection: 'row', gap: 10, zIndex: 3 }}>
               <View style={[styles.inputGroup, { flex: 1 }]}>
                 <Text style={styles.inputLabel}>Monthly EMI (₹)</Text>
-                <TextInput style={styles.input} keyboardType="numeric" value={formData.monthlyEmi} onChangeText={t => setFormData({...formData, monthlyEmi: t})} placeholder="Auto-calculated if empty" placeholderTextColor={adminColors.fgSub} />
+                <TextInput style={styles.input} keyboardType="numeric" value={formData.monthlyEmi} onChangeText={t => setFormData({ ...formData, monthlyEmi: t })} placeholder="Auto-calculated if empty" placeholderTextColor={adminColors.fgSub} />
               </View>
               <View style={{ flex: 1 }} />
             </View>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Address</Text>
-              <TextInput style={styles.input} value={formData.address} onChangeText={t => setFormData({...formData, address: t})} placeholder="Address" placeholderTextColor={adminColors.fgSub} />
+              <TextInput style={styles.input} value={formData.address} onChangeText={t => setFormData({ ...formData, address: t })} placeholder="Address" placeholderTextColor={adminColors.fgSub} />
             </View>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Notes</Text>
-              <TextInput style={[styles.input, { height: 60 }]} multiline value={formData.notes} onChangeText={t => setFormData({...formData, notes: t})} placeholder="Any notes" placeholderTextColor={adminColors.fgSub} />
+              <TextInput style={[styles.input, { height: 60 }]} multiline value={formData.notes} onChangeText={t => setFormData({ ...formData, notes: t })} placeholder="Any notes" placeholderTextColor={adminColors.fgSub} />
             </View>
           </ScrollView>
           <View style={styles.modalActions}>
@@ -581,12 +581,12 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 12 }}>
             <View style={{ width: 200 }}>
               <Text style={styles.inputLabel}>Late Due Fee (₹)</Text>
-              <TextInput 
-                style={[styles.input, { height: 38 }]} 
-                keyboardType="numeric" 
-                value={String(penaltyCharge)} 
-                onChangeText={setPenaltyCharge} 
-                placeholderTextColor={adminColors.fgSub} 
+              <TextInput
+                style={[styles.input, { height: 38 }]}
+                keyboardType="numeric"
+                value={String(penaltyCharge)}
+                onChangeText={setPenaltyCharge}
+                placeholderTextColor={adminColors.fgSub}
               />
             </View>
             <TouchableOpacity style={[styles.btnSave, { height: 38, justifyContent: 'center' }]} onPress={handleSavePenalty}>
@@ -684,7 +684,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
 
             {selectedCustomer && (
               <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
-                
+
                 {/* Basic Info */}
                 <Text style={styles.sectionTitle}>Basic Information</Text>
                 <View style={styles.detailGrid}>
@@ -821,7 +821,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
             <Text style={styles.modalText}>
               Please securely share these credentials with the user. The password is encrypted in our database and cannot be recovered if lost.
             </Text>
-            
+
             {newCredentials && (
               <View style={{ backgroundColor: adminColors.muted, padding: 16, borderRadius: adminColors.r8, marginBottom: 20 }}>
                 <View style={{ marginBottom: 12 }}>
@@ -834,7 +834,7 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
                 </View>
               </View>
             )}
-            
+
             <View style={styles.modalActions}>
               <TouchableOpacity style={styles.btnSave} onPress={() => { setCredentialsModalOpen(false); setNewCredentials(null); }}>
                 <Text style={styles.btnSaveText}>Done</Text>
@@ -1008,7 +1008,7 @@ const styles = StyleSheet.create({
     color: adminColors.fgSub,
     marginTop: 4,
   },
-  
+
   // Modals styling
   modalOverlay: {
     flex: 1,
@@ -1096,7 +1096,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: adminColors.accentFg,
   },
-  
+
   // View Details styling
   viewHeader: {
     flexDirection: 'row',

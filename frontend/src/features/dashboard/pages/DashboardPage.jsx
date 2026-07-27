@@ -13,7 +13,7 @@ import { loanService } from '../../../services/loanService';
 import { paymentService } from '../../../services/paymentService';
 
 const fmt = (n) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n);
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(n);
 const fmtDate = (d) =>
   new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 const daysUntil = (d) => Math.ceil((new Date(d) - new Date()) / 86400000);
@@ -104,11 +104,12 @@ const DashboardPage = () => {
     }, [])
   );
 
-  const daysLeft = daysUntil(loan.nextDueDate) || 5;
-  const progress = Math.round((loan.paid / loan.principal) * 100) || 32;
+  const daysLeft = loan ? daysUntil(loan.nextDueDate) : 5;
+  const progress = loan ? Math.round((loan.paid / loan.principal) * 100) : 32;
   const recentPayments = payments.payments.slice(0, 3);
   const userName = user?.name ? user.name : 'Jane Cooper';
   const userFirstName = user?.name ? user.name.split(' ')[0] : 'Jane';
+  const hasActiveLoan = loan && loan.outstanding > 0;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -141,6 +142,22 @@ const DashboardPage = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {!hasActiveLoan ? (
+          <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 80, paddingHorizontal: 20, marginTop: 40 }}>
+            <Ionicons name="folder-open-outline" size={64} color="#9CA3AF" style={{ marginBottom: 16 }} />
+            <Text style={{ fontSize: 20, fontWeight: '700', color: '#111827', marginBottom: 8 }}>There is no data</Text>
+            <Text style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
+              Dashboard data will appear here once your loan is approved and active.
+            </Text>
+            <TouchableOpacity 
+              style={{ backgroundColor: '#A3E635', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 14, alignItems: 'center' }}
+              onPress={() => navigation.navigate('Home')}
+            >
+              <Text style={{ fontSize: 15, fontWeight: '600', color: '#000000' }}>Explore Loans</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
         {/* ── This Month Debts Hero ──────────────────────────────────────── */}
         <View style={styles.debtsHero}>
           <View style={styles.debtsHeaderRow}>
@@ -175,7 +192,7 @@ const DashboardPage = () => {
           </View>
 
           <Text style={styles.debtsAmountVal}>
-            {fmt(loan.outstanding || 12505.58)}
+            {fmt(loan?.outstanding || 12505.58)}
           </Text>
         </View>
 
@@ -184,9 +201,9 @@ const DashboardPage = () => {
           {/* Card Top Row */}
           <View style={styles.cardTopRow}>
             <View>
-              <Text style={styles.cardEmiAmount}>{fmt(loan.nextDueAmount || 450.00)}</Text>
+              <Text style={styles.cardEmiAmount}>{fmt(loan?.nextDueAmount || 450.00)}</Text>
               <Text style={styles.cardEmiLabel}>Next EMI Due</Text>
-              <Text style={styles.cardEmiDate}>{fmtDate(loan.nextDueDate || '2024-05-15')}</Text>
+              <Text style={styles.cardEmiDate}>{fmtDate(loan?.nextDueDate || '2024-05-15')}</Text>
             </View>
 
             <View style={styles.dueBadgeWrap}>
@@ -232,7 +249,7 @@ const DashboardPage = () => {
             <View style={styles.gaugeCenterCol}>
               <Text style={styles.gaugePercentVal}>{progress}%</Text>
               <Text style={styles.gaugePaidSub}>
-                {loan.paidEmis || 2}/{loan.termMonths || 10} Paid
+                {loan?.paidEmis || 2}/{loan?.termMonths || 10} Paid
               </Text>
             </View>
           </View>
@@ -242,7 +259,7 @@ const DashboardPage = () => {
             <View>
               <Text style={styles.cardMaskId}>****8024</Text>
               <Text style={styles.cardBalText}>
-                <Text style={styles.cardBalVal}>{fmt(loan.outstanding || 67870)} </Text>
+                <Text style={styles.cardBalVal}>{fmt(loan?.outstanding || 67870)} </Text>
                 <Text style={styles.cardBalLabel}>Balance</Text>
               </Text>
             </View>
@@ -287,11 +304,12 @@ const DashboardPage = () => {
                 <Text style={styles.activityTitle}>EMI Payment</Text>
                 <Text style={styles.activityDate}>April 29, 2023</Text>
               </View>
-              <Text style={styles.activityAmount}>+$120.00</Text>
+              <Text style={styles.activityAmount}>+₹120.00</Text>
             </View>
           )}
         </View>
-
+        </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

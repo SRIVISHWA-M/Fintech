@@ -8,6 +8,7 @@ import colors from '../theme/colors';
 import { authStore } from '../store/authStore';
 
 import LoginScreen from '../features/auth/pages/LoginPage';
+import VerifyEmailPage from '../features/auth/pages/VerifyEmailPage';
 import VideoIntroPage from '../features/auth/pages/VideoIntroPage';
 import HomePage from '../features/dashboard/pages/HomePage';
 import DashboardScreen from '../features/dashboard/pages/DashboardPage';
@@ -99,6 +100,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
     <View style={styles.tabBarWrapper}>
       <View style={styles.tabContainer}>
         {state.routes.map((route, index) => {
+          if (route.name === 'PersonalLoanDetails') return null;
+
           const { options } = descriptors[route.key];
           const label = options.tabBarLabel !== undefined
             ? options.tabBarLabel
@@ -154,6 +157,7 @@ const MainTabs = () => (
     <Tab.Screen name="Home" component={HomePage} />
     <Tab.Screen name="Payments" component={PaymentsScreen} />
     <Tab.Screen name="Profile" component={ProfileScreen} />
+    <Tab.Screen name="PersonalLoanDetails" component={PersonalLoanDetailsPage} />
   </Tab.Navigator>
 );
 
@@ -166,6 +170,7 @@ const linking = {
         alias: ['intro'],
       },
       Login: 'login',
+      VerifyEmail: 'verify-email',
       SuperAdmin: 'super-admin',
       Main: {
         path: 'user',
@@ -214,7 +219,7 @@ const AppNavigator = () => {
               return;
             }
           } else {
-            if (pathname !== '/login' && pathname !== '/' && pathname !== '/intro') {
+            if (pathname !== '/login' && pathname !== '/' && pathname !== '/intro' && !pathname.startsWith('/verify-email')) {
               window.location.replace('/');
               return;
             }
@@ -245,12 +250,12 @@ const AppNavigator = () => {
         ) : isAuthenticated ? (
           <>
             <Stack.Screen name="Main" component={MainTabs} />
-            <Stack.Screen name="PersonalLoanDetails" component={PersonalLoanDetailsPage} />
           </>
         ) : (
           <>
             <Stack.Screen name="VideoIntro" component={VideoIntroPage} />
             <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="VerifyEmail" component={VerifyEmailPage} />
           </>
         )}
       </Stack.Navigator>

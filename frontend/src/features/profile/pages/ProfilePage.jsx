@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity,
+  View, Text, ScrollView, TouchableOpacity, TextInput, Modal,
   StyleSheet, SafeAreaView, Switch, Platform
 } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { authStore } from '../../../store/authStore';
@@ -14,6 +15,9 @@ const ProfilePage = () => {
   const styles = getStyles(colors);
   const navigation = useNavigation();
   const [auth, setAuth] = useState(authStore.getState());
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
 
   useEffect(() => {
     const u1 = authStore.subscribe(setAuth);
@@ -21,13 +25,24 @@ const ProfilePage = () => {
     return () => { u1(); };
   }, []);
 
+  useEffect(() => {
+    if (auth.user && !isEditingProfile && editName === '') {
+      setEditName(auth.user.name);
+      setEditEmail(auth.user.email);
+    }
+  }, [auth.user, isEditingProfile]);
+
   const user = auth.user || authStore.getState().user || {
     name: 'Alex Chen',
     email: 'alex.chen@example.com',
     creditScore: 780,
   };
 
-  const initials = user && user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'US';
+  // Initialize if not set
+  const displayName = editName || user.name;
+  const displayEmail = editEmail || user.email;
+
+  const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'US';
 
   // Dummy states for the UI toggles
   const [faceId, setFaceId] = useState(true);
@@ -39,6 +54,59 @@ const ProfilePage = () => {
 
   return (
     <SafeAreaView style={styles.safe}>
+      {/* ── Edit Profile Modal ────────────────────────────────────────────── */}
+      <Modal visible={isEditingProfile} animationType="fade" transparent={true} onRequestClose={() => setIsEditingProfile(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity onPress={() => {
+                // Revert changes on cancel
+                setEditName(user.name);
+                setEditEmail(user.email);
+                setIsEditingProfile(false);
+              }}>
+                <Text style={styles.modalCancelBtn}>Cancel</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity onPress={() => setIsEditingProfile(false)}>
+                <Text style={styles.modalSaveBtn}>Save</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.modalBody}>
+              <View style={styles.modalAvatarWrap}>
+                 <View style={styles.modalAvatar}>
+                   <Text style={styles.modalAvatarText}>{initials}</Text>
+                 </View>
+              </View>
+
+              <View style={styles.modalForm}>
+                <View style={styles.modalInputGroup}>
+                  <Text style={styles.modalLabel}>Name</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={editName}
+                    onChangeText={setEditName}
+                    autoCapitalize="words"
+                    autoCorrect={false}
+                  />
+                </View>
+                <View style={styles.modalInputGroup}>
+                  <Text style={styles.modalLabel}>Email</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={editEmail}
+                    onChangeText={setEditEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* ── Custom Header ────────────────────────────────────────────── */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
@@ -64,16 +132,20 @@ const ProfilePage = () => {
               <View style={styles.onlineDot} />
             </View>
             <View style={styles.accountInfo}>
-              <Text style={styles.userName}>{user.name}</Text>
-              <Text style={styles.userEmail}>{user.email}</Text>
+              <Text style={styles.userName}>{displayName}</Text>
+              <Text style={styles.userEmail}>{displayEmail}</Text>
             </View>
-            <TouchableOpacity style={styles.editBtn}>
+            <TouchableOpacity 
+              style={styles.editBtn}
+              onPress={() => setIsEditingProfile(true)}
+              activeOpacity={0.7}
+            >
               <Ionicons name="pencil" size={16} color={colors.mutedForeground} />
             </TouchableOpacity>
           </View>
 
           {/* Loan Limit & Eligibility Vibrant Card */}
-          <View style={styles.loanLimitCard}>
+          <View style={[styles.loanLimitCard, { overflow: 'hidden' }]}>
             <View style={styles.loanLimitHeader}>
               <Text style={styles.loanLimitTitle}>Loan Limit & Eligibility</Text>
               <Ionicons name="information-circle-outline" size={18} color={colors.successForeground} />
@@ -95,18 +167,25 @@ const ProfilePage = () => {
             <View style={styles.loanLimitFooter}>
               <View>
                 <Text style={styles.loanLimitMaxLabel}>Max Loan</Text>
-                <Text style={styles.loanLimitMaxValue}>$50,000</Text>
+                <Text style={styles.loanLimitMaxValue}>₹50,000</Text>
               </View>
               <TouchableOpacity style={styles.viewDetailsBtn}>
                 <Text style={styles.viewDetailsText}>View Details</Text>
               </TouchableOpacity>
             </View>
+
+            <BlurView intensity={25} tint="light" style={styles.comingSoonOverlay}>
+               <View style={styles.comingSoonBadge}>
+                 <Ionicons name="time-outline" size={16} color="#111827" />
+                 <Text style={styles.comingSoonText}>Coming Soon</Text>
+               </View>
+            </BlurView>
           </View>
         </View>
 
         {/* ── Security & Privacy Section ─────────────────────────────────── */}
         <Text style={styles.sectionHeader}>Security & Privacy</Text>
-        <View style={styles.card}>
+        <View style={[styles.card, { overflow: 'hidden' }]}>
           <View style={styles.row}>
             <View style={styles.rowLeft}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(59, 130, 246, 0.1)' }]}>
@@ -153,11 +232,18 @@ const ProfilePage = () => {
               thumbColor="#FFFFFF"
             />
           </View>
+
+          <BlurView intensity={25} tint="light" style={styles.comingSoonOverlay}>
+             <View style={styles.comingSoonBadge}>
+               <Ionicons name="time-outline" size={16} color="#111827" />
+               <Text style={styles.comingSoonText}>Coming Soon</Text>
+             </View>
+          </BlurView>
         </View>
 
         {/* ── Payment Methods Section ────────────────────────────────────── */}
         <Text style={styles.sectionHeader}>Payment Methods</Text>
-        <View style={styles.card}>
+        <View style={[styles.card, { overflow: 'hidden' }]}>
           <View style={styles.row}>
             <View style={styles.rowLeft}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
@@ -183,11 +269,18 @@ const ProfilePage = () => {
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.mutedForeground} />
           </TouchableOpacity>
+
+          <BlurView intensity={25} tint="light" style={styles.comingSoonOverlay}>
+             <View style={styles.comingSoonBadge}>
+               <Ionicons name="time-outline" size={16} color="#111827" />
+               <Text style={styles.comingSoonText}>Coming Soon</Text>
+             </View>
+          </BlurView>
         </View>
 
         {/* ── Communication Section ──────────────────────────────────────── */}
         <Text style={styles.sectionHeader}>Communication</Text>
-        <View style={styles.card}>
+        <View style={[styles.card, { overflow: 'hidden' }]}>
           <View style={styles.row}>
             <View style={styles.rowLeft}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(236, 72, 153, 0.1)' }]}>
@@ -234,6 +327,13 @@ const ProfilePage = () => {
               thumbColor="#FFFFFF"
             />
           </View>
+
+          <BlurView intensity={25} tint="light" style={styles.comingSoonOverlay}>
+             <View style={styles.comingSoonBadge}>
+               <Ionicons name="time-outline" size={16} color="#111827" />
+               <Text style={styles.comingSoonText}>Coming Soon</Text>
+             </View>
+          </BlurView>
         </View>
 
         {/* ── Sign Out ─────────────────────────────────────────────────── */}
@@ -337,14 +437,36 @@ const getStyles = (colors) => StyleSheet.create({
     backgroundColor: colors.limeBtn || '#A3E635',
     borderWidth: 2.5, borderColor: '#FFFFFF',
   },
-  accountInfo: { flex: 1 },
-  userName: { fontSize: 18, fontWeight: '600', color: '#111827', marginBottom: 4 },
-  userEmail: { fontSize: 13, color: '#6B7280', fontWeight: '500' },
-  editBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: '#F4F5F9',
-    alignItems: 'center', justifyContent: 'center',
+  accountInfo: { flex: 1, paddingRight: 10 },
+  userName: { fontSize: 18, fontWeight: '700', color: '#111827', marginBottom: 2 },
+  userEmail: { fontSize: 13, color: '#6B7280' },
+  editBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.mutedAlt, alignItems: 'center', justifyContent: 'center' },
+
+  // Edit Profile Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+  modalContent: {
+    width: '85%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.05)', backgroundColor: '#FFFFFF' },
+  modalTitle: { fontSize: 17, fontWeight: '700', color: '#111827' },
+  modalCancelBtn: { fontSize: 16, color: '#6B7280' },
+  modalSaveBtn: { fontSize: 16, fontWeight: '700', color: '#10B981' },
+  modalBody: { padding: 20, backgroundColor: '#FFFFFF' },
+  modalAvatarWrap: { alignItems: 'center', marginBottom: 24 },
+  modalAvatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.limeBtn || '#A3E635', alignItems: 'center', justifyContent: 'center', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+  modalAvatarText: { fontSize: 32, fontWeight: '700', color: '#111827' },
+  modalForm: { gap: 16 },
+  modalInputGroup: { gap: 8 },
+  modalLabel: { fontSize: 12, fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: 0.5, marginLeft: 4 },
+  modalInput: { backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)', borderRadius: 12, padding: 14, fontSize: 15, color: '#111827', elevation: 0 },
 
   // Neon Loan Limit Card
   loanLimitCard: {
@@ -400,37 +522,40 @@ const getStyles = (colors) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-end',
   },
-  loanLimitMaxLabel: {
-    fontSize: 12,
-    color: '#111827',
-    fontWeight: '600',
-    opacity: 0.8,
-    marginBottom: 2,
+  loanLimitMaxLabel: { fontSize: 11, color: '#3F6212', fontWeight: '500', marginBottom: 2 },
+  loanLimitMaxValue: { fontSize: 20, fontWeight: '700', color: '#1A2E05', letterSpacing: -0.5 },
+  viewDetailsBtn: { backgroundColor: '#1A2E05', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+  viewDetailsText: { color: '#A3E635', fontSize: 12, fontWeight: '700' },
+
+  comingSoonOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
-  loanLimitMaxValue: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  viewDetailsBtn: {
-    backgroundColor: '#111827',
-    paddingHorizontal: 16,
+  comingSoonBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 100,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  viewDetailsText: {
-    color: colors.limeBtn || '#A3E635',
+  comingSoonText: {
     fontSize: 13,
     fontWeight: '700',
+    color: '#111827',
   },
 
   // General rows
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-  },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 6 },
   rowLeft: {
     flexDirection: 'row',
     alignItems: 'center',

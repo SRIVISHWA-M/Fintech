@@ -38,10 +38,11 @@ const HomePage = () => {
       {/* ── Brand Header (FinTrust Logo & Profile Avatar) ───────────────── */}
       <View style={styles.header}>
         <View style={styles.logoRow}>
-          <View style={styles.logoIconBg}>
-            <Ionicons name="leaf" size={20} color="#A3E635" />
-          </View>
-          <Text style={styles.logoText}>FinTrust</Text>
+          <Image 
+            source={{ uri: 'https://res.cloudinary.com/wowukaao/image/upload/v1785171832/Screenshot_2026-07-27_223203-removebg-preview_kikjdd.png' }}
+            style={styles.logoIconImage}
+          />
+          <Text style={styles.logoText}>Hidel Finance</Text>
         </View>
 
         <TouchableOpacity
@@ -84,29 +85,13 @@ const HomePage = () => {
 
           <TouchableOpacity
             style={styles.exploreBtn}
-            onPress={() => navigation.navigate('PersonalLoanDetails')}
+            onPress={() => navigation.navigate('PersonalLoanDetails', { loanType: 'Personal Loan' })}
             activeOpacity={0.85}
           >
             <Text style={styles.exploreBtnText}>Explore Loans</Text>
           </TouchableOpacity>
         </View>
 
-        {/* ── Quick Action Category Circles ──────────────────────────────── */}
-        <View style={styles.quickActionRow}>
-          {[
-            { icon: 'person-outline', badge: 'cash-outline' },
-            { icon: 'home-outline', badge: 'cash-outline' },
-            { icon: 'home-outline', badge: 'key-outline' },
-            { icon: 'home-outline', badge: 'card-outline' },
-          ].map((item, idx) => (
-            <TouchableOpacity key={idx} style={styles.actionCircle} activeOpacity={0.75}>
-              <Ionicons name={item.icon} size={24} color="#374151" />
-              <View style={styles.circleBadge}>
-                <Ionicons name={item.badge} size={10} color="#10B981" />
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
 
         {/* ── Active Loan Banner (For Existing Users) ───────────────────── */}
         {isExistingUser && (
@@ -146,11 +131,7 @@ const HomePage = () => {
         {/* ── Popular Loan Categories Section ────────────────────────────── */}
         <Text style={styles.sectionTitle}>Popular Loan Categories</Text>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.popularRowContent}
-        >
+        <View style={styles.popularGridContent}>
           {/* Card 1: Personal Loan */}
           <View style={styles.popularCard}>
             <View style={styles.popularIconWrap}>
@@ -162,14 +143,14 @@ const HomePage = () => {
             <Text style={styles.cardTitle}>Personal Loan</Text>
 
             <Text style={styles.metricLabel}>Max amount</Text>
-            <Text style={styles.metricVal}>$50,000</Text>
+            <Text style={styles.metricVal}>₹50,000</Text>
 
             <Text style={styles.metricLabel}>Interest rate</Text>
             <Text style={styles.metricValSub}>From 5.99% APR</Text>
 
             <TouchableOpacity
               style={styles.applyLimeBtn}
-              onPress={() => navigation.navigate('PersonalLoanDetails')}
+              onPress={() => navigation.navigate('PersonalLoanDetails', { loanType: 'Personal Loan' })}
               activeOpacity={0.85}
             >
               <Text style={styles.applyLimeBtnText}>Apply Now</Text>
@@ -187,14 +168,14 @@ const HomePage = () => {
             <Text style={styles.cardTitle}>Business Loan</Text>
 
             <Text style={styles.metricLabel}>Max amount</Text>
-            <Text style={styles.metricVal}>$250,000</Text>
+            <Text style={styles.metricVal}>₹250,000</Text>
 
             <Text style={styles.metricLabel}>Interest rate</Text>
             <Text style={styles.metricValSub}>From 4.75% APR</Text>
 
             <TouchableOpacity
               style={styles.applyLimeBtn}
-              onPress={() => navigation.navigate('PersonalLoanDetails')}
+              onPress={() => navigation.navigate('PersonalLoanDetails', { loanType: 'Business Loan' })}
               activeOpacity={0.85}
             >
               <Text style={styles.applyLimeBtnText}>Apply Now</Text>
@@ -209,20 +190,42 @@ const HomePage = () => {
             <Text style={styles.cardTitle}>Auto Loan</Text>
 
             <Text style={styles.metricLabel}>Max amount</Text>
-            <Text style={styles.metricVal}>$250,000</Text>
+            <Text style={styles.metricVal}>₹250,000</Text>
 
             <Text style={styles.metricLabel}>Interest rate</Text>
             <Text style={styles.metricValSub}>From 4.75% APR</Text>
 
             <TouchableOpacity
               style={styles.applyLimeBtn}
-              onPress={() => navigation.navigate('PersonalLoanDetails')}
+              onPress={() => navigation.navigate('PersonalLoanDetails', { loanType: 'Auto Loan' })}
               activeOpacity={0.85}
             >
               <Text style={styles.applyLimeBtnText}>Apply Now</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
+
+          {/* Card 4: Home Loan */}
+          <View style={styles.popularCard}>
+            <View style={styles.popularIconWrap}>
+              <Ionicons name="home-outline" size={26} color="#1F2937" />
+            </View>
+            <Text style={styles.cardTitle}>Home Loan</Text>
+
+            <Text style={styles.metricLabel}>Max amount</Text>
+            <Text style={styles.metricVal}>₹500,000</Text>
+
+            <Text style={styles.metricLabel}>Interest rate</Text>
+            <Text style={styles.metricValSub}>From 3.25% APR</Text>
+
+            <TouchableOpacity
+              style={styles.applyLimeBtn}
+              onPress={() => navigation.navigate('PersonalLoanDetails', { loanType: 'Home Loan' })}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.applyLimeBtnText}>Apply Now</Text>
+            </TouchableOpacity>
+          </View>
+         </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -254,19 +257,17 @@ const getStyles = (colors) =>
     logoRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
+      gap: 12,
     },
-    logoIconBg: {
-      width: 34,
-      height: 34,
-      borderRadius: 10,
-      backgroundColor: '#111827',
-      alignItems: 'center',
-      justifyContent: 'center',
+    logoIconImage: {
+      width: 60,
+      height: 60,
+      borderRadius: 14,
+      resizeMode: 'contain',
     },
     logoText: {
-      fontSize: 22,
-      fontWeight: '600',
+      fontSize: 26,
+      fontWeight: '700',
       color: '#111827',
       letterSpacing: -0.5,
     },
@@ -500,12 +501,15 @@ const getStyles = (colors) =>
       paddingHorizontal: 20,
       marginBottom: 16,
     },
-    popularRowContent: {
+    popularGridContent: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
       paddingHorizontal: 20,
-      gap: 14,
+      rowGap: 16,
     },
     popularCard: {
-      width: 170,
+      width: '48%',
       backgroundColor: '#FFFFFF',
       borderRadius: 24,
       padding: 18,

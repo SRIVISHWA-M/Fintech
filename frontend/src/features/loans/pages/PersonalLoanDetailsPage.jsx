@@ -1,19 +1,58 @@
 import React, { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView,
-  Modal, TextInput, KeyboardAvoidingView, Platform, Animated
+  Modal, TextInput, KeyboardAvoidingView, Platform, Animated, Image
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '../../../theme/useTheme';
+
+const LOAN_DETAILS = {
+  'Personal Loan': {
+    title: 'Personal Loan',
+    subtitle: 'For Salaried & Self-Employed Professionals',
+    amount: '₹ 10,00,000',
+    rate: 'From 24% to 29.95% p.a.',
+    processing: 'Up to 5.1% + GST',
+    tenure: 'Up to 60 months'
+  },
+  'Business Loan': {
+    title: 'Business Loan',
+    subtitle: 'Fuel your business growth',
+    amount: '₹ 25,00,000',
+    rate: 'From 18% to 24.50% p.a.',
+    processing: 'Up to 2.5% + GST',
+    tenure: 'Up to 72 months'
+  },
+  'Auto Loan': {
+    title: 'Auto Loan',
+    subtitle: 'Drive your dream car today',
+    amount: '₹ 15,00,000',
+    rate: 'From 12% to 15.25% p.a.',
+    processing: 'Up to 1.5% + GST',
+    tenure: 'Up to 84 months'
+  },
+  'Home Loan': {
+    title: 'Home Loan',
+    subtitle: 'Make your dream home a reality',
+    amount: '₹ 2,00,00,000',
+    rate: 'From 8.5% to 10.50% p.a.',
+    processing: 'Up to 0.5% + GST',
+    tenure: 'Up to 360 months'
+  }
+};
 
 const PersonalLoanDetailsPage = () => {
   const { colors, isDark } = useTheme();
   const styles = getStyles(colors, isDark);
   const navigation = useNavigation();
+  const route = useRoute();
+  
+  const loanType = route.params?.loanType || 'Personal Loan';
+  const details = LOAN_DETAILS[loanType] || LOAN_DETAILS['Personal Loan'];
 
-  const [isReadMore, setIsReadMore] = useState(false);
+  const [isReadMore, setIsReadMore] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [formState, setFormState] = useState('idle'); // 'idle' | 'success'
   const [name, setName] = useState('');
@@ -74,21 +113,36 @@ const PersonalLoanDetailsPage = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
+      {/* Standard Brand Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={colors.foreground} />
+        <View style={styles.logoRow}>
+          <Image 
+            source={{ uri: 'https://res.cloudinary.com/wowukaao/image/upload/v1785171832/Screenshot_2026-07-27_223203-removebg-preview_kikjdd.png' }}
+            style={styles.logoIconImage}
+          />
+          <Text style={styles.logoText}>Hidel Finance</Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.avatarWrap}
+          onPress={() => navigation.navigate('Profile')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.avatarCircle}>
+            <Ionicons name="person" size={24} color="#9CA3AF" />
+          </View>
+          <View style={styles.onlineBadgeDot} />
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
         {/* Hero Section */}
         <View style={styles.heroSection}>
-          <Text style={styles.title}>Personal Loan</Text>
-          <Text style={styles.subtitle}>For Salaried & Self-Employed Professionals</Text>
+          <Text style={styles.title}>{details.title}</Text>
+          <Text style={styles.subtitle}>{details.subtitle}</Text>
 
           <Text style={styles.upToText}>UP TO</Text>
-          <Text style={styles.amountText}>₹ 10,00,000</Text>
+          <Text style={styles.amountText}>{details.amount}</Text>
         </View>
 
         {/* Loan Information Grid */}
@@ -99,7 +153,7 @@ const PersonalLoanDetailsPage = () => {
             </View>
             <View>
               <Text style={styles.infoLabel}>Processing fee</Text>
-              <Text style={styles.infoValue}>Up to 5.1% + GST</Text>
+              <Text style={styles.infoValue}>{details.processing}</Text>
             </View>
           </View>
 
@@ -109,7 +163,7 @@ const PersonalLoanDetailsPage = () => {
             </View>
             <View>
               <Text style={styles.infoLabel}>Tenure</Text>
-              <Text style={styles.infoValue}>Up to 60 months</Text>
+              <Text style={styles.infoValue}>{details.tenure}</Text>
             </View>
           </View>
 
@@ -119,7 +173,7 @@ const PersonalLoanDetailsPage = () => {
             </View>
             <View>
               <Text style={styles.infoLabel}>Interest Rates</Text>
-              <Text style={styles.infoValue}>From 24% to 29.95% p.a.</Text>
+              <Text style={styles.infoValue}>{details.rate}</Text>
             </View>
           </View>
         </View>
@@ -150,10 +204,10 @@ const PersonalLoanDetailsPage = () => {
 
             <TouchableOpacity style={styles.readMoreBtn} onPress={toggleReadMore}>
               <Text style={styles.readMoreText}>
-                {isReadMore ? 'View less requirements' : 'View complete application requirements'}
+                {isReadMore ? 'Hide application requirements' : 'View complete application requirements'}
               </Text>
               <Ionicons 
-                name={isReadMore ? "chevron-up" : "chevron-forward"} 
+                name={isReadMore ? "chevron-up" : "chevron-down"} 
                 size={14} 
                 color={colors.success} 
               />
@@ -186,7 +240,7 @@ const PersonalLoanDetailsPage = () => {
             {formState === 'idle' ? (
               <>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Apply For Personal Loan</Text>
+                  <Text style={styles.modalTitle}>Apply For {details.title}</Text>
                   <TouchableOpacity onPress={() => setModalVisible(false)}>
                     <Ionicons name="close" size={24} color={colors.foreground} />
                   </TouchableOpacity>
@@ -247,22 +301,61 @@ const getStyles = (colors, isDark) => StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  // Standard Header Styles
   header: {
-    height: 56,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 12 : 16,
+    paddingBottom: 12,
+    backgroundColor: '#F4F5F9',
   },
-  backButton: {
-    width: 40,
-    height: 40,
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  logoIconImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 14,
+    resizeMode: 'contain',
+  },
+  logoText: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#111827',
+    letterSpacing: -0.5,
+  },
+  avatarWrap: {
+    position: 'relative',
+  },
+  avatarCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#E5E7EB',
+    alignItems: 'center',
     justifyContent: 'center',
+  },
+  onlineBadgeDot: {
+    position: 'absolute',
+    top: 1,
+    right: 1,
+    width: 11,
+    height: 11,
+    borderRadius: 6,
+    backgroundColor: '#22C55E',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   container: {
     flex: 1,
   },
   scrollContent: {
     padding: 24,
-    paddingBottom: 100, // Space for sticky button
+    paddingBottom: 180, // Space for sticky button + tab bar
   },
   heroSection: {
     marginBottom: 32,
@@ -302,13 +395,18 @@ const getStyles = (colors, isDark) => StyleSheet.create({
     borderBottomColor: colors.border,
   },
   iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: `${colors.success}15`,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
   infoLabel: {
     fontSize: 13,
@@ -370,11 +468,10 @@ const getStyles = (colors, isDark) => StyleSheet.create({
   },
   bottomBar: {
     position: 'absolute',
-    bottom: 0,
+    bottom: Platform.OS === 'ios' ? 88 : 74,
     left: 0,
     right: 0,
     padding: 16,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 24,
     backgroundColor: colors.background,
     borderTopWidth: 1,
     borderTopColor: colors.border,

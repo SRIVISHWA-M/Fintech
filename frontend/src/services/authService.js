@@ -39,14 +39,7 @@ export const authService = {
       body: { name, email, phone, password },
     });
 
-    // Persist tokens
-    setAccessToken(data.accessToken);
-    await AsyncStorage.setItem(TOKEN_KEY, data.accessToken);
-    await AsyncStorage.setItem(REFRESH_KEY, data.refreshToken);
-
-    // Sync local store with real user data from backend
-    authStore.setUser(data.user);
-    return data.user;
+    return data;
   },
 
   logout: async () => {

@@ -11,7 +11,7 @@ import { useTheme } from '../../../theme/useTheme';
 import { paymentService } from '../../../services/paymentService';
 
 const fmt = (n) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n);
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(n);
 
 const fmtDate = (d) => {
   if (!d) return '';
@@ -35,6 +35,7 @@ const PaymentsPage = () => {
   );
 
   const userName = user?.name ? user.name : 'Jane Cooper';
+  const hasActiveLoan = loan && loan.outstanding > 0;
   const recentPayments = payments.payments.length > 0 ? payments.payments : [
     { id: 'p1', date: '2024-04-15', amount: 450.00, status: 'Success' },
     { id: 'p2', date: '2024-03-15', amount: 450.00, status: 'Success' },
@@ -68,6 +69,22 @@ const PaymentsPage = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {!hasActiveLoan ? (
+          <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 80, paddingHorizontal: 20, marginTop: 40 }}>
+            <Ionicons name="folder-open-outline" size={64} color="#9CA3AF" style={{ marginBottom: 16 }} />
+            <Text style={{ fontSize: 20, fontWeight: '700', color: '#111827', marginBottom: 8 }}>There is no data</Text>
+            <Text style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
+              Payment history and details will appear here once your loan is approved and active.
+            </Text>
+            <TouchableOpacity 
+              style={{ backgroundColor: '#A3E635', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 14, alignItems: 'center' }}
+              onPress={() => navigation.navigate('Home')}
+            >
+              <Text style={{ fontSize: 15, fontWeight: '600', color: '#000000' }}>Explore Loans</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
         {/* ── Dark Glassmorphic "Loan Summary" Hero Card ───────────────────── */}
         <View style={styles.loanSummaryCard}>
           {/* Corner Glow Blob */}
@@ -83,7 +100,7 @@ const PaymentsPage = () => {
 
           <Text style={styles.outstandingLabel}>Total Outstanding Balance</Text>
           <Text style={styles.outstandingAmountVal}>
-            {fmt(loan.outstanding || 12505.58)}
+            {fmt(loan?.outstanding || 12505.58)}
           </Text>
         </View>
 
@@ -120,7 +137,7 @@ const PaymentsPage = () => {
               <View style={styles.greenPillDot} />
             </View>
             <Text style={styles.nextDueDateVal}>
-              {fmtDate(loan.nextDueDate || '2024-05-15')}
+              {fmtDate(loan?.nextDueDate || '2024-05-15')}
             </Text>
           </View>
         </ScrollView>
@@ -146,6 +163,8 @@ const PaymentsPage = () => {
             </View>
           ))}
         </View>
+        </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

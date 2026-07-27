@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { Op } = require('sequelize');
 const { User, UserPreference } = require('../models');
+const { sendVerificationEmail } = require('../utils/emailService');
 const { UnauthorizedError, NotFoundError, BadRequestError } = require('../utils/errors');
 
 const SUPER_ADMIN = {
@@ -63,6 +65,10 @@ const login = async (email, password) => {
     throw new UnauthorizedError('Incorrect email/customer ID or password');
   }
 
+  if (!user.isVerified) {
+    throw new UnauthorizedError('Please verify your email address before logging in.');
+  }
+
   if (user.status === 'Pending') {
     throw new UnauthorizedError(`Account is pending approval. Please wait until a Super Admin approves your account.`);
   }
@@ -107,6 +113,10 @@ const signup = async (userData) => {
   // Generate a temporary Customer ID
   const customerId = `PENDING-${Math.floor(100000 + Math.random() * 900000)}`;
 
+  // Generate verification token
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  const verificationExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
   const newUser = await User.create({
     name,
     email: normalizedEmail,
@@ -114,6 +124,9 @@ const signup = async (userData) => {
     passwordHash: password,
     customerId,
     status: 'Pending',
+    isVerified: false,
+    verificationToken,
+    verificationExpires,
   });
 
   // Create default preferences
@@ -124,28 +137,11 @@ const signup = async (userData) => {
     loginAlerts: true,
   });
 
-  // Fetch with preferences to return matching structure
-  const user = await User.findByPk(newUser.id, {
-    include: [{ model: UserPreference, as: 'preferences' }],
-  });
-
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
+  // Send the verification email
+  await sendVerificationEmail(normalizedEmail, verificationToken);
 
   return {
-    user: {
-      id: user.id,
-      name: user.name,
-      customerId: user.customerId,
-      email: user.email,
-      role: user.role ? user.role.toLowerCase() : 'user',
-      phoneMasked: user.phone.replace(/(\+\d{2} \d{2})\d{3} \d{2}(\d{3})/, '$1••• ••$2'),
-      kycStatus: user.kycStatus,
-      creditScore: user.creditScore,
-      preferences: user.preferences,
-    },
-    accessToken,
-    refreshToken,
+    message: 'User created successfully. Please check your email to verify your account.',
   };
 };
 
@@ -244,10 +240,34 @@ const resetPassword = async (email, otp, newPassword) => {
   return true;
 };
 
+const verifyEmail = async (token) => {
+  if (!token) {
+    throw new BadRequestError('Verification token is required');
+  }
+
+  const user = await User.findOne({ where: { verificationToken: token } });
+
+  if (!user) {
+    throw new NotFoundError('Invalid verification token');
+  }
+
+  if (user.verificationExpires && user.verificationExpires < new Date()) {
+    throw new BadRequestError('Verification token has expired');
+  }
+
+  user.isVerified = true;
+  user.verificationToken = null;
+  user.verificationExpires = null;
+  await user.save();
+
+  return true;
+};
+
 module.exports = {
   login,
   signup,
   refreshAccessToken,
   forgotPassword,
   resetPassword,
+  verifyEmail,
 };

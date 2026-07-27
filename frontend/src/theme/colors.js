@@ -72,7 +72,7 @@ export const darkColors = {
 
 export const lightColors = {
   // Background & Surface
-  background: '#f8fafc',
+  background: '#c6c6c6cd',
   card: '#ffffff',
   cardElevated: '#ffffff',
   input: '#f1f5f9',
@@ -89,12 +89,12 @@ export const lightColors = {
   borderStrong: 'rgba(0,0,0,0.12)',
 
   // Accent / Success / Neon Lime (FinTrust Theme)
-  success: '#22c55e',
-  successLight: '#16a34a',
-  successDim: 'rgba(34,197,94,0.12)',
-  successDimMid: 'rgba(34,197,94,0.07)',
-  successBorder: 'rgba(34,197,94,0.22)',
-  successForeground: '#ffffff',
+  success: '#A3E635',
+  successLight: '#84CC16',
+  successDim: 'rgba(163,230,53,0.12)',
+  successDimMid: 'rgba(163,230,53,0.07)',
+  successBorder: 'rgba(163,230,53,0.22)',
+  successForeground: '#000000',
   limeBtn: '#A3E635',
   limeBtnText: '#000000',
   limeBtnDark: '#84CC16',
@@ -144,5 +144,5 @@ export const lightColors = {
 };
 
 // For backward compatibility during refactoring
-export const colors = darkColors;
+export const colors = lightColors;
 export default colors;
