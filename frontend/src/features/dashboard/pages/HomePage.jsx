@@ -38,7 +38,7 @@ const HomePage = () => {
       {/* ── Brand Header (FinTrust Logo & Profile Avatar) ───────────────── */}
       <View style={styles.header}>
         <View style={styles.logoRow}>
-          <Image 
+          <Image
             source={{ uri: 'https://res.cloudinary.com/wowukaao/image/upload/v1785171832/Screenshot_2026-07-27_223203-removebg-preview_kikjdd.png' }}
             style={styles.logoIconImage}
           />
@@ -123,7 +123,7 @@ const HomePage = () => {
               activeOpacity={0.85}
             >
               <Text style={styles.payNowBtnText}>Pay Now</Text>
-              <Ionicons name="chevron-forward" size={16} color="#FFFFFF" />
+              <Ionicons name="chevron-forward" size={16} color="#000000ff" />
             </TouchableOpacity>
           </View>
         )}
@@ -225,7 +225,7 @@ const HomePage = () => {
               <Text style={styles.applyLimeBtnText}>Apply Now</Text>
             </TouchableOpacity>
           </View>
-         </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -479,7 +479,7 @@ const getStyles = (colors) =>
       color: '#6B7280',
     },
     payNowBtn: {
-      backgroundColor: '#111827',
+      backgroundColor: '#A3E635',
       borderRadius: 14,
       paddingVertical: 12,
       flexDirection: 'row',
@@ -488,7 +488,7 @@ const getStyles = (colors) =>
       gap: 6,
     },
     payNowBtnText: {
-      color: '#FFFFFF',
+      color: '#000000',
       fontWeight: '700',
       fontSize: 13,
     },

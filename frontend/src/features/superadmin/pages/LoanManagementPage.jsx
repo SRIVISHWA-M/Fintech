@@ -19,6 +19,7 @@ import AdminTable from '../components/AdminTable';
 import StatusBadge from '../components/StatusBadge';
 import { loanCustomersList } from '../data/mockData';
 import { useToast } from '../../../context/ToastContext';
+import { adminLoanService } from '../../../services/adminLoanService';
 
 // Constants for drop down selections
 const LOAN_TYPES = ['All Loan Types', 'Home Loan', 'Vehicle Loan', 'Personal Loan', 'Business Loan'];
@@ -81,23 +82,49 @@ const getEmiVariant = (status) => {
 
 const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
     const { showSuccessToast, showDeleteToast } = useToast();
-    const [loanData, setLoanData] = useState(() =>
-        loanCustomersList.map((item) => ({
-            ...item,
-            status: item.status || 'Pending',
-            paymentMethod: item.paymentMethod || 'Manual Pay',
-            emiStatus: item.emiStatus || 'Not Started',
-            archived: false,
-            interestRate: item.interestRate || '10.5%',
-            tenureMonths: item.tenureMonths || 36,
-            monthlyEmi: item.monthlyEmi || Math.round(Number(item.loanAmount || 0) * 0.03),
-            remainingBalance: item.remainingBalance !== undefined ? item.remainingBalance : Number(item.loanAmount || 0),
-            nextDueDate: item.nextDueDate || '—',
-            penaltyAmount: item.penaltyAmount || 0,
-            latePaymentCount: item.latePaymentCount || 0,
-            lastPenaltyDate: item.lastPenaltyDate || null,
-        }))
-    );
+    const [loanData, setLoanData] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchLoans = async () => {
+        try {
+            setLoading(true);
+            const res = await adminLoanService.getAllLoans();
+            if (res && res.success) {
+                const formatted = res.data.map(item => ({
+                    id: item.id, // the uuid
+                    loanId: item.loanReference, // the LN-1234
+                    customerName: (item.user && item.user.name) ? item.user.name : 'Unknown',
+                    email: (item.user && item.user.email) ? item.user.email : '',
+                    phone: (item.user && item.user.phone) ? item.user.phone : '',
+                    loanType: item.type || 'Personal Loan',
+                    loanAmount: Number(item.principal) || 0,
+                    paymentMethod: item.paymentMethod || 'Manual Pay',
+                    status: item.status || 'Pending',
+                    applicationDate: new Date(item.createdAt).toISOString().slice(0, 10),
+                    emiStatus: item.emiStatus || 'Not Started',
+                    interestRate: String(item.interestRate) + '%',
+                    tenureMonths: item.termMonths || 36,
+                    monthlyEmi: Number(item.nextDueAmount) || 0,
+                    remainingBalance: Number(item.outstanding) || 0,
+                    nextDueDate: item.nextDueDate || '—',
+                    penaltyAmount: Number(item.penaltyAmount) || 0,
+                    latePaymentCount: item.latePaymentCount || 0,
+                    lastPenaltyDate: '',
+                    archived: false
+                }));
+                setLoanData(formatted);
+            }
+        } catch (error) {
+            console.error('Failed to fetch loans:', error);
+            Alert.alert('Error', 'Failed to load loans from server.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    React.useEffect(() => {
+        fetchLoans();
+    }, []);
 
     // Filters State
     const [selectedLoanType, setSelectedLoanType] = useState('All Loan Types');
@@ -276,7 +303,7 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
         setShowAddModal(true);
     };
 
-    const handleAddLoan = () => {
+    const handleAddLoan = async () => {
         if (!formData.customerName.trim()) {
             Alert.alert('Validation', 'Customer name is required');
             return;
@@ -294,70 +321,40 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
             return;
         }
 
-        const nextNumber = 1000 + loanData.length + 1;
         const amount = Number(formData.loanAmount);
 
-        // Late Payment dynamic handling logic
         let pMethod = formData.paymentMethod;
         let penaltyVal = Number(formData.penaltyAmount) || 0;
         let lateCountVal = Number(formData.latePaymentCount) || 0;
-        let lastPenaltyD = formData.lastPenaltyDate.trim() || null;
-        let txns = [];
 
         if (normalize(pMethod) === 'late payment') {
             if (penaltyVal === 0) penaltyVal = 2500;
             if (lateCountVal === 0) lateCountVal = 1;
-            if (!lastPenaltyD) lastPenaltyD = formData.applicationDate;
-
-            // Add a penalty payment transaction
-            txns.push({
-                transactionId: `TXN-${9000 + Math.floor(Math.random() * 1000)}`,
-                date: lastPenaltyD,
-                type: 'Penalty Payment',
-                paymentMethod: 'Late Payment',
-                amount: penaltyVal,
-                status: 'Success'
-            });
         }
 
-        // Add regular disbursal transaction if approved
-        if (normalize(formData.status) === 'approved') {
-            txns.push({
-                transactionId: `TXN-${9000 + Math.floor(Math.random() * 1000)}`,
-                date: formData.applicationDate,
-                type: 'Loan Disbursal',
-                paymentMethod: 'Bank Transfer',
-                amount: amount,
-                status: 'Success'
-            });
+        try {
+            const payload = {
+                customerName: formData.customerName.trim(),
+                email: formData.email.trim(),
+                phone: formData.phone.trim(),
+                type: formData.loanType,
+                principal: amount,
+                interestRate: parseFloat(formData.interestRate) || 10.5,
+                termMonths: Number(formData.tenureMonths) || 36,
+                nextDueDate: formData.nextDueDate || new Date().toISOString(),
+                paymentMethod: pMethod,
+                status: formData.status,
+            };
+            const res = await adminLoanService.createLoan(payload);
+            if (res.success) {
+                showSuccessToast("LOAN CREATED", `Loan was created successfully.`);
+                fetchLoans();
+                setShowAddModal(false);
+            }
+        } catch (error) {
+            console.error('Failed to create loan', error);
+            Alert.alert('Error', 'Failed to create loan.');
         }
-
-        const newLoan = {
-            id: `LN-${nextNumber}`,
-            customerName: formData.customerName.trim(),
-            email: formData.email.trim(),
-            phone: formData.phone.trim(),
-            loanType: formData.loanType,
-            loanAmount: amount,
-            paymentMethod: pMethod,
-            status: formData.status,
-            applicationDate: formData.applicationDate,
-            emiStatus: formData.emiStatus,
-            interestRate: formData.interestRate,
-            tenureMonths: Number(formData.tenureMonths) || 36,
-            monthlyEmi: Number(formData.monthlyEmi) || Math.round(amount * 0.03),
-            remainingBalance: Number(formData.remainingBalance) || amount,
-            nextDueDate: formData.nextDueDate || '—',
-            penaltyAmount: penaltyVal,
-            latePaymentCount: lateCountVal,
-            lastPenaltyDate: lastPenaltyD,
-            transactions: txns,
-            archived: false,
-        };
-
-        setLoanData((prev) => [newLoan, ...prev]);
-        setShowAddModal(false);
-        showSuccessToast("LOAN CREATED", `Loan ${newLoan.id} was created successfully.`);
     };
 
     const handleOpenEditModal = (loan) => {
@@ -384,7 +381,7 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
         setShowEditModal(true);
     };
 
-    const handleSaveEditLoan = () => {
+    const handleSaveEditLoan = async () => {
         if (!editFormData.customerName.trim()) {
             Alert.alert('Validation', 'Customer name is required');
             return;
@@ -406,61 +403,35 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
         let pMethod = editFormData.paymentMethod;
         let penaltyVal = Number(editFormData.penaltyAmount) || 0;
         let lateCountVal = Number(editFormData.latePaymentCount) || 0;
-        let lastPenaltyD = editFormData.lastPenaltyDate.trim() || null;
 
         if (normalize(pMethod) === 'late payment') {
             if (penaltyVal === 0) penaltyVal = 2500;
             if (lateCountVal === 0) lateCountVal = 1;
-            if (!lastPenaltyD) lastPenaltyD = new Date().toISOString().slice(0, 10);
         }
 
-        setLoanData((prev) =>
-            prev.map((loan) => {
-                if (loan.id === editFormData.id) {
-                    // Sync transaction history if late payment method is chosen
-                    let updatedTxns = [...(loan.transactions || [])];
-                    if (normalize(pMethod) === 'late payment' && normalize(loan.paymentMethod) !== 'late payment') {
-                        updatedTxns.push({
-                            transactionId: `TXN-${9000 + Math.floor(Math.random() * 1000)}`,
-                            date: lastPenaltyD,
-                            type: 'Penalty Payment',
-                            paymentMethod: 'Late Payment',
-                            amount: penaltyVal,
-                            status: 'Success'
-                        });
-                    }
-
-                    return {
-                        ...loan,
-                        customerName: editFormData.customerName.trim(),
-                        email: editFormData.email.trim(),
-                        phone: editFormData.phone.trim(),
-                        loanType: editFormData.loanType,
-                        loanAmount: amount,
-                        paymentMethod: pMethod,
-                        status: editFormData.status,
-                        emiStatus: editFormData.emiStatus,
-                        interestRate: editFormData.interestRate,
-                        tenureMonths: Number(editFormData.tenureMonths) || 36,
-                        monthlyEmi: Number(editFormData.monthlyEmi) || Math.round(amount * 0.03),
-                        remainingBalance: Number(editFormData.remainingBalance) || amount,
-                        nextDueDate: editFormData.nextDueDate || '—',
-                        penaltyAmount: penaltyVal,
-                        latePaymentCount: lateCountVal,
-                        lastPenaltyDate: lastPenaltyD,
-                        transactions: updatedTxns
-                    };
-                }
-                return loan;
-            })
-        );
-
-        setShowEditModal(false);
-        showSuccessToast("LOAN UPDATED", `Loan ${editFormData.id} was updated successfully.`);
-        // Refresh selected loan if viewed
-        if (selectedLoan && selectedLoan.id === editFormData.id) {
-            const updated = loanData.find(l => l.id === editFormData.id);
-            if (updated) setSelectedLoan(updated);
+        try {
+            const payload = {
+                type: editFormData.loanType,
+                principal: amount,
+                interestRate: parseFloat(editFormData.interestRate) || 10.5,
+                termMonths: Number(editFormData.tenureMonths) || 36,
+                nextDueDate: editFormData.nextDueDate,
+                paymentMethod: pMethod,
+                status: editFormData.status,
+                emiStatus: editFormData.emiStatus,
+                penaltyAmount: penaltyVal,
+                latePaymentCount: lateCountVal
+            };
+            const res = await adminLoanService.updateLoan(editFormData.id, payload);
+            if (res.success) {
+                showSuccessToast("LOAN UPDATED", `Loan updated successfully.`);
+                fetchLoans(); // Refresh list
+                setShowEditModal(false);
+                setShowViewModal(false); // Close view modal so it refreshes next time
+            }
+        } catch (error) {
+            console.error('Failed to update loan', error);
+            Alert.alert('Error', 'Failed to update loan.');
         }
     };
 
@@ -521,28 +492,28 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
         setShowViewModal(true);
     };
 
-    const handleApproveLoan = (rowId) => {
-        setLoanData((prev) =>
-            prev.map((loan) =>
-                loan.id === rowId ? { ...loan, status: 'Approved' } : loan
-            )
-        );
+    const handleApproveLoan = async (rowId) => {
+        try {
+            await adminLoanService.updateLoan(rowId, { status: 'Approved' });
+            fetchLoans();
+            showSuccessToast("LOAN APPROVED", `Loan was approved.`);
+        } catch (error) { console.error(error); }
     };
 
-    const handleRejectLoan = (rowId) => {
-        setLoanData((prev) =>
-            prev.map((loan) =>
-                loan.id === rowId ? { ...loan, status: 'Rejected' } : loan
-            )
-        );
+    const handleRejectLoan = async (rowId) => {
+        try {
+            await adminLoanService.updateLoan(rowId, { status: 'Rejected' });
+            fetchLoans();
+            showSuccessToast("LOAN REJECTED", `Loan was rejected.`);
+        } catch (error) { console.error(error); }
     };
 
-    const handleMarkOverdue = (rowId) => {
-        setLoanData((prev) =>
-            prev.map((loan) =>
-                loan.id === rowId ? { ...loan, emiStatus: 'Overdue' } : loan
-            )
-        );
+    const handleMarkOverdue = async (rowId) => {
+        try {
+            await adminLoanService.updateLoan(rowId, { emiStatus: 'Overdue' });
+            fetchLoans();
+            showSuccessToast("MARKED OVERDUE", `Loan marked as overdue.`);
+        } catch (error) { console.error(error); }
     };
 
     // Premium visual confirm actions
@@ -580,9 +551,15 @@ const LoanManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
         triggerConfirmPopup(
             'Delete Loan',
             'Are you sure you want to delete this loan record? This action cannot be undone.',
-            () => {
-                setLoanData((prev) => prev.filter((loan) => loan.id !== rowId));
-                showDeleteToast("LOAN DELETED", `Loan ${rowId} was deleted successfully.`);
+            async () => {
+                try {
+                    await adminLoanService.deleteLoan(rowId);
+                    showDeleteToast("LOAN DELETED", `Loan was deleted successfully.`);
+                    fetchLoans();
+                } catch (error) {
+                    console.error(error);
+                    Alert.alert('Error', 'Failed to delete loan.');
+                }
             },
             'Delete',
             adminColors.danger

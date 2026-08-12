@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import { authStore } from '../store/authStore';
+import { authService } from '../services/authService';
 
 import LoginScreen from '../features/auth/pages/LoginPage';
 import VerifyEmailPage from '../features/auth/pages/VerifyEmailPage';

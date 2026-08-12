@@ -9,6 +9,7 @@ import { loanStore } from '../../../store/loanStore';
 import { authStore } from '../../../store/authStore';
 import { useTheme } from '../../../theme/useTheme';
 import { paymentService } from '../../../services/paymentService';
+import { loanService } from '../../../services/loanService';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(n);
@@ -25,11 +26,31 @@ const PaymentsPage = () => {
   const [loan, setLoan] = useState(loanStore.getState());
   const [user] = useState(authStore.getState().user);
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+
+  const dateStripDays = React.useMemo(() => {
+    const days = [];
+    const today = new Date();
+    for (let i = 3; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      days.push({
+        id: `day-${i}`,
+        dayLabel: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        dayNum: d.getDate(),
+        isActive: i === 0
+      });
+    }
+    return days;
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       const u1 = paymentStore.subscribe(setPayments);
       const u2 = loanStore.subscribe(setLoan);
       paymentService.getPayments().catch(e => console.log('Payments API unavailable:', e.message));
+      loanService.getActiveLoan().catch(e => console.log('Loan API unavailable:', e.message));
       return () => { u1(); u2(); };
     }, [])
   );
@@ -54,7 +75,7 @@ const PaymentsPage = () => {
           </View>
 
           <View>
-            <Text style={styles.greetingSub}>Good Morning</Text>
+            <Text style={styles.greetingSub}>{greeting}</Text>
             <Text style={styles.userNameText}>{userName}</Text>
           </View>
         </View>
@@ -76,7 +97,7 @@ const PaymentsPage = () => {
             <Text style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
               Payment history and details will appear here once your loan is approved and active.
             </Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={{ backgroundColor: '#A3E635', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 14, alignItems: 'center' }}
               onPress={() => navigation.navigate('Home')}
             >
@@ -85,85 +106,77 @@ const PaymentsPage = () => {
           </View>
         ) : (
           <>
-        {/* ── Dark Glassmorphic "Loan Summary" Hero Card ───────────────────── */}
-        <View style={styles.loanSummaryCard}>
-          {/* Corner Glow Blob */}
-          <View style={styles.glowBlob} />
+            {/* ── Dark Glassmorphic "Loan Summary" Hero Card ───────────────────── */}
+            <View style={styles.loanSummaryCard}>
+              {/* Corner Glow Blob */}
+              <View style={styles.glowBlob} />
 
-          <View style={styles.summaryHeaderRow}>
-            <Text style={styles.summaryTitle}>Loan Summary</Text>
-            <View style={styles.activeStatusBadge}>
-              <View style={styles.greenStatusDot} />
-              <Text style={styles.activeStatusText}>Active Loan</Text>
-            </View>
-          </View>
-
-          <Text style={styles.outstandingLabel}>Total Outstanding Balance</Text>
-          <Text style={styles.outstandingAmountVal}>
-            {fmt(loan?.outstanding || 12505.58)}
-          </Text>
-        </View>
-
-        {/* ── Horizontal Date Strip & "Next Due Date" Pill Card ────────────── */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.dateStripRow}
-        >
-          <View style={styles.dateCell}>
-            <Text style={styles.dateDayLabel}>Mon</Text>
-            <Text style={styles.dateNumLabel}>17</Text>
-          </View>
-
-          <View style={styles.dateCell}>
-            <Text style={styles.dateDayLabel}>Sat</Text>
-            <Text style={styles.dateNumLabel}>18</Text>
-          </View>
-
-          <View style={styles.dateCell}>
-            <Text style={styles.dateDayLabel}>Sun</Text>
-            <Text style={styles.dateNumLabel}>19</Text>
-          </View>
-
-          <View style={[styles.dateCell, styles.dateCellActive]}>
-            <Text style={styles.dateDayLabelActive}>Apr</Text>
-            <Text style={styles.dateNumLabelActive}>20</Text>
-          </View>
-
-          {/* Lime Next Due Date Card Pill */}
-          <View style={styles.nextDueLimePillCard}>
-            <View style={styles.nextDuePillHeader}>
-              <Text style={styles.nextDueLabelText}>Next Due Date</Text>
-              <View style={styles.greenPillDot} />
-            </View>
-            <Text style={styles.nextDueDateVal}>
-              {fmtDate(loan?.nextDueDate || '2024-05-15')}
-            </Text>
-          </View>
-        </ScrollView>
-
-        {/* ── "Recent Payments" Section ───────────────────────────────────── */}
-        <Text style={styles.sectionTitle}>Recent Payments</Text>
-
-        <View style={styles.paymentsList}>
-          {recentPayments.map((item) => (
-            <View key={item.id} style={styles.paymentCard}>
-              <View style={styles.receiptLimeCircle}>
-                <Ionicons name="receipt-outline" size={20} color="#000000" />
+              <View style={styles.summaryHeaderRow}>
+                <Text style={styles.summaryTitle}>Loan Summary</Text>
+                <View style={styles.activeStatusBadge}>
+                  <View style={styles.greenStatusDot} />
+                  <Text style={styles.activeStatusText}>Active Loan</Text>
+                </View>
               </View>
 
-              <View style={styles.paymentMetaCol}>
-                <Text style={styles.paymentDateText}>{fmtDate(item.date)}</Text>
-                <Text style={styles.paymentAmountVal}>{fmt(item.amount)}</Text>
-              </View>
-
-              <Text style={styles.statusSuccessText}>
-                {item.status || 'Success'}
+              <Text style={styles.outstandingLabel}>Total Outstanding Balance</Text>
+              <Text style={styles.outstandingAmountVal}>
+                {fmt(loan?.outstanding || 12505.58)}
               </Text>
             </View>
-          ))}
-        </View>
-        </>
+
+            {/* ── Horizontal Date Strip & "Next Due Date" Pill Card ────────────── */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginHorizontal: -30 }}
+              contentContainerStyle={[styles.dateStripRow, { paddingHorizontal: 20 }]}
+            >
+              {dateStripDays.map((d) => (
+                <View key={d.id} style={[styles.dateCell, d.isActive && styles.dateCellActive]}>
+                  <Text style={d.isActive ? styles.dateDayLabelActive : styles.dateDayLabel}>
+                    {d.dayLabel}
+                  </Text>
+                  <Text style={d.isActive ? styles.dateNumLabelActive : styles.dateNumLabel}>
+                    {d.dayNum}
+                  </Text>
+                </View>
+              ))}
+
+              {/* Lime Next Due Date Card Pill */}
+              <View style={styles.nextDueLimePillCard}>
+                <View style={styles.nextDuePillHeader}>
+                  <Text style={styles.nextDueLabelText}>Next Due Date</Text>
+                  <View style={styles.greenPillDot} />
+                </View>
+                <Text style={styles.nextDueDateVal}>
+                  {fmtDate(loan?.nextDueDate || '2024-05-15')}
+                </Text>
+              </View>
+            </ScrollView>
+
+            {/* ── "Recent Payments" Section ───────────────────────────────────── */}
+            <Text style={styles.sectionTitle}>Recent Payments</Text>
+
+            <View style={styles.paymentsList}>
+              {recentPayments.map((item) => (
+                <View key={item.id} style={styles.paymentCard}>
+                  <View style={styles.receiptLimeCircle}>
+                    <Ionicons name="receipt-outline" size={20} color="#000000" />
+                  </View>
+
+                  <View style={styles.paymentMetaCol}>
+                    <Text style={styles.paymentDateText}>{fmtDate(item.date)}</Text>
+                    <Text style={styles.paymentAmountVal}>{fmt(item.amount)}</Text>
+                  </View>
+
+                  <Text style={styles.statusSuccessText}>
+                    {item.status || 'Success'}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </>
         )}
       </ScrollView>
     </SafeAreaView>

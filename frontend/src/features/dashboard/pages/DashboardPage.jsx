@@ -111,6 +111,9 @@ const DashboardPage = () => {
   const userFirstName = user?.name ? user.name.split(' ')[0] : 'Jane';
   const hasActiveLoan = loan && loan.outstanding > 0;
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+
   return (
     <SafeAreaView style={styles.safe}>
       {/* ── Header Row (Avatar + Good Morning + Green Bell) ───────────────── */}
@@ -127,7 +130,7 @@ const DashboardPage = () => {
           </TouchableOpacity>
 
           <View>
-            <Text style={styles.greetingSub}>Good Morning</Text>
+            <Text style={styles.greetingSub}>{greeting}</Text>
             <Text style={styles.userNameText}>{userName}</Text>
           </View>
         </View>

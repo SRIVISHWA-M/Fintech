@@ -62,6 +62,9 @@ const LoansPage = () => {
   const [payments, setPayments] = useState(paymentStore.getState());
   const user = authStore.getState().user;
   const userName = user?.name ? user.name : 'Jane Cooper';
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
   const [selectedMethod, setSelectedMethod] = useState('hdfc');
   const [customAmount, setCustomAmount] = useState('');
   const [payType, setPayType] = useState('emi');
@@ -79,8 +82,8 @@ const LoansPage = () => {
 
   const payAmount = loan ? (
     payType === 'emi' ? loan.nextDueAmount
-    : payType === 'full' ? loan.outstanding
-    : parseFloat(customAmount) || 0
+      : payType === 'full' ? loan.outstanding
+        : parseFloat(customAmount) || 0
   ) : 0;
 
   const methodLabel = PAYMENT_METHODS.find((m) => m.id === selectedMethod)?.label || '';
@@ -141,12 +144,12 @@ const LoansPage = () => {
             ))}
           </View>
 
-          <TouchableOpacity 
-            style={styles.payAgainBtn} 
+          <TouchableOpacity
+            style={styles.payAgainBtn}
             onPress={() => {
               setSuccess(null);
               navigation.navigate('Home');
-            }} 
+            }}
             activeOpacity={0.85}
           >
             <Ionicons name="home-outline" size={16} color={colors.successForeground} />
@@ -173,7 +176,7 @@ const LoansPage = () => {
           </TouchableOpacity>
 
           <View>
-            <Text style={styles.greetingSub}>Good Morning</Text>
+            <Text style={styles.greetingSub}>{greeting}</Text>
             <Text style={styles.userNameText}>{userName}</Text>
           </View>
         </View>
@@ -192,8 +195,8 @@ const LoansPage = () => {
             <Text style={{ fontSize: 14, color: colors.mutedForeground, textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
               Loan details and payment options will appear here once your loan is approved and active.
             </Text>
-            <TouchableOpacity 
-              style={[styles.payBtn, { alignSelf: 'center', paddingHorizontal: 32 }]} 
+            <TouchableOpacity
+              style={[styles.payBtn, { alignSelf: 'center', paddingHorizontal: 32 }]}
               onPress={() => navigation.navigate('Home')}
             >
               <Text style={styles.payBtnText}>Explore Loans</Text>
@@ -204,170 +207,170 @@ const LoansPage = () => {
             {/* ── Loan Card ────────────────────────────────────────────────── */}
             <View style={styles.heroCard}>
               <View style={styles.creditCardVisual}>
-            {/* Metallic Glass Glare Effects */}
-            <View style={styles.cardGlare} />
-            
-            <Text style={styles.cardBrandTitle}>Hidel</Text>
-            
-            <View style={styles.cardMidSection}>
-              <Text style={styles.outstandingLabel}>Current Balance</Text>
-              <Text style={styles.outstandingAmountVal}>
-                {fmt(loan.outstanding)}
-              </Text>
-            </View>
+                {/* Metallic Glass Glare Effects */}
+                <View style={styles.cardGlare} />
 
-            <View style={styles.cardBottomRow}>
-              <Text style={styles.cardNumberText}>**** **** **** {loan.id ? loan.id.slice(-4) : '6925'}</Text>
-              <View style={styles.cardExpWrap}>
-                <Text style={styles.cardExpLabel}>Exp.Date</Text>
-                <Text style={styles.cardExpVal}>10/28</Text>
+                <Text style={styles.cardBrandTitle}>Hidel</Text>
+
+                <View style={styles.cardMidSection}>
+                  <Text style={styles.outstandingLabel}>Current Balance</Text>
+                  <Text style={styles.outstandingAmountVal}>
+                    {fmt(loan.outstanding)}
+                  </Text>
+                </View>
+
+                <View style={styles.cardBottomRow}>
+                  <Text style={styles.cardNumberText}>**** **** **** {loan.id ? loan.id.slice(-4) : '6925'}</Text>
+                  <View style={styles.cardExpWrap}>
+                    <Text style={styles.cardExpLabel}>Exp.Date</Text>
+                    <Text style={styles.cardExpVal}>10/28</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Progress */}
+              <View style={{ marginTop: 16 }}>
+                <View style={styles.progressBarBg}>
+                  <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
+                </View>
+                <View style={styles.progressMeta}>
+                  <Text style={styles.progressMetaL}>{loan.paidEmis} of {loan.termMonths} EMIs · {progress}% repaid</Text>
+                  <Text style={styles.progressMetaR}>{fmt(loan.paid)} total paid</Text>
+                </View>
+              </View>
+
+              {/* Key info */}
+              <View style={styles.keyInfoRow}>
+                {[
+                  { label: 'Principal', val: fmt(loan.principal) },
+                  { label: 'Rate', val: `${loan.interestRate}% p.a.` },
+                  { label: 'Next Due', val: fmtDate(loan.nextDueDate) },
+                ].map(({ label, val }, i, arr) => (
+                  <React.Fragment key={label}>
+                    <View style={styles.keyInfoCol}>
+                      <Text style={styles.keyInfoLabel}>{label}</Text>
+                      <Text style={styles.keyInfoVal}>{val}</Text>
+                    </View>
+                    {i < arr.length - 1 && <View style={styles.keyInfoDivider} />}
+                  </React.Fragment>
+                ))}
               </View>
             </View>
-          </View>
 
-          {/* Progress */}
-          <View style={{ marginTop: 16 }}>
-            <View style={styles.progressBarBg}>
-              <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
-            </View>
-            <View style={styles.progressMeta}>
-              <Text style={styles.progressMetaL}>{loan.paidEmis} of {loan.termMonths} EMIs · {progress}% repaid</Text>
-              <Text style={styles.progressMetaR}>{fmt(loan.paid)} total paid</Text>
-            </View>
-          </View>
-
-          {/* Key info */}
-          <View style={styles.keyInfoRow}>
-            {[
-              { label: 'Principal', val: fmt(loan.principal) },
-              { label: 'Rate', val: `${loan.interestRate}% p.a.` },
-              { label: 'Next Due', val: fmtDate(loan.nextDueDate) },
-            ].map(({ label, val }, i, arr) => (
-              <React.Fragment key={label}>
-                <View style={styles.keyInfoCol}>
-                  <Text style={styles.keyInfoLabel}>{label}</Text>
-                  <Text style={styles.keyInfoVal}>{val}</Text>
+            {/* ── Urgent Alert ─────────────────────────────────────────────── */}
+            {daysLeft <= 5 && (
+              <View style={styles.urgentBanner}>
+                <View style={styles.urgentIconWrap}>
+                  <Ionicons name="alert-circle" size={16} color={colors.destructive} />
                 </View>
-                {i < arr.length - 1 && <View style={styles.keyInfoDivider} />}
-              </React.Fragment>
-            ))}
-          </View>
-        </View>
-
-        {/* ── Urgent Alert ─────────────────────────────────────────────── */}
-        {daysLeft <= 5 && (
-          <View style={styles.urgentBanner}>
-            <View style={styles.urgentIconWrap}>
-              <Ionicons name="alert-circle" size={16} color={colors.destructive} />
-            </View>
-            <Text style={styles.urgentText}>
-              EMI {daysLeft <= 0 ? 'is overdue' : `due in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`} — {fmtDate(loan.nextDueDate)}
-            </Text>
-          </View>
-        )}
-
-        {/* ── Payment Section ───────────────────────────────────────────── */}
-        <View style={styles.payCard}>
-          <View style={styles.payCardHeader}>
-            <Ionicons name="card-outline" size={18} color={colors.success} />
-            <Text style={styles.sectionTitle}>Make a Payment</Text>
-          </View>
-
-          {/* Type selector */}
-          <View style={styles.typeRow}>
-            {[
-              { id: 'emi', label: 'Pay EMI', value: fmt(loan.nextDueAmount) },
-              { id: 'custom', label: 'Partial amount', value: 'Enter amount' },
-              { id: 'full', label: 'Full amount', value: fmt(loan.outstanding) },
-            ].map(({ id, label, value }) => (
-              <TouchableOpacity
-                key={id}
-                style={[styles.typeBtn, payType === id && styles.typeBtnActive]}
-                onPress={() => setPayType(id)}
-                activeOpacity={0.75}
-              >
-                {payType === id && (
-                  <View style={styles.typeBtnDot} />
-                )}
-                <Text style={[styles.typeBtnLabel, payType === id && { color: colors.success }]}>{label}</Text>
-                <Text style={[styles.typeBtnValue, payType === id && { color: colors.foreground }]}>{value}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Custom input */}
-          {payType === 'custom' && (
-            <View style={styles.customInputWrap}>
-              <Text style={styles.rupeeSign}>₹</Text>
-              <TextInput
-                style={styles.customInput}
-                placeholder="Enter amount"
-                placeholderTextColor={colors.mutedForeground}
-                keyboardType="numeric"
-                value={customAmount}
-                onChangeText={setCustomAmount}
-              />
-              <Text style={styles.maxLabel}>Max: {fmt(loan.outstanding)}</Text>
-            </View>
-          )}
-
-          {/* Payment Methods */}
-          <Text style={styles.methodHeading}>Select Payment Method</Text>
-          <View style={{ gap: 8 }}>
-            {PAYMENT_METHODS.map(({ id, label, iconName, sub }) => (
-              <TouchableOpacity
-                key={id}
-                style={[styles.methodBtn, selectedMethod === id && styles.methodBtnActive]}
-                onPress={() => setSelectedMethod(id)}
-                activeOpacity={0.75}
-              >
-                <View style={[styles.methodIcon, selectedMethod === id && styles.methodIconActive]}>
-                  <Ionicons name={iconName} size={16} color={selectedMethod === id ? colors.success : colors.mutedForeground} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.methodLabel}>{label}</Text>
-                  <Text style={styles.methodSub}>{sub}</Text>
-                </View>
-                <View style={[styles.radioOuter, selectedMethod === id && styles.radioOuterActive]}>
-                  {selectedMethod === id && <View style={styles.radioInner} />}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Summary */}
-          <View style={styles.summaryBox}>
-            {[['Amount', fmt(payAmount)], ['Method', methodLabel]].map(([k, v]) => (
-              <View key={k} style={styles.summaryRow}>
-                <Text style={styles.summaryKey}>{k}</Text>
-                <Text style={styles.summaryVal}>{v}</Text>
+                <Text style={styles.urgentText}>
+                  EMI {daysLeft <= 0 ? 'is overdue' : `due in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`} — {fmtDate(loan.nextDueDate)}
+                </Text>
               </View>
-            ))}
-            <View style={styles.summaryDivider} />
-            <View style={styles.summaryRow}>
-              <Text style={[styles.summaryKey, { fontWeight: '700', color: colors.foreground, fontSize: 15 }]}>Total</Text>
-              <Text style={[styles.summaryVal, { color: colors.success, fontSize: 16, fontWeight: '600' }]}>{fmt(payAmount)}</Text>
-            </View>
-          </View>
-
-          {/* Pay button */}
-          <TouchableOpacity
-            style={[styles.payBtn, (loading || payAmount <= 0) && styles.payBtnDisabled]}
-            onPress={handlePayment}
-            disabled={loading || payAmount <= 0}
-            activeOpacity={0.85}
-          >
-            {loading ? (
-              <ActivityIndicator color={colors.successForeground} />
-            ) : (
-              <>
-                <Ionicons name="lock-closed-outline" size={16} color={colors.successForeground} />
-                <Text style={styles.payBtnText}>Pay {fmt(payAmount)} Securely</Text>
-              </>
             )}
-          </TouchableOpacity>
-            <Text style={styles.secureNote}>🔒 256-bit SSL encrypted · RBI compliant</Text>
-          </View>
+
+            {/* ── Payment Section ───────────────────────────────────────────── */}
+            <View style={styles.payCard}>
+              <View style={styles.payCardHeader}>
+                <Ionicons name="card-outline" size={18} color={colors.success} />
+                <Text style={styles.sectionTitle}>Make a Payment</Text>
+              </View>
+
+              {/* Type selector */}
+              <View style={styles.typeRow}>
+                {[
+                  { id: 'emi', label: 'Pay EMI', value: fmt(loan.nextDueAmount) },
+                  { id: 'custom', label: 'Partial amount', value: 'Enter amount' },
+                  { id: 'full', label: 'Full amount', value: fmt(loan.outstanding) },
+                ].map(({ id, label, value }) => (
+                  <TouchableOpacity
+                    key={id}
+                    style={[styles.typeBtn, payType === id && styles.typeBtnActive]}
+                    onPress={() => setPayType(id)}
+                    activeOpacity={0.75}
+                  >
+                    {payType === id && (
+                      <View style={styles.typeBtnDot} />
+                    )}
+                    <Text style={[styles.typeBtnLabel, payType === id && { color: colors.success }]}>{label}</Text>
+                    <Text style={[styles.typeBtnValue, payType === id && { color: colors.foreground }]}>{value}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Custom input */}
+              {payType === 'custom' && (
+                <View style={styles.customInputWrap}>
+                  <Text style={styles.rupeeSign}>₹</Text>
+                  <TextInput
+                    style={styles.customInput}
+                    placeholder="Enter amount"
+                    placeholderTextColor={colors.mutedForeground}
+                    keyboardType="numeric"
+                    value={customAmount}
+                    onChangeText={setCustomAmount}
+                  />
+                  <Text style={styles.maxLabel}>Max: {fmt(loan.outstanding)}</Text>
+                </View>
+              )}
+
+              {/* Payment Methods */}
+              <Text style={styles.methodHeading}>Select Payment Method</Text>
+              <View style={{ gap: 8 }}>
+                {PAYMENT_METHODS.map(({ id, label, iconName, sub }) => (
+                  <TouchableOpacity
+                    key={id}
+                    style={[styles.methodBtn, selectedMethod === id && styles.methodBtnActive]}
+                    onPress={() => setSelectedMethod(id)}
+                    activeOpacity={0.75}
+                  >
+                    <View style={[styles.methodIcon, selectedMethod === id && styles.methodIconActive]}>
+                      <Ionicons name={iconName} size={16} color={selectedMethod === id ? colors.success : colors.mutedForeground} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.methodLabel}>{label}</Text>
+                      <Text style={styles.methodSub}>{sub}</Text>
+                    </View>
+                    <View style={[styles.radioOuter, selectedMethod === id && styles.radioOuterActive]}>
+                      {selectedMethod === id && <View style={styles.radioInner} />}
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Summary */}
+              <View style={styles.summaryBox}>
+                {[['Amount', fmt(payAmount)], ['Method', methodLabel]].map(([k, v]) => (
+                  <View key={k} style={styles.summaryRow}>
+                    <Text style={styles.summaryKey}>{k}</Text>
+                    <Text style={styles.summaryVal}>{v}</Text>
+                  </View>
+                ))}
+                <View style={styles.summaryDivider} />
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.summaryKey, { fontWeight: '700', color: colors.foreground, fontSize: 15 }]}>Total</Text>
+                  <Text style={[styles.summaryVal, { color: colors.success, fontSize: 16, fontWeight: '600' }]}>{fmt(payAmount)}</Text>
+                </View>
+              </View>
+
+              {/* Pay button */}
+              <TouchableOpacity
+                style={[styles.payBtn, (loading || payAmount <= 0) && styles.payBtnDisabled]}
+                onPress={handlePayment}
+                disabled={loading || payAmount <= 0}
+                activeOpacity={0.85}
+              >
+                {loading ? (
+                  <ActivityIndicator color={colors.successForeground} />
+                ) : (
+                  <>
+                    <Ionicons name="lock-closed-outline" size={16} color={colors.successForeground} />
+                    <Text style={styles.payBtnText}>Pay {fmt(payAmount)} Securely</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+              {/* <Text style={styles.secureNote}>🔒 256-bit SSL encrypted · RBI compliant</Text> */}
+            </View>
           </>
         )}
 

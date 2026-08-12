@@ -77,6 +77,26 @@ const Loan = sequelize.define('Loan', {
     allowNull: false,
     defaultValue: 50.00,
   },
+  status: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'Active',
+  },
+  emiStatus: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'Not Started',
+  },
+  penaltyAmount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0.00,
+  },
+  latePaymentCount: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
 });
 
 module.exports = Loan;

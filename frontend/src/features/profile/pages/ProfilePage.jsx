@@ -68,7 +68,15 @@ const ProfilePage = () => {
                 <Text style={styles.modalCancelBtn}>Cancel</Text>
               </TouchableOpacity>
               <Text style={styles.modalTitle}>Edit Profile</Text>
-              <TouchableOpacity onPress={() => setIsEditingProfile(false)}>
+              <TouchableOpacity onPress={async () => {
+                try {
+                  await authService.updateProfile({ name: editName, email: editEmail });
+                  setIsEditingProfile(false);
+                } catch (e) {
+                  console.error('Failed to update profile:', e);
+                  setIsEditingProfile(false);
+                }
+              }}>
                 <Text style={styles.modalSaveBtn}>Save</Text>
               </TouchableOpacity>
             </View>
@@ -109,7 +117,7 @@ const ProfilePage = () => {
 
       {/* ── Custom Header ────────────────────────────────────────────── */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.headerBtn} onPress={() => navigation.navigate('Home')} activeOpacity={0.7}>
           <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Settings</Text>
@@ -357,9 +365,10 @@ const getStyles = (colors) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === 'ios' ? 12 : 16,
-    backgroundColor: '#c6c6c6cd',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 12 : 16,
+    paddingBottom: 16,
+    backgroundColor: '#FFFFFF',
   },
   headerBtn: {
     width: 40,

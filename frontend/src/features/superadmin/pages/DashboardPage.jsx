@@ -347,7 +347,7 @@ const DashboardPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
               <Ionicons name="chevron-forward" size={12} color={adminColors.accent} />
             </TouchableOpacity>
           </View>
-          {recentActivity.slice(0, 4).map((a) => {
+          {recentActivity.slice(0, 3).map((a) => {
             const { icon, color } = activityMap[a.type] || { icon: 'ellipse', color: adminColors.fgMuted };
             return (
               <View key={a.id} style={styles.actRow}>
