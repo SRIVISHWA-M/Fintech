@@ -65,9 +65,9 @@ const login = async (email, password) => {
     throw new UnauthorizedError('Incorrect email/customer ID or password');
   }
 
-  if (!user.isVerified) {
-    throw new UnauthorizedError('Please verify your email address before logging in.');
-  }
+  // if (!user.isVerified) {
+  //   throw new UnauthorizedError('Please verify your email address before logging in.');
+  // }
 
   if (user.status === 'Pending') {
     throw new UnauthorizedError(`Account is pending approval. Please wait until a Super Admin approves your account.`);

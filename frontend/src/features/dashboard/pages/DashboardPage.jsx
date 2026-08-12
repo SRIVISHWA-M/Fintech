@@ -24,8 +24,8 @@ const RepaymentTrendChart = () => (
     <Svg width="100%" height="160" viewBox="0 0 320 140">
       <Defs>
         <LinearGradient id="trendGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <Stop offset="0%" stopColor="#A3E635" stopOpacity="0.45" />
-          <Stop offset="100%" stopColor="#A3E635" stopOpacity="0.0" />
+          <Stop offset="0%" stopColor="#3cd778" stopOpacity="0.45" />
+          <Stop offset="100%" stopColor="#3cd778" stopOpacity="0.0" />
         </LinearGradient>
       </Defs>
 
@@ -47,7 +47,7 @@ const RepaymentTrendChart = () => (
       <Path
         d="M 10 115 Q 60 95 110 90 T 210 60 T 310 30"
         fill="none"
-        stroke="#A3E635"
+        stroke="#3cd778"
         strokeWidth="3.5"
         strokeLinecap="round"
       />
@@ -111,9 +111,6 @@ const DashboardPage = () => {
   const userFirstName = user?.name ? user.name.split(' ')[0] : 'Jane';
   const hasActiveLoan = loan && loan.outstanding > 0;
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
-
   return (
     <SafeAreaView style={styles.safe}>
       {/* ── Header Row (Avatar + Good Morning + Green Bell) ───────────────── */}
@@ -130,7 +127,7 @@ const DashboardPage = () => {
           </TouchableOpacity>
 
           <View>
-            <Text style={styles.greetingSub}>{greeting}</Text>
+            <Text style={styles.greetingSub}>Good Morning</Text>
             <Text style={styles.userNameText}>{userName}</Text>
           </View>
         </View>
@@ -153,7 +150,7 @@ const DashboardPage = () => {
               Dashboard data will appear here once your loan is approved and active.
             </Text>
             <TouchableOpacity 
-              style={{ backgroundColor: '#A3E635', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 14, alignItems: 'center' }}
+              style={{ backgroundColor: '#3cd778', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 14, alignItems: 'center' }}
               onPress={() => navigation.navigate('Home')}
             >
               <Text style={{ fontSize: 15, fontWeight: '600', color: '#000000' }}>Explore Loans</Text>
@@ -232,7 +229,7 @@ const DashboardPage = () => {
               <Path
                 d="M 20 100 A 80 80 0 0 1 180 100"
                 fill="none"
-                stroke="#A3E635"
+                stroke="#3cd778"
                 strokeWidth="14"
                 strokeDasharray="251"
                 strokeDashoffset={251 - (251 * Math.min(progress, 100)) / 100}
@@ -243,7 +240,7 @@ const DashboardPage = () => {
                 cx="58"
                 cy="44"
                 r="7"
-                fill="#A3E635"
+                fill="#3cd778"
                 stroke="#FFFFFF"
                 strokeWidth="2.5"
               />
@@ -372,10 +369,10 @@ const getStyles = (colors) =>
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: '#A3E635',
+      backgroundColor: '#3cd778',
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: '#84CC16',
+      shadowColor: '#33ba65',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,
       shadowRadius: 6,
@@ -551,11 +548,11 @@ const getStyles = (colors) =>
       color: '#6B7280',
     },
     payNowLimeBtn: {
-      backgroundColor: '#A3E635',
+      backgroundColor: '#3cd778',
       borderRadius: 18,
       paddingHorizontal: 22,
       paddingVertical: 10,
-      shadowColor: '#84CC16',
+      shadowColor: '#33ba65',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,
       shadowRadius: 6,
@@ -593,7 +590,7 @@ const getStyles = (colors) =>
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: '#A3E635',
+      backgroundColor: '#3cd778',
       alignItems: 'center',
       justifyContent: 'center',
     },

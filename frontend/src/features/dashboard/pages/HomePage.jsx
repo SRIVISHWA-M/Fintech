@@ -38,7 +38,7 @@ const HomePage = () => {
       {/* ── Brand Header (FinTrust Logo & Profile Avatar) ───────────────── */}
       <View style={styles.header}>
         <View style={styles.logoRow}>
-          <Image
+          <Image 
             source={{ uri: 'https://res.cloudinary.com/wowukaao/image/upload/v1785171832/Screenshot_2026-07-27_223203-removebg-preview_kikjdd.png' }}
             style={styles.logoIconImage}
           />
@@ -123,7 +123,7 @@ const HomePage = () => {
               activeOpacity={0.85}
             >
               <Text style={styles.payNowBtnText}>Pay Now</Text>
-              <Ionicons name="chevron-forward" size={16} color="#000000ff" />
+              <Ionicons name="chevron-forward" size={16} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         )}
@@ -225,7 +225,7 @@ const HomePage = () => {
               <Text style={styles.applyLimeBtnText}>Apply Now</Text>
             </TouchableOpacity>
           </View>
-        </View>
+         </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -312,8 +312,8 @@ const getStyles = (colors) =>
       position: 'relative',
       overflow: 'hidden',
       borderWidth: 1,
-      borderColor: 'rgba(163, 230, 53, 0.25)',
-      shadowColor: '#A3E635',
+      borderColor: 'rgba(52,216,124, 0.25)',
+      shadowColor: '#3cd778',
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.22,
       shadowRadius: 20,
@@ -327,7 +327,7 @@ const getStyles = (colors) =>
       width: 140,
       height: 140,
       borderRadius: 70,
-      backgroundColor: 'rgba(163, 230, 53, 0.22)',
+      backgroundColor: 'rgba(52,216,124, 0.22)',
     },
     glowBlobRight: {
       position: 'absolute',
@@ -369,11 +369,11 @@ const getStyles = (colors) =>
       fontWeight: '500',
     },
     exploreBtn: {
-      backgroundColor: '#A3E635',
+      backgroundColor: '#3cd778',
       borderRadius: 24,
       paddingVertical: 14,
       alignItems: 'center',
-      shadowColor: '#84CC16',
+      shadowColor: '#33ba65',
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 10,
@@ -479,7 +479,7 @@ const getStyles = (colors) =>
       color: '#6B7280',
     },
     payNowBtn: {
-      backgroundColor: '#A3E635',
+      backgroundColor: '#111827',
       borderRadius: 14,
       paddingVertical: 12,
       flexDirection: 'row',
@@ -488,7 +488,7 @@ const getStyles = (colors) =>
       gap: 6,
     },
     payNowBtnText: {
-      color: '#000000',
+      color: '#FFFFFF',
       fontWeight: '700',
       fontSize: 13,
     },
@@ -563,7 +563,7 @@ const getStyles = (colors) =>
       marginBottom: 16,
     },
     applyLimeBtn: {
-      backgroundColor: '#A3E635',
+      backgroundColor: '#3cd778',
       borderRadius: 18,
       paddingVertical: 10,
       alignItems: 'center',

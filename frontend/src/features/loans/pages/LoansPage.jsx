@@ -42,7 +42,7 @@ const CardWaves = () => (
     <Svg width="100%" height="100%">
       <Defs>
         <LinearGradient id="wg" x1="0%" y1="0%" x2="100%" y2="0%">
-          <Stop offset="0%" stopColor="#34d87c" stopOpacity="0.10" />
+          <Stop offset="0%" stopColor="#3cd778" stopOpacity="0.10" />
           <Stop offset="100%" stopColor="#60a5fa" stopOpacity="0.04" />
         </LinearGradient>
       </Defs>

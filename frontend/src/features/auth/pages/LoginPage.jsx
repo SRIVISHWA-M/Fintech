@@ -325,7 +325,7 @@ const LoginPage = () => {
 
                   <View style={styles.switchModeContainer}>
                     <Text style={styles.switchModeText}>Already have an account? </Text>
-                    <TouchableOpacity onPress={() => { setMode('login'); setEmail('aarav.shah@example.com'); setPassword('password123'); }}>
+                    <TouchableOpacity onPress={() => { setMode('login'); setEmail(''); setPassword(''); }}>
                       <Text style={styles.switchModeAction}>Sign In</Text>
                     </TouchableOpacity>
                   </View>
@@ -496,9 +496,9 @@ const getStyles = (colors) => StyleSheet.create({
     paddingHorizontal: 14,
   },
   inputWrapperFocused: {
-    borderColor: '#A3E635',
+    borderColor: '#3cd778',
     backgroundColor: '#FFFFFF',
-    shadowColor: '#A3E635',
+    shadowColor: '#3cd778',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -518,14 +518,14 @@ const getStyles = (colors) => StyleSheet.create({
     padding: 4,
   },
   signInBtn: {
-    backgroundColor: '#A3E635',
+    backgroundColor: '#3cd778',
     borderRadius: 12,
     height: 48,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-    shadowColor: '#84CC16',
+    shadowColor: '#3cd778',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
