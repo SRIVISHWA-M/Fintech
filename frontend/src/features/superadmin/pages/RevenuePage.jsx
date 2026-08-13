@@ -116,7 +116,7 @@ const recentFinancialEvents = [
 ];
 
 const financialEventColors = {
-  repayment: '#10b981', // green
+  repayment: '#90EE90', // green
   fee:        '#3b82f6', // blue
   penalty:    '#f59e0b', // amber
   disbursal:  '#8b5cf6', // purple
@@ -281,14 +281,14 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   trendBadge: {
-    backgroundColor: 'rgba(16,185,129,0.1)',
+    backgroundColor: 'rgba(144, 238, 144,0.1)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 99,
   },
   trendText: {
     fontSize: 10,
-    color: '#10b981',
+    color: '#90EE90',
     fontWeight: '700',
   },
   insightRow: {

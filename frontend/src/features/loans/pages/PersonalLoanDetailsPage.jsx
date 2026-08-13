@@ -346,7 +346,7 @@ const getStyles = (colors, isDark) => StyleSheet.create({
     width: 11,
     height: 11,
     borderRadius: 6,
-    backgroundColor: '#22C55E',
+    backgroundColor: '#90EE90',
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },

@@ -481,7 +481,7 @@ const getStyles = (colors) => StyleSheet.create({
     marginBottom: 6,
   },
   forgotText: {
-    color: '#10B981',
+    color: '#90EE90',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -496,9 +496,9 @@ const getStyles = (colors) => StyleSheet.create({
     paddingHorizontal: 14,
   },
   inputWrapperFocused: {
-    borderColor: '#3cd778',
+    borderColor: '#90EE90',
     backgroundColor: '#FFFFFF',
-    shadowColor: '#3cd778',
+    shadowColor: '#90EE90',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -518,14 +518,14 @@ const getStyles = (colors) => StyleSheet.create({
     padding: 4,
   },
   signInBtn: {
-    backgroundColor: '#3cd778',
+    backgroundColor: '#90EE90',
     borderRadius: 12,
     height: 48,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-    shadowColor: '#3cd778',
+    shadowColor: '#90EE90',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
@@ -547,7 +547,7 @@ const getStyles = (colors) => StyleSheet.create({
     fontSize: 13 
   },
   switchModeAction: { 
-    color: '#10B981', 
+    color: '#90EE90', 
     fontSize: 13, 
     fontWeight: '700' 
   },

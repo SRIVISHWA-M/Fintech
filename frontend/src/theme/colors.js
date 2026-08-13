@@ -19,11 +19,11 @@ export const darkColors = {
   borderStrong: 'rgba(255,255,255,0.12)',
 
   // Accent / Success (emerald green)
-  success: '#3cd778',
-  successLight: '#4ce98a',
-  successDim: 'rgba(60,215,120,0.12)',
-  successDimMid: 'rgba(60,215,120,0.07)',
-  successBorder: 'rgba(60,215,120,0.22)',
+  success: '#90EE90',
+  successLight: '#90EE90',
+  successDim: 'rgba(144, 238, 144,0.12)',
+  successDimMid: 'rgba(144, 238, 144,0.07)',
+  successBorder: 'rgba(144, 238, 144,0.22)',
   successForeground: '#041a0d',
 
   // Destructive / Warning
@@ -49,7 +49,7 @@ export const darkColors = {
     elevation: 6,
   },
   shadowGlow: {
-    shadowColor: '#3cd778',
+    shadowColor: '#90EE90',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
     shadowRadius: 16,
@@ -89,15 +89,15 @@ export const lightColors = {
   borderStrong: 'rgba(0,0,0,0.12)',
 
   // Accent / Success / Neon Lime (FinTrust Theme)
-  success: '#3cd778',
-  successLight: '#33ba65',
-  successDim: 'rgba(60,215,120,0.12)',
-  successDimMid: 'rgba(60,215,120,0.07)',
-  successBorder: 'rgba(60,215,120,0.22)',
+  success: '#90EE90',
+  successLight: '#90EE90',
+  successDim: 'rgba(144, 238, 144,0.12)',
+  successDimMid: 'rgba(144, 238, 144,0.07)',
+  successBorder: 'rgba(144, 238, 144,0.22)',
   successForeground: '#000000',
-  limeBtn: '#3cd778',
+  limeBtn: '#90EE90',
   limeBtnText: '#000000',
-  limeBtnDark: '#33ba65',
+  limeBtnDark: '#90EE90',
 
   // Destructive / Warning
   destructive: '#ef4444',
@@ -122,7 +122,7 @@ export const lightColors = {
     elevation: 2,
   },
   shadowGlow: {
-    shadowColor: '#3cd778',
+    shadowColor: '#90EE90',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 16,

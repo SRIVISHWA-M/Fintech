@@ -24,8 +24,8 @@ const RepaymentTrendChart = () => (
     <Svg width="100%" height="160" viewBox="0 0 320 140">
       <Defs>
         <LinearGradient id="trendGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <Stop offset="0%" stopColor="#3cd778" stopOpacity="0.45" />
-          <Stop offset="100%" stopColor="#3cd778" stopOpacity="0.0" />
+          <Stop offset="0%" stopColor="#90EE90" stopOpacity="0.45" />
+          <Stop offset="100%" stopColor="#90EE90" stopOpacity="0.0" />
         </LinearGradient>
       </Defs>
 
@@ -47,7 +47,7 @@ const RepaymentTrendChart = () => (
       <Path
         d="M 10 115 Q 60 95 110 90 T 210 60 T 310 30"
         fill="none"
-        stroke="#3cd778"
+        stroke="#90EE90"
         strokeWidth="3.5"
         strokeLinecap="round"
       />
@@ -150,7 +150,7 @@ const DashboardPage = () => {
               Dashboard data will appear here once your loan is approved and active.
             </Text>
             <TouchableOpacity 
-              style={{ backgroundColor: '#3cd778', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 14, alignItems: 'center' }}
+              style={{ backgroundColor: '#90EE90', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 14, alignItems: 'center' }}
               onPress={() => navigation.navigate('Home')}
             >
               <Text style={{ fontSize: 15, fontWeight: '600', color: '#000000' }}>Explore Loans</Text>
@@ -207,7 +207,7 @@ const DashboardPage = () => {
             </View>
 
             <View style={styles.dueBadgeWrap}>
-              <Ionicons name="time-outline" size={14} color="#65A30D" />
+              <Ionicons name="time-outline" size={14} color="#90EE90" />
               <Text style={styles.dueBadgeText}>
                 {daysLeft <= 0 ? 'Overdue!' : `Due in ${daysLeft} days`}
               </Text>
@@ -229,7 +229,7 @@ const DashboardPage = () => {
               <Path
                 d="M 20 100 A 80 80 0 0 1 180 100"
                 fill="none"
-                stroke="#3cd778"
+                stroke="#90EE90"
                 strokeWidth="14"
                 strokeDasharray="251"
                 strokeDashoffset={251 - (251 * Math.min(progress, 100)) / 100}
@@ -240,7 +240,7 @@ const DashboardPage = () => {
                 cx="58"
                 cy="44"
                 r="7"
-                fill="#3cd778"
+                fill="#90EE90"
                 stroke="#FFFFFF"
                 strokeWidth="2.5"
               />
@@ -369,10 +369,10 @@ const getStyles = (colors) =>
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: '#3cd778',
+      backgroundColor: '#90EE90',
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: '#33ba65',
+      shadowColor: '#90EE90',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,
       shadowRadius: 6,
@@ -491,7 +491,7 @@ const getStyles = (colors) =>
     dueBadgeText: {
       fontSize: 11,
       fontWeight: '700',
-      color: '#65A30D',
+      color: '#90EE90',
     },
 
     // Gauge
@@ -548,11 +548,11 @@ const getStyles = (colors) =>
       color: '#6B7280',
     },
     payNowLimeBtn: {
-      backgroundColor: '#3cd778',
+      backgroundColor: '#90EE90',
       borderRadius: 18,
       paddingHorizontal: 22,
       paddingVertical: 10,
-      shadowColor: '#33ba65',
+      shadowColor: '#90EE90',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,
       shadowRadius: 6,
@@ -590,7 +590,7 @@ const getStyles = (colors) =>
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: '#3cd778',
+      backgroundColor: '#90EE90',
       alignItems: 'center',
       justifyContent: 'center',
     },

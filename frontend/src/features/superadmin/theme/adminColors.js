@@ -31,9 +31,9 @@ export const adminColors = {
   accentFg: '#ffffff',
 
   // Status colors
-  success: '#10b981',
-  successDim: 'rgba(16, 185, 129, 0.10)',
-  successFg: '#065f46',
+  success: '#90EE90',
+  successDim: 'rgba(144, 238, 144, 0.10)',
+  successFg: '#90EE90',
 
   // Warning colors
   warning: '#fbbf24',

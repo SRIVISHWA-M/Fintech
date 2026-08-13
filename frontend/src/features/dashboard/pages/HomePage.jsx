@@ -98,7 +98,7 @@ const HomePage = () => {
           <View style={styles.activeLoanCard}>
             <View style={styles.activeLoanHeader}>
               <View style={styles.activeLoanBadge}>
-                <Ionicons name="shield-checkmark" size={12} color="#10B981" />
+                <Ionicons name="shield-checkmark" size={12} color="#90EE90" />
                 <Text style={styles.activeLoanBadgeText}>Active Loan</Text>
               </View>
               <Text style={styles.activeLoanId}>{loan.id}</Text>
@@ -137,7 +137,7 @@ const HomePage = () => {
             <View style={styles.popularIconWrap}>
               <Ionicons name="person-outline" size={26} color="#1F2937" />
               <View style={styles.popularIconBadge}>
-                <Ionicons name="cash-outline" size={11} color="#10B981" />
+                <Ionicons name="cash-outline" size={11} color="#90EE90" />
               </View>
             </View>
             <Text style={styles.cardTitle}>Personal Loan</Text>
@@ -162,7 +162,7 @@ const HomePage = () => {
             <View style={styles.popularIconWrap}>
               <Ionicons name="trending-up-outline" size={26} color="#1F2937" />
               <View style={styles.popularIconBadge}>
-                <Ionicons name="bar-chart-outline" size={11} color="#10B981" />
+                <Ionicons name="bar-chart-outline" size={11} color="#90EE90" />
               </View>
             </View>
             <Text style={styles.cardTitle}>Business Loan</Text>
@@ -289,7 +289,7 @@ const getStyles = (colors) =>
       width: 11,
       height: 11,
       borderRadius: 6,
-      backgroundColor: '#22C55E',
+      backgroundColor: '#90EE90',
       borderWidth: 2,
       borderColor: '#FFFFFF',
     },
@@ -313,7 +313,7 @@ const getStyles = (colors) =>
       overflow: 'hidden',
       borderWidth: 1,
       borderColor: 'rgba(52,216,124, 0.25)',
-      shadowColor: '#3cd778',
+      shadowColor: '#90EE90',
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.22,
       shadowRadius: 20,
@@ -369,11 +369,11 @@ const getStyles = (colors) =>
       fontWeight: '500',
     },
     exploreBtn: {
-      backgroundColor: '#3cd778',
+      backgroundColor: '#90EE90',
       borderRadius: 24,
       paddingVertical: 14,
       alignItems: 'center',
-      shadowColor: '#33ba65',
+      shadowColor: '#90EE90',
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 10,
@@ -441,7 +441,7 @@ const getStyles = (colors) =>
     activeLoanBadgeText: {
       fontSize: 11,
       fontWeight: '700',
-      color: '#10B981',
+      color: '#90EE90',
     },
     activeLoanId: {
       fontSize: 11,
@@ -472,7 +472,7 @@ const getStyles = (colors) =>
     activeLoanDueAmount: {
       fontSize: 16,
       fontWeight: '700',
-      color: '#10B981',
+      color: '#90EE90',
     },
     activeLoanDueDate: {
       fontSize: 10,
@@ -563,7 +563,7 @@ const getStyles = (colors) =>
       marginBottom: 16,
     },
     applyLimeBtn: {
-      backgroundColor: '#3cd778',
+      backgroundColor: '#90EE90',
       borderRadius: 18,
       paddingVertical: 10,
       alignItems: 'center',

@@ -254,8 +254,8 @@ const ProfilePage = () => {
         <View style={[styles.card, { overflow: 'hidden' }]}>
           <View style={styles.row}>
             <View style={styles.rowLeft}>
-              <View style={[styles.iconBox, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
-                <Ionicons name="business-outline" size={20} color="#10B981" />
+              <View style={[styles.iconBox, { backgroundColor: 'rgba(144, 238, 144, 0.1)' }]}>
+                <Ionicons name="business-outline" size={20} color="#90EE90" />
               </View>
               <View>
                 <Text style={styles.rowLabel}>Linked Bank Account</Text>
@@ -467,7 +467,7 @@ const getStyles = (colors) => StyleSheet.create({
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.05)', backgroundColor: '#FFFFFF' },
   modalTitle: { fontSize: 17, fontWeight: '700', color: '#111827' },
   modalCancelBtn: { fontSize: 16, color: '#6B7280' },
-  modalSaveBtn: { fontSize: 16, fontWeight: '700', color: '#10B981' },
+  modalSaveBtn: { fontSize: 16, fontWeight: '700', color: '#90EE90' },
   modalBody: { padding: 20, backgroundColor: '#FFFFFF' },
   modalAvatarWrap: { alignItems: 'center', marginBottom: 24 },
   modalAvatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.limeBtn || '#A3E635', alignItems: 'center', justifyContent: 'center', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },

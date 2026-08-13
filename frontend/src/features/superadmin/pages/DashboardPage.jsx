@@ -205,8 +205,8 @@ const DashboardPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
         {/* Card 1: Approved Loans */}
         <View style={styles.kpiCard}>
           <View style={styles.kpiCardHeader}>
-            <View style={[styles.kpiIconBox, { backgroundColor: 'rgba(16,185,129,0.1)' }]}>
-              <Ionicons name="checkmark-circle-outline" size={18} color="#10b981" />
+            <View style={[styles.kpiIconBox, { backgroundColor: 'rgba(144, 238, 144,0.1)' }]}>
+              <Ionicons name="checkmark-circle-outline" size={18} color="#90EE90" />
             </View>
             <View style={styles.trendBadgePositive}>
               <Text style={styles.trendTextPositive}>+12.4%</Text>
@@ -268,7 +268,7 @@ const DashboardPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
             <Text style={styles.progressCardVal}>1,842</Text>
             <Text style={styles.progressCardSub}>3.5% more than last week</Text>
           </View>
-          <CircularProgress percentage={52} color="#10b981" />
+          <CircularProgress percentage={52} color="#90EE90" />
         </View>
 
         {/* Card 2: Short-Term Loans */}
@@ -558,14 +558,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   trendBadgePositive: {
-    backgroundColor: 'rgba(16,185,129,0.1)',
+    backgroundColor: 'rgba(144, 238, 144,0.1)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 99,
   },
   trendTextPositive: {
     fontSize: 10,
-    color: '#10b981',
+    color: '#90EE90',
     fontWeight: '700',
   },
   trendBadgeNegative: {

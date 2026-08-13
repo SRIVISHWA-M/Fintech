@@ -77,7 +77,7 @@ const PaymentsPage = () => {
               Payment history and details will appear here once your loan is approved and active.
             </Text>
             <TouchableOpacity 
-              style={{ backgroundColor: '#3cd778', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 14, alignItems: 'center' }}
+              style={{ backgroundColor: '#90EE90', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 14, alignItems: 'center' }}
               onPress={() => navigation.navigate('Home')}
             >
               <Text style={{ fontSize: 15, fontWeight: '600', color: '#000000' }}>Explore Loans</Text>
@@ -224,10 +224,10 @@ const getStyles = (colors) =>
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: '#3cd778',
+      backgroundColor: '#90EE90',
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: '#33ba65',
+      shadowColor: '#90EE90',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,
       shadowRadius: 6,
@@ -255,7 +255,7 @@ const getStyles = (colors) =>
       width: 120,
       height: 120,
       borderRadius: 60,
-      backgroundColor: 'rgba(34, 197, 94, 0.18)',
+      backgroundColor: 'rgba(144, 238, 144, 0.18)',
     },
     summaryHeaderRow: {
       flexDirection: 'row',
@@ -277,16 +277,16 @@ const getStyles = (colors) =>
       paddingVertical: 5,
       borderRadius: 16,
       borderWidth: 1,
-      borderColor: 'rgba(34, 197, 94, 0.3)',
+      borderColor: 'rgba(144, 238, 144, 0.3)',
     },
     greenStatusDot: {
       width: 7,
       height: 7,
       borderRadius: 4,
-      backgroundColor: '#22C55E',
+      backgroundColor: '#90EE90',
     },
     activeStatusText: {
-      color: '#4ce98a',
+      color: '#90EE90',
       fontSize: 11,
       fontWeight: '700',
     },
@@ -326,7 +326,7 @@ const getStyles = (colors) =>
       elevation: 2,
     },
     dateCellActive: {
-      borderColor: '#3cd778',
+      borderColor: '#90EE90',
       borderWidth: 1.5,
     },
     dateDayLabel: {
@@ -337,7 +337,7 @@ const getStyles = (colors) =>
     },
     dateDayLabelActive: {
       fontSize: 11,
-      color: '#65A30D',
+      color: '#90EE90',
       fontWeight: '700',
       marginBottom: 4,
     },
@@ -349,15 +349,15 @@ const getStyles = (colors) =>
     dateNumLabelActive: {
       fontSize: 15,
       fontWeight: '600',
-      color: '#65A30D',
+      color: '#90EE90',
     },
     nextDueLimePillCard: {
-      backgroundColor: '#3cd778',
+      backgroundColor: '#90EE90',
       borderRadius: 20,
       paddingHorizontal: 16,
       paddingVertical: 10,
       justifyContent: 'center',
-      shadowColor: '#33ba65',
+      shadowColor: '#90EE90',
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.25,
       shadowRadius: 8,
@@ -378,7 +378,7 @@ const getStyles = (colors) =>
       width: 6,
       height: 6,
       borderRadius: 3,
-      backgroundColor: '#15803D',
+      backgroundColor: '#90EE90',
     },
     nextDueDateVal: {
       fontSize: 15,
@@ -417,10 +417,10 @@ const getStyles = (colors) =>
       width: 46,
       height: 46,
       borderRadius: 23,
-      backgroundColor: '#3cd778',
+      backgroundColor: '#90EE90',
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: '#33ba65',
+      shadowColor: '#90EE90',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.2,
       shadowRadius: 4,
@@ -444,7 +444,7 @@ const getStyles = (colors) =>
     statusSuccessText: {
       fontSize: 13,
       fontWeight: '700',
-      color: '#65A30D',
+      color: '#90EE90',
     },
   });
 
