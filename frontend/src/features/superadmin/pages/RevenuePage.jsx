@@ -116,11 +116,11 @@ const recentFinancialEvents = [
 ];
 
 const financialEventColors = {
-  repayment: '#90EE90', // green
-  fee:        '#3b82f6', // blue
-  penalty:    '#f59e0b', // amber
-  disbursal:  '#8b5cf6', // purple
-  refund:     '#ef4444', // red
+  repayment: '#36e436ff', // green
+  fee: '#3b82f6', // blue
+  penalty: '#f59e0b', // amber
+  disbursal: '#8b5cf6', // purple
+  refund: '#ef4444', // red
 };
 
 /**
@@ -129,7 +129,7 @@ const financialEventColors = {
 const RevenuePage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
   return (
     <AdminLayout activeTab={activeTab} onNavigate={onNavigate} searchQuery={searchQuery} onSearch={onSearch}>
-      
+
       {/* ── KPI Row ── */}
       <View style={styles.kpiRow}>
         <AdminMetricCard icon="wallet-outline" iconColor={adminColors.accent} label="Total Revenue" value="₹1.24 Cr" change="+12.8%" positive />
@@ -175,7 +175,7 @@ const RevenuePage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Collection Performance</Text>
             <Text style={[styles.cardSub, { marginBottom: 16 }]}>Current month overdue recovery performance</Text>
-            
+
             <View style={styles.insightRow}>
               <View style={styles.insightBox}>
                 <Text style={styles.insightLabel}>Collected This Month</Text>
@@ -196,7 +196,7 @@ const RevenuePage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Top Revenue Products</Text>
             <Text style={[styles.cardSub, { marginBottom: 16 }]}>Loan types generating highest earnings</Text>
-            
+
             <View style={styles.productSplit}>
               {[
                 { name: 'Home Loan', amount: '₹43.4 L', share: '35%' },
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   },
   trendText: {
     fontSize: 10,
-    color: '#90EE90',
+    color: '#36e436ff',
     fontWeight: '700',
   },
   insightRow: {

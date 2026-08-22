@@ -82,9 +82,9 @@ const ProfilePage = () => {
             </View>
             <View style={styles.modalBody}>
               <View style={styles.modalAvatarWrap}>
-                 <View style={styles.modalAvatar}>
-                   <Text style={styles.modalAvatarText}>{initials}</Text>
-                 </View>
+                <View style={styles.modalAvatar}>
+                  <Text style={styles.modalAvatarText}>{initials}</Text>
+                </View>
               </View>
 
               <View style={styles.modalForm}>
@@ -143,7 +143,7 @@ const ProfilePage = () => {
               <Text style={styles.userName}>{displayName}</Text>
               <Text style={styles.userEmail}>{displayEmail}</Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.editBtn}
               onPress={() => setIsEditingProfile(true)}
               activeOpacity={0.7}
@@ -158,7 +158,7 @@ const ProfilePage = () => {
               <Text style={styles.loanLimitTitle}>Loan Limit & Eligibility</Text>
               <Ionicons name="information-circle-outline" size={18} color={colors.successForeground} />
             </View>
-            
+
             {/* Credit score indicator */}
             <View style={styles.creditScoreRow}>
               <View style={styles.creditScoreTextWrap}>
@@ -183,10 +183,10 @@ const ProfilePage = () => {
             </View>
 
             <BlurView intensity={25} tint="light" style={styles.comingSoonOverlay}>
-               <View style={styles.comingSoonBadge}>
-                 <Ionicons name="time-outline" size={16} color="#111827" />
-                 <Text style={styles.comingSoonText}>Coming Soon</Text>
-               </View>
+              <View style={styles.comingSoonBadge}>
+                <Ionicons name="time-outline" size={16} color="#111827" />
+                <Text style={styles.comingSoonText}>Coming Soon</Text>
+              </View>
             </BlurView>
           </View>
         </View>
@@ -209,7 +209,7 @@ const ProfilePage = () => {
             />
           </View>
           <View style={styles.divider} />
-          
+
           <View style={styles.row}>
             <View style={styles.rowLeft}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
@@ -242,10 +242,10 @@ const ProfilePage = () => {
           </View>
 
           <BlurView intensity={25} tint="light" style={styles.comingSoonOverlay}>
-             <View style={styles.comingSoonBadge}>
-               <Ionicons name="time-outline" size={16} color="#111827" />
-               <Text style={styles.comingSoonText}>Coming Soon</Text>
-             </View>
+            <View style={styles.comingSoonBadge}>
+              <Ionicons name="time-outline" size={16} color="#111827" />
+              <Text style={styles.comingSoonText}>Coming Soon</Text>
+            </View>
           </BlurView>
         </View>
 
@@ -255,7 +255,7 @@ const ProfilePage = () => {
           <View style={styles.row}>
             <View style={styles.rowLeft}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(144, 238, 144, 0.1)' }]}>
-                <Ionicons name="business-outline" size={20} color="#90EE90" />
+                <Ionicons name="business-outline" size={20} color="#36e436ff" />
               </View>
               <View>
                 <Text style={styles.rowLabel}>Linked Bank Account</Text>
@@ -267,7 +267,7 @@ const ProfilePage = () => {
             </TouchableOpacity>
           </View>
           <View style={styles.divider} />
-          
+
           <TouchableOpacity style={styles.row} activeOpacity={0.7}>
             <View style={styles.rowLeft}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(245, 158, 11, 0.1)' }]}>
@@ -279,10 +279,10 @@ const ProfilePage = () => {
           </TouchableOpacity>
 
           <BlurView intensity={25} tint="light" style={styles.comingSoonOverlay}>
-             <View style={styles.comingSoonBadge}>
-               <Ionicons name="time-outline" size={16} color="#111827" />
-               <Text style={styles.comingSoonText}>Coming Soon</Text>
-             </View>
+            <View style={styles.comingSoonBadge}>
+              <Ionicons name="time-outline" size={16} color="#111827" />
+              <Text style={styles.comingSoonText}>Coming Soon</Text>
+            </View>
           </BlurView>
         </View>
 
@@ -304,7 +304,7 @@ const ProfilePage = () => {
             />
           </View>
           <View style={styles.divider} />
-          
+
           <View style={styles.row}>
             <View style={styles.rowLeft}>
               <View style={[styles.iconBox, { backgroundColor: 'rgba(99, 102, 241, 0.1)' }]}>
@@ -337,10 +337,10 @@ const ProfilePage = () => {
           </View>
 
           <BlurView intensity={25} tint="light" style={styles.comingSoonOverlay}>
-             <View style={styles.comingSoonBadge}>
-               <Ionicons name="time-outline" size={16} color="#111827" />
-               <Text style={styles.comingSoonText}>Coming Soon</Text>
-             </View>
+            <View style={styles.comingSoonBadge}>
+              <Ionicons name="time-outline" size={16} color="#111827" />
+              <Text style={styles.comingSoonText}>Coming Soon</Text>
+            </View>
           </BlurView>
         </View>
 
@@ -360,7 +360,7 @@ const ProfilePage = () => {
 
 const getStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#c6c6c6cd' },
-  
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -467,7 +467,7 @@ const getStyles = (colors) => StyleSheet.create({
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.05)', backgroundColor: '#FFFFFF' },
   modalTitle: { fontSize: 17, fontWeight: '700', color: '#111827' },
   modalCancelBtn: { fontSize: 16, color: '#6B7280' },
-  modalSaveBtn: { fontSize: 16, fontWeight: '700', color: '#90EE90' },
+  modalSaveBtn: { fontSize: 16, fontWeight: '700', color: '#36e436ff' },
   modalBody: { padding: 20, backgroundColor: '#FFFFFF' },
   modalAvatarWrap: { alignItems: 'center', marginBottom: 24 },
   modalAvatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.limeBtn || '#A3E635', alignItems: 'center', justifyContent: 'center', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },

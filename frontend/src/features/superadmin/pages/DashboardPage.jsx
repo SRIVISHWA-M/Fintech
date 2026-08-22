@@ -186,11 +186,11 @@ const riskStyles = StyleSheet.create({
 
 // ─── Activity Icon Map ────────────────────────────────────────────────────────
 const activityMap = {
-  approval:   { icon: 'checkmark-circle',  color: adminColors.success },
-  flag:       { icon: 'flag',              color: adminColors.warning },
-  collection: { icon: 'cash',              color: adminColors.chartBlue },
-  config:     { icon: 'settings',          color: adminColors.chartPurple },
-  user:       { icon: 'person-add',        color: adminColors.chartTeal },
+  approval: { icon: 'checkmark-circle', color: adminColors.success },
+  flag: { icon: 'flag', color: adminColors.warning },
+  collection: { icon: 'cash', color: adminColors.chartBlue },
+  config: { icon: 'settings', color: adminColors.chartPurple },
+  user: { icon: 'person-add', color: adminColors.chartTeal },
 };
 
 /**
@@ -199,14 +199,14 @@ const activityMap = {
 const DashboardPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
   return (
     <AdminLayout activeTab={activeTab} onNavigate={onNavigate} searchQuery={searchQuery} onSearch={onSearch}>
-      
+
       {/* ─── Row 1: KPI Cards ────────────────────────────────────────────────── */}
       <View style={styles.gridRow}>
         {/* Card 1: Approved Loans */}
         <View style={styles.kpiCard}>
           <View style={styles.kpiCardHeader}>
             <View style={[styles.kpiIconBox, { backgroundColor: 'rgba(144, 238, 144,0.1)' }]}>
-              <Ionicons name="checkmark-circle-outline" size={18} color="#90EE90" />
+              <Ionicons name="checkmark-circle-outline" size={18} color="#36e436ff" />
             </View>
             <View style={styles.trendBadgePositive}>
               <Text style={styles.trendTextPositive}>+12.4%</Text>
@@ -268,7 +268,7 @@ const DashboardPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
             <Text style={styles.progressCardVal}>1,842</Text>
             <Text style={styles.progressCardSub}>3.5% more than last week</Text>
           </View>
-          <CircularProgress percentage={52} color="#90EE90" />
+          <CircularProgress percentage={52} color="#36e436ff" />
         </View>
 
         {/* Card 2: Short-Term Loans */}
@@ -411,8 +411,8 @@ const DashboardPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
               <Text style={styles.snapshotValue}>₹22.6 L</Text>
             </View>
           </View>
-          <TouchableOpacity 
-            style={styles.snapshotLink} 
+          <TouchableOpacity
+            style={styles.snapshotLink}
             onPress={() => onNavigate('revenue')}
             activeOpacity={0.75}
           >
@@ -445,8 +445,8 @@ const DashboardPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
               <Text style={styles.snapshotValue}>36 Months</Text>
             </View>
           </View>
-          <TouchableOpacity 
-            style={styles.snapshotLink} 
+          <TouchableOpacity
+            style={styles.snapshotLink}
             onPress={() => onNavigate('loan')}
             activeOpacity={0.75}
           >
@@ -479,8 +479,8 @@ const DashboardPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
               <Text style={[styles.snapshotValue, { color: adminColors.danger }]}>2.14%</Text>
             </View>
           </View>
-          <TouchableOpacity 
-            style={styles.snapshotLink} 
+          <TouchableOpacity
+            style={styles.snapshotLink}
             onPress={() => onNavigate('collections')}
             activeOpacity={0.75}
           >
@@ -513,8 +513,8 @@ const DashboardPage = ({ activeTab, onNavigate, searchQuery, onSearch }) => {
               <Text style={[styles.snapshotValue, { color: adminColors.danger }]}>28</Text>
             </View>
           </View>
-          <TouchableOpacity 
-            style={styles.snapshotLink} 
+          <TouchableOpacity
+            style={styles.snapshotLink}
             onPress={() => onNavigate('users')}
             activeOpacity={0.75}
           >
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
   },
   trendTextPositive: {
     fontSize: 10,
-    color: '#90EE90',
+    color: '#36e436ff',
     fontWeight: '700',
   },
   trendBadgeNegative: {

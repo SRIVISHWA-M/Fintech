@@ -38,7 +38,7 @@ const HomePage = () => {
       {/* ── Brand Header (FinTrust Logo & Profile Avatar) ───────────────── */}
       <View style={styles.header}>
         <View style={styles.logoRow}>
-          <Image 
+          <Image
             source={{ uri: 'https://res.cloudinary.com/wowukaao/image/upload/v1785171832/Screenshot_2026-07-27_223203-removebg-preview_kikjdd.png' }}
             style={styles.logoIconImage}
           />
@@ -98,7 +98,7 @@ const HomePage = () => {
           <View style={styles.activeLoanCard}>
             <View style={styles.activeLoanHeader}>
               <View style={styles.activeLoanBadge}>
-                <Ionicons name="shield-checkmark" size={12} color="#90EE90" />
+                <Ionicons name="shield-checkmark" size={12} color="#29e729ff" />
                 <Text style={styles.activeLoanBadgeText}>Active Loan</Text>
               </View>
               <Text style={styles.activeLoanId}>{loan.id}</Text>
@@ -137,7 +137,7 @@ const HomePage = () => {
             <View style={styles.popularIconWrap}>
               <Ionicons name="person-outline" size={26} color="#1F2937" />
               <View style={styles.popularIconBadge}>
-                <Ionicons name="cash-outline" size={11} color="#90EE90" />
+                <Ionicons name="cash-outline" size={11} color="#36e436ff" />
               </View>
             </View>
             <Text style={styles.cardTitle}>Personal Loan</Text>
@@ -162,7 +162,7 @@ const HomePage = () => {
             <View style={styles.popularIconWrap}>
               <Ionicons name="trending-up-outline" size={26} color="#1F2937" />
               <View style={styles.popularIconBadge}>
-                <Ionicons name="bar-chart-outline" size={11} color="#90EE90" />
+                <Ionicons name="bar-chart-outline" size={11} color="#36e436ff" />
               </View>
             </View>
             <Text style={styles.cardTitle}>Business Loan</Text>
@@ -225,7 +225,7 @@ const HomePage = () => {
               <Text style={styles.applyLimeBtnText}>Apply Now</Text>
             </TouchableOpacity>
           </View>
-         </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -289,7 +289,7 @@ const getStyles = (colors) =>
       width: 11,
       height: 11,
       borderRadius: 6,
-      backgroundColor: '#90EE90',
+      backgroundColor: '#36e436ff',
       borderWidth: 2,
       borderColor: '#FFFFFF',
     },
@@ -313,7 +313,7 @@ const getStyles = (colors) =>
       overflow: 'hidden',
       borderWidth: 1,
       borderColor: 'rgba(52,216,124, 0.25)',
-      shadowColor: '#90EE90',
+      shadowColor: '#36e436ff',
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.22,
       shadowRadius: 20,
@@ -369,11 +369,11 @@ const getStyles = (colors) =>
       fontWeight: '500',
     },
     exploreBtn: {
-      backgroundColor: '#90EE90',
+      backgroundColor: '#36e436ff',
       borderRadius: 24,
       paddingVertical: 14,
       alignItems: 'center',
-      shadowColor: '#90EE90',
+      shadowColor: '#36e436ff',
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 10,
@@ -441,7 +441,7 @@ const getStyles = (colors) =>
     activeLoanBadgeText: {
       fontSize: 11,
       fontWeight: '700',
-      color: '#90EE90',
+      color: '#36e436ff',
     },
     activeLoanId: {
       fontSize: 11,
@@ -472,7 +472,7 @@ const getStyles = (colors) =>
     activeLoanDueAmount: {
       fontSize: 16,
       fontWeight: '700',
-      color: '#90EE90',
+      color: '#36e436ff',
     },
     activeLoanDueDate: {
       fontSize: 10,
@@ -563,7 +563,8 @@ const getStyles = (colors) =>
       marginBottom: 16,
     },
     applyLimeBtn: {
-      backgroundColor: '#90EE90',
+
+      backgroundColor: '#36e436ff',
       borderRadius: 18,
       paddingVertical: 10,
       alignItems: 'center',

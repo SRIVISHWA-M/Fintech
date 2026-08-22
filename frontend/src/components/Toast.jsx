@@ -4,8 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 
 const variantConfig = {
   success: {
-    border: '#90EE90',
-    text: '#90EE90',
+    border: '#36e436ff',
+    text: '#36e436ff',
     icon: 'checkmark-circle',
   },
   delete: {

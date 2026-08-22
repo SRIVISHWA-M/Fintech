@@ -19,8 +19,8 @@ export const darkColors = {
   borderStrong: 'rgba(255,255,255,0.12)',
 
   // Accent / Success (emerald green)
-  success: '#90EE90',
-  successLight: '#90EE90',
+  success: '#36e436ff',
+  successLight: '#36e436ff',
   successDim: 'rgba(144, 238, 144,0.12)',
   successDimMid: 'rgba(144, 238, 144,0.07)',
   successBorder: 'rgba(144, 238, 144,0.22)',
@@ -49,7 +49,7 @@ export const darkColors = {
     elevation: 6,
   },
   shadowGlow: {
-    shadowColor: '#90EE90',
+    shadowColor: '#36e436ff',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
     shadowRadius: 16,
@@ -89,15 +89,15 @@ export const lightColors = {
   borderStrong: 'rgba(0,0,0,0.12)',
 
   // Accent / Success / Neon Lime (FinTrust Theme)
-  success: '#90EE90',
-  successLight: '#90EE90',
+  success: '#36e436ff',
+  successLight: '#36e436ff',
   successDim: 'rgba(144, 238, 144,0.12)',
   successDimMid: 'rgba(144, 238, 144,0.07)',
   successBorder: 'rgba(144, 238, 144,0.22)',
   successForeground: '#000000',
-  limeBtn: '#90EE90',
+  limeBtn: '#36e436ff',
   limeBtnText: '#000000',
-  limeBtnDark: '#90EE90',
+  limeBtnDark: '#36e436ff',
 
   // Destructive / Warning
   destructive: '#ef4444',
@@ -122,7 +122,7 @@ export const lightColors = {
     elevation: 2,
   },
   shadowGlow: {
-    shadowColor: '#90EE90',
+    shadowColor: '#36e436ff',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 16,

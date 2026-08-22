@@ -48,7 +48,7 @@ const PersonalLoanDetailsPage = () => {
   const styles = getStyles(colors, isDark);
   const navigation = useNavigation();
   const route = useRoute();
-  
+
   const loanType = route.params?.loanType || 'Personal Loan';
   const details = LOAN_DETAILS[loanType] || LOAN_DETAILS['Personal Loan'];
 
@@ -116,7 +116,7 @@ const PersonalLoanDetailsPage = () => {
       {/* Standard Brand Header */}
       <View style={styles.header}>
         <View style={styles.logoRow}>
-          <Image 
+          <Image
             source={{ uri: 'https://res.cloudinary.com/wowukaao/image/upload/v1785171832/Screenshot_2026-07-27_223203-removebg-preview_kikjdd.png' }}
             style={styles.logoIconImage}
           />
@@ -182,15 +182,15 @@ const PersonalLoanDetailsPage = () => {
         <View style={styles.eligibilitySection}>
           <Text style={styles.sectionTitle}>Eligibility criteria</Text>
           <View style={styles.eligibilityCard}>
-            
-            
+
+
 
             {isReadMore && (
               <View style={styles.expandedCriteria}>
                 <View style={styles.criteriaItem}>
-                <View style={styles.dot} />
-               <Text style={styles.criteriaText}>Indian Citizen</Text>
-               </View>
+                  <View style={styles.dot} />
+                  <Text style={styles.criteriaText}>Indian Citizen</Text>
+                </View>
                 <View style={styles.criteriaItem}>
                   <View style={styles.dot} />
                   <Text style={styles.criteriaText}>Possess Government approved Valid Identity Proof & Address Proof and Aadhaar-linked mobile number</Text>
@@ -206,10 +206,10 @@ const PersonalLoanDetailsPage = () => {
               <Text style={styles.readMoreText}>
                 {isReadMore ? 'Hide application requirements' : 'View complete application requirements'}
               </Text>
-              <Ionicons 
-                name={isReadMore ? "chevron-up" : "chevron-down"} 
-                size={14} 
-                color={colors.success} 
+              <Ionicons
+                name={isReadMore ? "chevron-up" : "chevron-down"}
+                size={14}
+                color={colors.success}
               />
             </TouchableOpacity>
 
@@ -227,67 +227,67 @@ const PersonalLoanDetailsPage = () => {
       {/* Lead Form Modal */}
       {modalVisible && (
         <View style={[StyleSheet.absoluteFill, { zIndex: 999, elevation: 999 }]}>
-          <KeyboardAvoidingView 
+          <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.modalOverlay}
           >
-            <BlurView 
-              intensity={isDark ? 40 : 20} 
-              tint={isDark ? "dark" : "light"} 
-              style={StyleSheet.absoluteFill} 
+            <BlurView
+              intensity={isDark ? 40 : 20}
+              tint={isDark ? "dark" : "light"}
+              style={StyleSheet.absoluteFill}
             />
             <View style={styles.modalContent}>
-            {formState === 'idle' ? (
-              <>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Apply For {details.title}</Text>
-                  <TouchableOpacity onPress={() => setModalVisible(false)}>
-                    <Ionicons name="close" size={24} color={colors.foreground} />
+              {formState === 'idle' ? (
+                <>
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>Apply For {details.title}</Text>
+                    <TouchableOpacity onPress={() => setModalVisible(false)}>
+                      <Ionicons name="close" size={24} color={colors.foreground} />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={styles.inputLabel}>Full Name</Text>
+                    <TextInput
+                      style={[styles.input, errors.name && styles.inputError]}
+                      placeholder="Enter your full name"
+                      placeholderTextColor={colors.mutedForeground}
+                      value={name}
+                      onChangeText={setName}
+                    />
+                    {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
+                  </View>
+
+                  <View style={styles.formGroup}>
+                    <Text style={styles.inputLabel}>Mobile Number</Text>
+                    <TextInput
+                      style={[styles.input, errors.phone && styles.inputError]}
+                      placeholder="Enter 10-digit mobile number"
+                      placeholderTextColor={colors.mutedForeground}
+                      keyboardType="number-pad"
+                      maxLength={10}
+                      value={phone}
+                      onChangeText={setPhone}
+                    />
+                    {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}
+                  </View>
+
+                  <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
+                    <Text style={styles.submitBtnText}>Submit</Text>
                   </TouchableOpacity>
-                </View>
-
-                <View style={styles.formGroup}>
-                  <Text style={styles.inputLabel}>Full Name</Text>
-                  <TextInput
-                    style={[styles.input, errors.name && styles.inputError]}
-                    placeholder="Enter your full name"
-                    placeholderTextColor={colors.mutedForeground}
-                    value={name}
-                    onChangeText={setName}
-                  />
-                  {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
-                </View>
-
-                <View style={styles.formGroup}>
-                  <Text style={styles.inputLabel}>Mobile Number</Text>
-                  <TextInput
-                    style={[styles.input, errors.phone && styles.inputError]}
-                    placeholder="Enter 10-digit mobile number"
-                    placeholderTextColor={colors.mutedForeground}
-                    keyboardType="number-pad"
-                    maxLength={10}
-                    value={phone}
-                    onChangeText={setPhone}
-                  />
-                  {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}
-                </View>
-
-                <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-                  <Text style={styles.submitBtnText}>Submit</Text>
-                </TouchableOpacity>
-              </>
-            ) : (
-              <Animated.View style={[styles.successContainer, { opacity: fadeAnim }]}>
-                <Ionicons name="checkmark-circle" size={80} color={colors.success} style={{ marginBottom: 20 }} />
-                <Text style={styles.successTitle}>Application Received!</Text>
-                <Text style={styles.successMessage}>
-                  Hidel Finance will send you response in 24/7 regarding your loan application.
-                </Text>
-                <TouchableOpacity style={styles.homeBtn} onPress={handleGoHome}>
-                  <Text style={styles.homeBtnText}>Go to Homepage</Text>
-                </TouchableOpacity>
-              </Animated.View>
-            )}
+                </>
+              ) : (
+                <Animated.View style={[styles.successContainer, { opacity: fadeAnim }]}>
+                  <Ionicons name="checkmark-circle" size={80} color={colors.success} style={{ marginBottom: 20 }} />
+                  <Text style={styles.successTitle}>Application Received!</Text>
+                  <Text style={styles.successMessage}>
+                    Hidel Finance will send you response in 24/7 regarding your loan application.
+                  </Text>
+                  <TouchableOpacity style={styles.homeBtn} onPress={handleGoHome}>
+                    <Text style={styles.homeBtnText}>Go to Homepage</Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              )}
             </View>
           </KeyboardAvoidingView>
         </View>
@@ -346,7 +346,7 @@ const getStyles = (colors, isDark) => StyleSheet.create({
     width: 11,
     height: 11,
     borderRadius: 6,
-    backgroundColor: '#90EE90',
+    backgroundColor: '#36e436ff',
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },

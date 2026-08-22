@@ -24,8 +24,8 @@ const RepaymentTrendChart = () => (
     <Svg width="100%" height="160" viewBox="0 0 320 140">
       <Defs>
         <LinearGradient id="trendGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <Stop offset="0%" stopColor="#90EE90" stopOpacity="0.45" />
-          <Stop offset="100%" stopColor="#90EE90" stopOpacity="0.0" />
+          <Stop offset="0%" stopColor="#36e436ff" stopOpacity="0.45" />
+          <Stop offset="100%" stopColor="#36e436ff" stopOpacity="0.0" />
         </LinearGradient>
       </Defs>
 
@@ -47,7 +47,7 @@ const RepaymentTrendChart = () => (
       <Path
         d="M 10 115 Q 60 95 110 90 T 210 60 T 310 30"
         fill="none"
-        stroke="#90EE90"
+        stroke="#36e436ff"
         strokeWidth="3.5"
         strokeLinecap="round"
       />
@@ -149,8 +149,8 @@ const DashboardPage = () => {
             <Text style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
               Dashboard data will appear here once your loan is approved and active.
             </Text>
-            <TouchableOpacity 
-              style={{ backgroundColor: '#90EE90', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 14, alignItems: 'center' }}
+            <TouchableOpacity
+              style={{ backgroundColor: '#36e436ff', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 14, alignItems: 'center' }}
               onPress={() => navigation.navigate('Home')}
             >
               <Text style={{ fontSize: 15, fontWeight: '600', color: '#000000' }}>Explore Loans</Text>
@@ -158,157 +158,157 @@ const DashboardPage = () => {
           </View>
         ) : (
           <>
-        {/* ── This Month Debts Hero ──────────────────────────────────────── */}
-        <View style={styles.debtsHero}>
-          <View style={styles.debtsHeaderRow}>
-            <Text style={styles.debtsTitle}>This Month Debts</Text>
-            <TouchableOpacity
-              style={styles.periodPill}
-              onPress={() => setShowFilterDropdown(!showFilterDropdown)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.periodPillText}>{periodFilter}</Text>
-              <Ionicons name="chevron-down" size={14} color="#374151" />
-            </TouchableOpacity>
+            {/* ── This Month Debts Hero ──────────────────────────────────────── */}
+            <View style={styles.debtsHero}>
+              <View style={styles.debtsHeaderRow}>
+                <Text style={styles.debtsTitle}>This Month Debts</Text>
+                <TouchableOpacity
+                  style={styles.periodPill}
+                  onPress={() => setShowFilterDropdown(!showFilterDropdown)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.periodPillText}>{periodFilter}</Text>
+                  <Ionicons name="chevron-down" size={14} color="#374151" />
+                </TouchableOpacity>
 
-            {showFilterDropdown && (
-              <View style={styles.dropdownMenu}>
-                {['Monthly', '3-Month', 'Yearly'].map((item) => (
-                  <TouchableOpacity
-                    key={item}
-                    style={styles.dropdownItem}
-                    onPress={() => {
-                      setPeriodFilter(item);
-                      setShowFilterDropdown(false);
-                    }}
-                  >
-                    <Text style={[styles.dropdownItemText, periodFilter === item && styles.dropdownItemTextActive]}>
-                      {item}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                {showFilterDropdown && (
+                  <View style={styles.dropdownMenu}>
+                    {['Monthly', '3-Month', 'Yearly'].map((item) => (
+                      <TouchableOpacity
+                        key={item}
+                        style={styles.dropdownItem}
+                        onPress={() => {
+                          setPeriodFilter(item);
+                          setShowFilterDropdown(false);
+                        }}
+                      >
+                        <Text style={[styles.dropdownItemText, periodFilter === item && styles.dropdownItemTextActive]}>
+                          {item}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
               </View>
-            )}
-          </View>
 
-          <Text style={styles.debtsAmountVal}>
-            {fmt(loan?.outstanding || 12505.58)}
-          </Text>
-        </View>
-
-        {/* ── Arc Gauge EMI Card (Matching Reference Screenshot) ──────────── */}
-        <View style={styles.arcCard}>
-          {/* Card Top Row */}
-          <View style={styles.cardTopRow}>
-            <View>
-              <Text style={styles.cardEmiAmount}>{fmt(loan?.nextDueAmount || 450.00)}</Text>
-              <Text style={styles.cardEmiLabel}>Next EMI Due</Text>
-              <Text style={styles.cardEmiDate}>{fmtDate(loan?.nextDueDate || '2024-05-15')}</Text>
-            </View>
-
-            <View style={styles.dueBadgeWrap}>
-              <Ionicons name="time-outline" size={14} color="#90EE90" />
-              <Text style={styles.dueBadgeText}>
-                {daysLeft <= 0 ? 'Overdue!' : `Due in ${daysLeft} days`}
-              </Text>
-            </View>
-          </View>
-
-          {/* Semi-Circular Lime Arc Gauge Ring */}
-          <View style={styles.gaugeWrapper}>
-            <Svg width="220" height="125" viewBox="0 0 200 120">
-              {/* Background Arc */}
-              <Path
-                d="M 20 100 A 80 80 0 0 1 180 100"
-                fill="none"
-                stroke="#F3F4F6"
-                strokeWidth="14"
-                strokeLinecap="round"
-              />
-              {/* Lime Progress Arc */}
-              <Path
-                d="M 20 100 A 80 80 0 0 1 180 100"
-                fill="none"
-                stroke="#90EE90"
-                strokeWidth="14"
-                strokeDasharray="251"
-                strokeDashoffset={251 - (251 * Math.min(progress, 100)) / 100}
-                strokeLinecap="round"
-              />
-              {/* Glowing Lime Dot indicator */}
-              <Circle
-                cx="58"
-                cy="44"
-                r="7"
-                fill="#90EE90"
-                stroke="#FFFFFF"
-                strokeWidth="2.5"
-              />
-            </Svg>
-
-            <View style={styles.gaugeCenterCol}>
-              <Text style={styles.gaugePercentVal}>{progress}%</Text>
-              <Text style={styles.gaugePaidSub}>
-                {loan?.paidEmis || 2}/{loan?.termMonths || 10} Paid
-              </Text>
-            </View>
-          </View>
-
-          {/* Card Bottom Row */}
-          <View style={styles.cardBottomRow}>
-            <View>
-              <Text style={styles.cardMaskId}>****8024</Text>
-              <Text style={styles.cardBalText}>
-                <Text style={styles.cardBalVal}>{fmt(loan?.outstanding || 67870)} </Text>
-                <Text style={styles.cardBalLabel}>Balance</Text>
+              <Text style={styles.debtsAmountVal}>
+                {fmt(loan?.outstanding || 12505.58)}
               </Text>
             </View>
 
-            <TouchableOpacity
-              style={styles.payNowLimeBtn}
-              onPress={() => navigation.navigate('Loans')}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.payNowLimeBtnText}>Pay Now</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* ── Repayment Trend Chart Section ──────────────────────────────── */}
-        <Text style={styles.sectionTitle}>Repayment Trend</Text>
-        <RepaymentTrendChart />
-
-        {/* ── Recent Activity Section ────────────────────────────────────── */}
-        <Text style={[styles.sectionTitle, { marginTop: 22 }]}>Recent Activity</Text>
-
-        <View style={styles.activityList}>
-          {recentPayments.length > 0 ? (
-            recentPayments.map((p) => (
-              <View key={p.id} style={styles.activityRow}>
-                <View style={styles.activityIconCircle}>
-                  <Ionicons name="arrow-up-outline" size={18} color="#000000" style={{ transform: [{ rotate: '45deg' }] }} />
+            {/* ── Arc Gauge EMI Card (Matching Reference Screenshot) ──────────── */}
+            <View style={styles.arcCard}>
+              {/* Card Top Row */}
+              <View style={styles.cardTopRow}>
+                <View>
+                  <Text style={styles.cardEmiAmount}>{fmt(loan?.nextDueAmount || 450.00)}</Text>
+                  <Text style={styles.cardEmiLabel}>Next EMI Due</Text>
+                  <Text style={styles.cardEmiDate}>{fmtDate(loan?.nextDueDate || '2024-05-15')}</Text>
                 </View>
-                <View style={styles.activityMetaCol}>
-                  <Text style={styles.activityTitle}>EMI Payment</Text>
-                  <Text style={styles.activityDate}>{fmtDate(p.date)}</Text>
+
+                <View style={styles.dueBadgeWrap}>
+                  <Ionicons name="time-outline" size={14} color="#36e436ff" />
+                  <Text style={styles.dueBadgeText}>
+                    {daysLeft <= 0 ? 'Overdue!' : `Due in ${daysLeft} days`}
+                  </Text>
                 </View>
-                <Text style={styles.activityAmount}>+{fmt(p.amount)}</Text>
               </View>
-            ))
-          ) : (
-            <View style={styles.activityRow}>
-              <View style={styles.activityIconCircle}>
-                <Ionicons name="arrow-up-outline" size={18} color="#000000" style={{ transform: [{ rotate: '45deg' }] }} />
+
+              {/* Semi-Circular Lime Arc Gauge Ring */}
+              <View style={styles.gaugeWrapper}>
+                <Svg width="220" height="125" viewBox="0 0 200 120">
+                  {/* Background Arc */}
+                  <Path
+                    d="M 20 100 A 80 80 0 0 1 180 100"
+                    fill="none"
+                    stroke="#F3F4F6"
+                    strokeWidth="14"
+                    strokeLinecap="round"
+                  />
+                  {/* Lime Progress Arc */}
+                  <Path
+                    d="M 20 100 A 80 80 0 0 1 180 100"
+                    fill="none"
+                    stroke="#36e436ff"
+                    strokeWidth="14"
+                    strokeDasharray="251"
+                    strokeDashoffset={251 - (251 * Math.min(progress, 100)) / 100}
+                    strokeLinecap="round"
+                  />
+                  {/* Glowing Lime Dot indicator */}
+                  <Circle
+                    cx="58"
+                    cy="44"
+                    r="7"
+                    fill="#36e436ff"
+                    stroke="#FFFFFF"
+                    strokeWidth="2.5"
+                  />
+                </Svg>
+
+                <View style={styles.gaugeCenterCol}>
+                  <Text style={styles.gaugePercentVal}>{progress}%</Text>
+                  <Text style={styles.gaugePaidSub}>
+                    {loan?.paidEmis || 2}/{loan?.termMonths || 10} Paid
+                  </Text>
+                </View>
               </View>
-              <View style={styles.activityMetaCol}>
-                <Text style={styles.activityTitle}>EMI Payment</Text>
-                <Text style={styles.activityDate}>April 29, 2023</Text>
+
+              {/* Card Bottom Row */}
+              <View style={styles.cardBottomRow}>
+                <View>
+                  <Text style={styles.cardMaskId}>****8024</Text>
+                  <Text style={styles.cardBalText}>
+                    <Text style={styles.cardBalVal}>{fmt(loan?.outstanding || 67870)} </Text>
+                    <Text style={styles.cardBalLabel}>Balance</Text>
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.payNowLimeBtn}
+                  onPress={() => navigation.navigate('Loans')}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.payNowLimeBtnText}>Pay Now</Text>
+                </TouchableOpacity>
               </View>
-              <Text style={styles.activityAmount}>+₹120.00</Text>
             </View>
-          )}
-        </View>
-        </>
+
+            {/* ── Repayment Trend Chart Section ──────────────────────────────── */}
+            <Text style={styles.sectionTitle}>Repayment Trend</Text>
+            <RepaymentTrendChart />
+
+            {/* ── Recent Activity Section ────────────────────────────────────── */}
+            <Text style={[styles.sectionTitle, { marginTop: 22 }]}>Recent Activity</Text>
+
+            <View style={styles.activityList}>
+              {recentPayments.length > 0 ? (
+                recentPayments.map((p) => (
+                  <View key={p.id} style={styles.activityRow}>
+                    <View style={styles.activityIconCircle}>
+                      <Ionicons name="arrow-up-outline" size={18} color="#000000" style={{ transform: [{ rotate: '45deg' }] }} />
+                    </View>
+                    <View style={styles.activityMetaCol}>
+                      <Text style={styles.activityTitle}>EMI Payment</Text>
+                      <Text style={styles.activityDate}>{fmtDate(p.date)}</Text>
+                    </View>
+                    <Text style={styles.activityAmount}>+{fmt(p.amount)}</Text>
+                  </View>
+                ))
+              ) : (
+                <View style={styles.activityRow}>
+                  <View style={styles.activityIconCircle}>
+                    <Ionicons name="arrow-up-outline" size={18} color="#000000" style={{ transform: [{ rotate: '45deg' }] }} />
+                  </View>
+                  <View style={styles.activityMetaCol}>
+                    <Text style={styles.activityTitle}>EMI Payment</Text>
+                    <Text style={styles.activityDate}>April 29, 2023</Text>
+                  </View>
+                  <Text style={styles.activityAmount}>+₹120.00</Text>
+                </View>
+              )}
+            </View>
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -369,10 +369,10 @@ const getStyles = (colors) =>
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: '#90EE90',
+      backgroundColor: '#36e436ff',
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: '#90EE90',
+      shadowColor: '#36e436ff',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,
       shadowRadius: 6,
@@ -491,7 +491,7 @@ const getStyles = (colors) =>
     dueBadgeText: {
       fontSize: 11,
       fontWeight: '700',
-      color: '#90EE90',
+      color: '#36e436ff',
     },
 
     // Gauge
@@ -548,11 +548,11 @@ const getStyles = (colors) =>
       color: '#6B7280',
     },
     payNowLimeBtn: {
-      backgroundColor: '#90EE90',
+      backgroundColor: '#36e436ff',
       borderRadius: 18,
       paddingHorizontal: 22,
       paddingVertical: 10,
-      shadowColor: '#90EE90',
+      shadowColor: '#36e436ff',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,
       shadowRadius: 6,
@@ -590,7 +590,7 @@ const getStyles = (colors) =>
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: '#90EE90',
+      backgroundColor: '#36e436ff',
       alignItems: 'center',
       justifyContent: 'center',
     },

@@ -57,7 +57,7 @@ const LoginPage = () => {
   const [mode, setMode] = useState('login'); // 'login' | 'signup' | 'forgot' | 'reset'
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  
+
   // Signup specific states
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -88,7 +88,7 @@ const LoginPage = () => {
         email: demoUser.email,
         role: demoUser.email === 'superadmin@hidelfinance.com' ? 'superadmin' : 'user',
       };
-      
+
       authStore.setUser(mappedUser);
     } finally {
       setLoading(false);
@@ -169,21 +169,21 @@ const LoginPage = () => {
         >
           <View style={styles.shell}>
             <View style={styles.formCard}>
-              
+
               <View style={styles.logoArea}>
                 <NovaLogo size={80} layout="column" subtitle={null} titleColor="#111827" />
               </View>
 
               <Text style={styles.heading}>
-                {mode === 'login' ? 'Welcome Back' : 
-                 mode === 'signup' ? 'Create Account' : 
-                 mode === 'forgot' ? 'Reset Password' : 'Set New Password'}
+                {mode === 'login' ? 'Welcome Back' :
+                  mode === 'signup' ? 'Create Account' :
+                    mode === 'forgot' ? 'Reset Password' : 'Set New Password'}
               </Text>
-              
+
               <Text style={styles.subheading}>
-                {mode === 'login' ? 'Sign in to access your secure dashboard.' : 
-                 mode === 'signup' ? 'Join to manage your finances securely.' : 
-                 mode === 'forgot' ? 'Enter your email to receive a reset code.' : 'Enter the code sent to your email.'}
+                {mode === 'login' ? 'Sign in to access your secure dashboard.' :
+                  mode === 'signup' ? 'Join to manage your finances securely.' :
+                    mode === 'forgot' ? 'Enter your email to receive a reset code.' : 'Enter the code sent to your email.'}
               </Text>
 
               {/* LOGIN MODE */}
@@ -350,7 +350,7 @@ const LoginPage = () => {
                       />
                     </View>
                   </View>
-                  
+
                   <TouchableOpacity style={styles.signInBtn} onPress={handleForgotPassword} disabled={loading} activeOpacity={0.85}>
                     {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.signInText}>Send Reset Code</Text>}
                   </TouchableOpacity>
@@ -415,8 +415,8 @@ const LoginPage = () => {
 };
 
 const getStyles = (colors) => StyleSheet.create({
-  container: { 
-    flex: 1, 
+  container: {
+    flex: 1,
     backgroundColor: '#F8FAFC',
   },
   keyboard: { flex: 1 },
@@ -445,8 +445,8 @@ const getStyles = (colors) => StyleSheet.create({
     shadowRadius: 12,
     elevation: 2,
   },
-  logoArea: { 
-    alignItems: 'center', 
+  logoArea: {
+    alignItems: 'center',
     marginBottom: 20,
   },
   heading: {
@@ -481,7 +481,7 @@ const getStyles = (colors) => StyleSheet.create({
     marginBottom: 6,
   },
   forgotText: {
-    color: '#90EE90',
+    color: '#36e436ff',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -496,9 +496,9 @@ const getStyles = (colors) => StyleSheet.create({
     paddingHorizontal: 14,
   },
   inputWrapperFocused: {
-    borderColor: '#90EE90',
+    borderColor: '#36e436ff',
     backgroundColor: '#FFFFFF',
-    shadowColor: '#90EE90',
+    shadowColor: '#36e436ff',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -518,14 +518,14 @@ const getStyles = (colors) => StyleSheet.create({
     padding: 4,
   },
   signInBtn: {
-    backgroundColor: '#90EE90',
+    backgroundColor: '#36e436ff',
     borderRadius: 12,
     height: 48,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-    shadowColor: '#90EE90',
+    shadowColor: '#36e436ff',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
@@ -537,19 +537,19 @@ const getStyles = (colors) => StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-  switchModeContainer: { 
-    flexDirection: 'row', 
-    justifyContent: 'center', 
-    marginTop: 16 
+  switchModeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16
   },
-  switchModeText: { 
-    color: '#64748B', 
-    fontSize: 13 
+  switchModeText: {
+    color: '#64748B',
+    fontSize: 13
   },
-  switchModeAction: { 
-    color: '#90EE90', 
-    fontSize: 13, 
-    fontWeight: '700' 
+  switchModeAction: {
+    color: '#36e436ff',
+    fontSize: 13,
+    fontWeight: '700'
   },
   securityStrip: {
     flexDirection: 'row',
