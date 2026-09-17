@@ -4,10 +4,14 @@ const UserPreference = require('./UserPreference');
 const Loan = require('./Loan');
 const Payment = require('./Payment');
 const SystemSetting = require('./SystemSetting');
+const EmailVerificationOtp = require('./EmailVerificationOtp');
 
 // Associations
 User.hasOne(UserPreference, { foreignKey: 'userId', as: 'preferences', onDelete: 'CASCADE' });
 UserPreference.belongsTo(User, { foreignKey: 'userId' });
+
+User.hasMany(EmailVerificationOtp, { foreignKey: 'userId', as: 'verificationOtps', onDelete: 'CASCADE' });
+EmailVerificationOtp.belongsTo(User, { foreignKey: 'userId' });
 
 User.hasMany(Loan, { foreignKey: 'userId', as: 'loans', onDelete: 'CASCADE' });
 Loan.belongsTo(User, { foreignKey: 'userId' });
@@ -25,4 +29,5 @@ module.exports = {
   Loan,
   Payment,
   SystemSetting,
+  EmailVerificationOtp,
 };

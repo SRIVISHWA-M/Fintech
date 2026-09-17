@@ -100,11 +100,24 @@ const logout = async (req, res, next) => {
 
 const verifyEmail = async (req, res, next) => {
   try {
-    const { token } = req.body;
-    await authService.verifyEmail(token);
+    const { email, otp } = req.body;
+    await authService.verifyEmail(email, otp);
     res.status(200).json({
       success: true,
       message: 'Email verified successfully. You can now log in.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resendVerificationOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    await authService.resendVerificationOtp(email);
+    res.status(200).json({
+      success: true,
+      message: 'A new verification OTP has been sent to your email.',
     });
   } catch (error) {
     next(error);
@@ -119,4 +132,5 @@ module.exports = {
   resetPassword,
   logout,
   verifyEmail,
+  resendVerificationOtp,
 };

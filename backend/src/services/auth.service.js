@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { Op } = require('sequelize');
-const { User, UserPreference } = require('../models');
+const { User, UserPreference, EmailVerificationOtp } = require('../models');
 const { sendVerificationEmail } = require('../utils/emailService');
 const { UnauthorizedError, NotFoundError, BadRequestError } = require('../utils/errors');
 
@@ -65,13 +65,11 @@ const login = async (email, password) => {
     throw new UnauthorizedError('Incorrect email/customer ID or password');
   }
 
-  // if (!user.isVerified) {
-  //   throw new UnauthorizedError('Please verify your email address before logging in.');
-  // }
-
-  if (user.status === 'Pending') {
-    throw new UnauthorizedError(`Account is pending approval. Please wait until a Super Admin approves your account.`);
+  if (!user.isVerified) {
+    throw new UnauthorizedError('Please verify your email address before logging in.');
   }
+
+
 
   if (user.status === 'Rejected') {
     throw new UnauthorizedError(`Account has been rejected. Please contact support.`);
@@ -107,15 +105,16 @@ const signup = async (userData) => {
 
   const existingUser = await User.findOne({ where: { email: normalizedEmail } });
   if (existingUser) {
-    throw new BadRequestError('Email address is already in use');
+    if (existingUser.isVerified) {
+      throw new BadRequestError('Email address is already in use');
+    }
+    // If not verified, user might be retrying signup (e.g. after a failed email send)
+    // We clean up the old unverified record to let them try again.
+    await User.destroy({ where: { id: existingUser.id } });
   }
 
   // Generate a temporary Customer ID
   const customerId = `PENDING-${Math.floor(100000 + Math.random() * 900000)}`;
-
-  // Generate verification token
-  const verificationToken = crypto.randomBytes(32).toString('hex');
-  const verificationExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
   const newUser = await User.create({
     name,
@@ -125,8 +124,6 @@ const signup = async (userData) => {
     customerId,
     status: 'Pending',
     isVerified: false,
-    verificationToken,
-    verificationExpires,
   });
 
   // Create default preferences
@@ -137,8 +134,28 @@ const signup = async (userData) => {
     loginAlerts: true,
   });
 
-  // Send the verification email
-  await sendVerificationEmail(normalizedEmail, verificationToken);
+  // Generate 6-digit OTP securely
+  const otp = crypto.randomInt(100000, 1000000).toString();
+  
+  // Hash the OTP
+  const salt = await require('bcryptjs').genSalt(10);
+  const otpHash = await require('bcryptjs').hash(otp, salt);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  await EmailVerificationOtp.create({
+    userId: newUser.id,
+    otpHash,
+    expiresAt,
+  });
+
+  // Send the verification email with the plain OTP
+  try {
+    await sendVerificationEmail(normalizedEmail, newUser.name, otp);
+  } catch (error) {
+    // If email fails to send, destroy the created user so they can retry
+    await User.destroy({ where: { id: newUser.id } });
+    throw new BadRequestError(error.message || 'Unable to send verification email. Please try again.');
+  }
 
   return {
     message: 'User created successfully. Please check your email to verify your account.',
@@ -240,25 +257,96 @@ const resetPassword = async (email, otp, newPassword) => {
   return true;
 };
 
-const verifyEmail = async (token) => {
-  if (!token) {
-    throw new BadRequestError('Verification token is required');
+const verifyEmail = async (email, otp) => {
+  if (!email || !otp) {
+    throw new BadRequestError('Email and OTP are required');
   }
 
-  const user = await User.findOne({ where: { verificationToken: token } });
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await User.findOne({ where: { email: normalizedEmail } });
 
   if (!user) {
-    throw new NotFoundError('Invalid verification token');
+    throw new NotFoundError('User not found');
   }
 
-  if (user.verificationExpires && user.verificationExpires < new Date()) {
-    throw new BadRequestError('Verification token has expired');
+  if (user.isVerified) {
+    throw new BadRequestError('Email is already verified');
   }
+
+  const otpRecord = await EmailVerificationOtp.findOne({
+    where: { userId: user.id, verified: false },
+    order: [['createdAt', 'DESC']],
+  });
+
+  if (!otpRecord) {
+    throw new BadRequestError('No pending verification request found');
+  }
+
+  if (otpRecord.attempts >= 5) {
+    throw new BadRequestError('Maximum verification attempts exceeded. Please request a new OTP.');
+  }
+
+  if (otpRecord.expiresAt < new Date()) {
+    throw new BadRequestError('Verification OTP has expired. Please request a new one.');
+  }
+
+  const isValid = await require('bcryptjs').compare(otp, otpRecord.otpHash);
+
+  if (!isValid) {
+    otpRecord.attempts += 1;
+    await otpRecord.save();
+    throw new BadRequestError('Invalid OTP');
+  }
+
+  // Success
+  otpRecord.verified = true;
+  await otpRecord.save();
 
   user.isVerified = true;
-  user.verificationToken = null;
-  user.verificationExpires = null;
+  user.status = 'Active'; // Automatically approve user upon email verification
   await user.save();
+
+  return true;
+};
+
+const resendVerificationOtp = async (email) => {
+  if (!email) {
+    throw new BadRequestError('Email is required');
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await User.findOne({ where: { email: normalizedEmail } });
+
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+
+  if (user.isVerified) {
+    throw new BadRequestError('Email is already verified');
+  }
+
+  // Expire all previous OTPs
+  await EmailVerificationOtp.update(
+    { expiresAt: new Date() },
+    { where: { userId: user.id, verified: false } }
+  );
+
+  // Generate 6-digit OTP securely
+  const otp = crypto.randomInt(100000, 1000000).toString();
+  
+  // Hash the OTP
+  const salt = await require('bcryptjs').genSalt(10);
+  const otpHash = await require('bcryptjs').hash(otp, salt);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  await EmailVerificationOtp.create({
+    userId: user.id,
+    otpHash,
+    expiresAt,
+  });
+
+  // Send the verification email with the plain OTP
+  await sendVerificationEmail(normalizedEmail, user.name, otp);
 
   return true;
 };
@@ -270,4 +358,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   verifyEmail,
+  resendVerificationOtp,
 };

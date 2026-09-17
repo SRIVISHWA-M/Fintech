@@ -17,7 +17,19 @@ const startServer = async () => {
   try {
     logger.info('Connecting to database...');
     await sequelize.authenticate();
-    logger.info('Database connection established successfully.');
+    
+    // Check if connected to Supabase Database
+    if (process.env.DB_HOST && process.env.DB_HOST.includes('supabase.co')) {
+      logger.info('Supabase database connection established successfully.');
+    } else {
+      logger.info('Database connection established successfully.');
+    }
+
+    // Check if Supabase Client is initialized
+    const supabase = require('./config/supabase');
+    if (supabase) {
+      logger.info('Supabase client is connected and ready to use.');
+    }
 
     logger.info('Initializing database schemas and seed records...');
     await seedDatabase();

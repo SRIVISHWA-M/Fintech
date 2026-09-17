@@ -415,16 +415,6 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
       width: 220,
       render: (_, row) => (
         <View style={colStyles.actions}>
-          {row.status === 'Pending' ? (
-            <>
-              <TouchableOpacity style={colStyles.btnActionApprove} onPress={() => handleApprove(row)}>
-                <Text style={colStyles.btnActionTextApprove}>Approve</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={colStyles.btnActionReject} onPress={() => handleReject(row)}>
-                <Text style={colStyles.btnActionTextReject}>Reject</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
             <>
               <TouchableOpacity style={colStyles.btnAction} onPress={() => openViewModal(row)}>
                 <Text style={colStyles.btnActionText}>View</Text>
@@ -444,7 +434,6 @@ const UserManagementPage = ({ activeTab, onNavigate, searchQuery, onSearch }) =>
                 <View style={{ width: 58 }} />
               )}
             </>
-          )}
           <TouchableOpacity style={colStyles.btnIcon} onPress={() => openDeleteModal(row)}>
             <Ionicons name="trash-outline" size={14} color={adminColors.danger} />
           </TouchableOpacity>

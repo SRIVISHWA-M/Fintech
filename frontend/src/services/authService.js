@@ -62,6 +62,20 @@ export const authService = {
     });
   },
 
+  verifyEmail: async (email, otp) => {
+    return apiRequest('/auth/verify-email', {
+      method: 'POST',
+      body: { email, otp },
+    });
+  },
+
+  resendVerificationOtp: async (email) => {
+    return apiRequest('/auth/resend-verification-otp', {
+      method: 'POST',
+      body: { email },
+    });
+  },
+
   resetPassword: async (email, otp, newPassword) => {
     return apiRequest('/auth/reset-password', {
       method: 'POST',

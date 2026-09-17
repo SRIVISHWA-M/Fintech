@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import { useNavigation } from '@react-navigation/native';
 import { authStore } from '../../../store/authStore';
 import { useTheme } from '../../../theme/useTheme';
 import { authService } from '../../../services/authService';
@@ -45,6 +46,7 @@ const LoginPage = () => {
   const styles = getStyles(colors);
   const { width } = useWindowDimensions();
   const isDesktop = width >= 900;
+  const navigation = useNavigation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -103,9 +105,9 @@ const LoginPage = () => {
     setLoading(true);
     try {
       const res = await authService.signup(name, email, phone, password);
-      Alert.alert('Success', res.message || 'Signup successful. Please check your email to verify your account.');
+      // Don't show success alert immediately, navigate to verification screen
+      navigation.navigate('VerifyEmail', { email: email.trim().toLowerCase() });
       setMode('login');
-      setEmail('');
       setPassword('');
     } catch (error) {
       Alert.alert('Signup Failed', error.message || 'An error occurred during registration.');

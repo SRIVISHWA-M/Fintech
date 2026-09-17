@@ -1,56 +1,65 @@
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
-// We use process.env.RESEND_API_KEY if it exists, otherwise a dummy key
-// Note: Without a valid RESEND_API_KEY, actual email sending will fail,
-// but the Resend client can still be instantiated.
-const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key_for_dev');
-
-const sendVerificationEmail = async (email, token) => {
-  const verificationUrl = `http://localhost:8081/verify-email?token=${token}`;
-  
+const sendVerificationEmail = async (email, name, otp) => {
   console.log('\n=============================================');
   console.log(`[EMAIL SERVICE] Sending Verification Email to ${email}`);
-  console.log(`[EMAIL SERVICE] Link: ${verificationUrl}`);
   console.log('=============================================\n');
 
-  if (!process.env.RESEND_API_KEY) {
-    console.log('[EMAIL SERVICE] Missing RESEND_API_KEY. Skipping actual email send via Resend.');
-    return true;
+  const senderEmail = process.env.GMAIL_USER;
+  const senderPass = process.env.GMAIL_PASS;
+
+  if (!senderEmail || !senderPass) {
+    console.log('[EMAIL SERVICE] Missing GMAIL_USER or GMAIL_PASS. Skipping actual email send via Nodemailer.');
+    return true; // For testing when credentials aren't set
   }
 
-  try {
-    const data = await resend.emails.send({
-      from: 'Hidel Finance <onboarding@resend.dev>', // resend.dev is the default sandbox domain
-      to: [email],
-      subject: 'Verify your Hidel Finance Account',
-      html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #111827;">Welcome to Hidel Finance!</h2>
-          <p style="color: #4B5563; font-size: 16px;">
-            Thank you for creating an account with us. Please verify your email address by clicking the button below.
-          </p>
-          <div style="margin: 30px 0;">
-            <a href="${verificationUrl}" style="background-color: #A3E635; color: #111827; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
-              Verify Email
-            </a>
+  // Configure Nodemailer for Gmail
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: senderEmail,
+      pass: senderPass
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  });
+
+  const mailOptions = {
+    from: `"Hidel Finance" <${senderEmail}>`,
+    to: email,
+    subject: 'Verify your Hidel Finance Account',
+    html: `
+      <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #111827;">Welcome to Hidel Finance!</h2>
+        <p style="color: #4B5563; font-size: 16px;">
+          Hello ${name},
+        </p>
+        <p style="color: #4B5563; font-size: 16px;">
+          Your email verification OTP is:
+        </p>
+        <div style="margin: 30px 0; text-align: center;">
+          <div style="background-color: #F3F4F6; display: inline-block; padding: 16px 32px; border-radius: 8px; font-weight: bold; font-size: 32px; letter-spacing: 4px; color: #111827;">
+            ${otp}
           </div>
-          <p style="color: #6B7280; font-size: 14px;">
-            If the button doesn't work, you can copy and paste this link into your browser:<br>
-            <a href="${verificationUrl}" style="color: #60A5FA;">${verificationUrl}</a>
-          </p>
-          <p style="color: #6B7280; font-size: 14px; margin-top: 30px;">
-            This link will expire in 30 minutes.
-          </p>
         </div>
-      `
-    });
-    
-    console.log('[EMAIL SERVICE] Email sent successfully via Resend. ID:', data.id);
-    return true;
+        <p style="color: #6B7280; font-size: 14px; margin-top: 30px;">
+          This OTP will expire in 10 minutes.
+        </p>
+        <p style="color: #6B7280; font-size: 14px; margin-top: 10px;">
+          If you did not create this account, please ignore this email.
+        </p>
+      </div>
+    `
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("[EMAIL SERVICE] Email sent successfully via Gmail. Message ID:", info.messageId);
+    return info.messageId;
   } catch (error) {
-    console.error('[EMAIL SERVICE] Failed to send email via Resend:', error);
-    // We throw or handle error depending on requirements. For now, log it.
-    throw new Error('Failed to send verification email');
+    console.error("[EMAIL SERVICE] Nodemailer error:", error);
+    throw new Error(`Email sending failed: ${error.message}`);
   }
 };
 
