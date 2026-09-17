@@ -1,0 +1,10 @@
+{
+  "name": "nova-finance-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start:frontend": "npm start --prefix frontend",
+    "start:backend": "npm run dev --prefix backend",
+    "install:all": "npm install --prefix frontend && npm install --prefix backend"
+  }
+}
